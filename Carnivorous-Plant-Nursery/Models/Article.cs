@@ -8,5 +8,7 @@ namespace Carnivorous_Plant_Nursery.Models
         public decimal? Price { get; set; }
         public bool IsAvailableInWebshop { get; set; }
         public string? Description { get; set; }
+
+        protected Article() {}
     }
 }

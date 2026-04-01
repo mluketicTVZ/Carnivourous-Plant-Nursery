@@ -17,43 +17,23 @@ Console.WriteLine("=================================");
 Console.WriteLine("Pokretanje simulacije dohvata inventara...");
 var taxonomyList = await FetchInventoryAsync();
 
-// LINQ Queries
-// 1. Fetch all objects from all taxonomies that are for sale in the webshop
-var webshopItems = taxonomyList
-    .SelectMany(t => t.InventoryItems)
-    .Where(item => item.IsAvailableInWebshop)
-    .OrderBy(item => item.Price)
-    .ToList();
-
+var webshopItems = GetWebshopItems(taxonomyList);
 Console.WriteLine($"\nPronadeno {webshopItems.Count} predmeta dostupnih u webshopu:");
 foreach(var wp in webshopItems)
 {
     Console.WriteLine($"- {wp.ListingTitle} (Cijena: {wp.Price} EUR)");
 }
 
-// 2. Fetch seeds that require stratification
-var seedsForStratification = taxonomyList
-    .SelectMany(t => t.InventoryItems)
-    .OfType<SeedBatch>()
-    .Where(s => s.RequiresStratification)
-    .OrderByDescending(s => s.SeedCount)
-    .ToList();
-
+var seedsForStratification = GetSeedsRequiringStratification(taxonomyList);
 Console.WriteLine($"\nPronadeno {seedsForStratification.Count} serija sjemenki koje trebaju hladnu stratifikaciju.");
 
-// 3. Display 'lineage' relationships: Find plants with known Mother or Father (Lineage)
-var lineagePlants = taxonomyList
-    .SelectMany(t => t.InventoryItems)
-    .Where(i => i.Lineage != null && (i.Lineage.MotherId != null || i.Lineage.FatherId != null))
-    .ToList();
-
+var lineagePlants = GetItemsWithKnownLineage(taxonomyList);
 Console.WriteLine("\nBiljke s poznatim podrijetlom (Lineage):");
 foreach (var lb in lineagePlants)
 {
-    Console.WriteLine($"- {lb.ListingTitle} ({lb.Taxonomy?.FullName ?? DisplayConstants.UnknownTaxonomy}): Generacija - {lb.Lineage?.Generation ?? DisplayConstants.UnknownGeneration}");
+    Console.WriteLine($"- {lb.ListingTitle} ({lb.Taxonomy?.FullName ?? DisplayConstant.UnknownTaxonomy}): Generacija - {lb.Lineage?.Generation ?? DisplayConstant.UnknownGeneration}");
 }
 Console.WriteLine("=================================");
-// ==========================================
 
 if (!app.Environment.IsDevelopment())
 {
@@ -67,15 +47,10 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-// For debugging and testing purposes we only print the state and DO NOT RUN the application if testing in terminal
-// but for a web application we call app.Run();
 app.Run();
 
-// Lab methods in top-level context
 async Task<List<Taxonomy>> FetchInventoryAsync()
 {
-    // Simulate database fetch delay (async)
     await Task.Delay(1000);
     
     // 1. Dionaea muscipula
@@ -159,4 +134,31 @@ async Task<List<Taxonomy>> FetchInventoryAsync()
     droseraTaxonomy.InventoryItems.Add(seeds2);
 
     return new List<Taxonomy> { dionaeaTaxonomy, sarraceniaTaxonomy, droseraTaxonomy };
+}
+
+List<InventoryItem> GetWebshopItems(List<Taxonomy> taxonomies)
+{
+    return taxonomies
+        .SelectMany(t => t.InventoryItems)
+        .Where(item => item.IsAvailableInWebshop)
+        .OrderBy(item => item.Price)
+        .ToList();
+}
+
+List<SeedBatch> GetSeedsRequiringStratification(List<Taxonomy> taxonomies)
+{
+    return taxonomies
+        .SelectMany(t => t.InventoryItems)
+        .OfType<SeedBatch>()
+        .Where(s => s.RequiresStratification == true)
+        .OrderByDescending(s => s.SeedCount)
+        .ToList();
+}
+
+List<InventoryItem> GetItemsWithKnownLineage(List<Taxonomy> taxonomies)
+{
+    return taxonomies
+        .SelectMany(t => t.InventoryItems)
+        .Where(i => i.Lineage != null && (i.Lineage.MotherId != null || i.Lineage.FatherId != null))
+        .ToList();
 }
