@@ -1,34 +1,21 @@
 using System.Diagnostics;
 using Carnivorous_Plant_Nursery.Models;
-using Carnivorous_Plant_Nursery.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace Carnivorous_Plant_Nursery.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly InventorySimulationService _inventorySimulator;
 
-        public HomeController(ILogger<HomeController> logger, InventorySimulationService inventorySimulator)
+        public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
-            _inventorySimulator = inventorySimulator;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var taxonomies = await _inventorySimulator.FetchInventoryAsync();
-            var model = new HomeIndexViewModel
-            {
-                Taxonomies = taxonomies,
-                WebshopItems = _inventorySimulator.GetWebshopItems(taxonomies),
-                SeedsForStratification = _inventorySimulator.GetSeedsRequiringStratification(taxonomies),
-                LineagePlants = _inventorySimulator.GetItemsWithKnownLineage(taxonomies)
-            };
-            
-            return View(model);
+            return View();
         }
 
         public IActionResult Privacy()

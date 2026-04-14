@@ -1,72 +1,8 @@
-﻿@model Carnivorous_Plant_Nursery.Models.HomeIndexViewModel
-
-@{
-    ViewData["Title"] = "Carnivorous Plant Nursery - Inventory";
+﻿@{
+    ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center mb-5">
-    <h1 class="display-4 fw-bold text-success">Carnivorous Plant Nursery</h1>
-    <p class="lead text-muted">A modern look at our inventory, webshop, and seed management.</p>
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
-
-<div class="row mb-5">
-    <div class="col-12">
-        <h2 class="text-secondary border-bottom pb-2">Webshop Items (<span class="badge bg-success">@Model.WebshopItems.Count</span>)</h2>
-        <div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
-            @foreach (var wp in Model.WebshopItems)
-            {
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0 bg-light">
-                        <div class="card-body">
-                            <h5 class="card-title text-success">@wp.ListingTitle</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">@wp.Taxonomy?.FullName</h6>
-                            <p class="card-text fw-semibold fs-5 mt-3">@wp.Price EUR</p>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
-</div>
-
-<div class="row mb-5">
-    <div class="col-md-6 mb-4">
-        <div class="card shadow-sm h-100 border-0 bg-info bg-opacity-10">
-            <div class="card-header bg-info text-white">
-                <h4 class="mb-0 font-weight-bold">Seeds Requiring Stratification</h4>
-            </div>
-            <div class="card-body">
-                <p>Found <strong>@Model.SeedsForStratification.Count</strong> seed batches requiring cold stratification.</p>
-                <ul class="list-group">
-                    @foreach (var seed in Model.SeedsForStratification)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            @seed.Taxonomy?.FullName
-                            <span class="badge bg-info rounded-pill">@seed.SeedCount seeds</span>
-                        </li>
-                    }
-                </ul>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 mb-4">
-        <div class="card shadow-sm h-100 border-0 bg-warning bg-opacity-10">
-            <div class="card-header bg-warning text-dark">
-                <h4 class="mb-0 font-weight-bold">Plants with Known Lineage</h4>
-            </div>
-            <div class="card-body">
-                <p>Found <strong>@Model.LineagePlants.Count</strong> plants with registered lineage/genetics.</p>
-                <ul class="list-group">
-                    @foreach (var lp in Model.LineagePlants)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            @lp.ListingTitle 
-                            <span class="text-muted fst-italic ms-2">Generacija: @(lp.Lineage?.Generation ?? "Nepoznato")</span>
-                        </li>
-                    }
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
