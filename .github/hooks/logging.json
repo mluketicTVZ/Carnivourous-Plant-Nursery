@@ -3,13 +3,13 @@
     "UserPromptSubmit": [
       {
         "type": "command",
-        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"'$input' | Add-Content -Path 'lab-1\\agent_log.txt'\""
+        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"'$input' | Add-Content -Path 'lab-2\\agent_log.txt'\""
       }
     ],
     "PreToolUse": [
       {
         "type": "command",
-        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"'$input' | Add-Content -Path 'lab-1\\agent_log.txt'\""
+        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"'$input' | Add-Content -Path 'lab-2\\agent_log.txt'\""
       }
     ]
   }
