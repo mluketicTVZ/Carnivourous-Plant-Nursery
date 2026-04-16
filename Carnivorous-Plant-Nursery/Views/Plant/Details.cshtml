@@ -10,6 +10,8 @@
     <span>@Model.Taxonomy?.CommonName</span>
 </div>
 
+<partial name="_BackButton" />
+
 <div class="entity-details-wrapper">
     <div class="details-header">
         <h1>@Model.Taxonomy?.CommonName</h1>
@@ -30,6 +32,10 @@
             <div class="data-row">
                 <span class="card-label">Cultivar</span>
                 <span>@(string.IsNullOrEmpty(Model.Taxonomy?.Cultivar) ? "Natural Species (None)" : Model.Taxonomy?.Cultivar)</span>
+            </div>
+            <div class="data-row">
+                <span class="card-label">Growth Stage</span>
+                <span>@Model.CurrentStage</span>
             </div>
             <div class="data-row">
                 <span class="card-label">Health</span>

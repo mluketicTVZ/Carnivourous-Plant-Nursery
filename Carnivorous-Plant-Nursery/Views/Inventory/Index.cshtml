@@ -9,12 +9,33 @@
     <span>Inventory Stock</span>
 </div>
 
+<partial name="_BackButton" />
+
 <div style="margin-bottom: 2rem;">
     <h1 style="color: #104e8b; border-bottom: 3px solid #4682b4; padding-bottom: 10px; display: inline-block;">Current Stock</h1>
     <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 10px;">
         Monitor our nursery availability, from young seedlings to mature specimens.
     </p>
 </div>
+
+<form method="get" asp-action="Index" class="inventory-filter-form">
+    <div class="filter-group">
+        <label for="searchTerm">Search Inventory SKU / Name</label>
+        <input type="text" id="searchTerm" name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Enter SKU or name..." />
+    </div>
+
+    <div class="filter-group filter-group-checkbox">
+        <label>
+            <input type="checkbox" name="webshopOnly" value="true" @(ViewBag.WebshopOnly == true ? "checked" : "") />
+            Available in Webshop Only
+        </label>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-left: auto;">
+        <button type="submit" class="btn-filter-inventory">Scan Inventory</button>
+        <a asp-action="Index" class="btn-clear" style="text-align: center;">Clear</a>
+    </div>
+</form>
 
 <div class="entity-catalog">
     @foreach (var item in Model)

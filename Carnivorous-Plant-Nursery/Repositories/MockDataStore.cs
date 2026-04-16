@@ -109,8 +109,32 @@ namespace Carnivorous_Plant_Nursery.Repositories
                 Cultivar = "", CommonName = "Maslaček hvatač",
                 CareProfileId = 3, CareProfile = care3
             };
+            var heliamphora = new Taxonomy
+            {
+                Id = 6, Genus = "Heliamphora", Species = "nutans",
+                Cultivar = "", CommonName = "Nutansov vrčar",
+                CareProfileId = 3, CareProfile = care3
+            };
+            var darlingtonia = new Taxonomy
+            {
+                Id = 7, Genus = "Darlingtonia", Species = "californica",
+                Cultivar = "", CommonName = "Kobrin ljiljan",
+                CareProfileId = 2, CareProfile = care2
+            };
+            var droseraBinata = new Taxonomy
+            {
+                Id = 8, Genus = "Drosera", Species = "binata",
+                Cultivar = "Multifida Extrema", CommonName = "Vilasta rosika",
+                CareProfileId = 3, CareProfile = care3
+            };
+            var cephalotus = new Taxonomy
+            {
+                Id = 9, Genus = "Cephalotus", Species = "follicularis",
+                Cultivar = "", CommonName = "Australska vrčarica",
+                CareProfileId = 3, CareProfile = care3
+            };
 
-            Taxonomies = new List<Taxonomy> { dionaea, sarracenia, drosera, nepenthes, pinguicula };
+            Taxonomies = new List<Taxonomy> { dionaea, sarracenia, drosera, nepenthes, pinguicula, heliamphora, darlingtonia, droseraBinata, cephalotus };
 
             // Lineages
             var lineage1 = new Lineage
@@ -192,8 +216,59 @@ namespace Carnivorous_Plant_Nursery.Repositories
                 PotDiameterCm = 7.0m, PotHeightCm = 6.0m,
                 EstimatedAgeAtAcquiryYears = 2
             };
+            // IDs 6–8 are used by existing SeedBatches; new Plants continue from 9.
+            var plant6 = new Plant
+            {
+                Id = 9, TaxonomyId = 6, Taxonomy = heliamphora,
+                ListingTitle = "Heliamphora nutans – Odrasla", SKU = "PL-HEL-001",
+                Price = 34.00m, IsAvailableInWebshop = true,
+                Description = "Visočinska vrčarica s karakterističnim nektarijskim spoon-om na vrhu vrča.",
+                DateAcquired = new DateTime(2024, 6, 10),
+                LocationInNursery = "Terrarium odjel",
+                CurrentStage = PlantStage.Mature, HealthStatus = HealthState.Excellent,
+                PotDiameterCm = 11.0m, PotHeightCm = 13.0m,
+                EstimatedAgeAtAcquiryYears = 3
+            };
+            var plant7 = new Plant
+            {
+                Id = 10, TaxonomyId = 7, Taxonomy = darlingtonia,
+                ListingTitle = "Darlingtonia californica – Mlada biljka", SKU = "PL-DAR-001",
+                Price = 19.99m, IsAvailableInWebshop = false,
+                Description = "Kobrin ljiljan u karanteni nakon uvoza; nije dostupan za prodaju.",
+                DateAcquired = new DateTime(2025, 3, 5),
+                InternalNotes = "Karantena do lipnja 2025. – preventivni tretman štetočina.",
+                LocationInNursery = "Karantenska komora K1",
+                CurrentStage = PlantStage.Juvenile, HealthStatus = HealthState.Quarantined,
+                PotDiameterCm = 9.0m, PotHeightCm = 10.0m,
+                EstimatedAgeAtAcquiryYears = 1
+            };
+            var plant8 = new Plant
+            {
+                Id = 11, TaxonomyId = 8, Taxonomy = droseraBinata,
+                ListingTitle = "Drosera binata 'Multifida Extrema' – Zrela", SKU = "PL-DRO-003",
+                Price = 8.50m, IsAvailableInWebshop = true,
+                Description = "Razgranata vilasta rosika s brojnim hvatačkim nitima; brzo raste.",
+                DateAcquired = new DateTime(2024, 4, 18),
+                LocationInNursery = "Polica pod lampama",
+                CurrentStage = PlantStage.Mature, HealthStatus = HealthState.Good,
+                PotDiameterCm = 10.0m, PotHeightCm = 10.0m,
+                EstimatedAgeAtAcquiryYears = 2
+            };
+            var plant9 = new Plant
+            {
+                Id = 12, TaxonomyId = 9, Taxonomy = cephalotus,
+                ListingTitle = "Cephalotus follicularis – Sadnica", SKU = "PL-CEP-001",
+                Price = 45.00m, IsAvailableInWebshop = false,
+                Description = "Iznimno rijetka australska vrčarica; sadnica još nije dovoljno razvijena za prodaju.",
+                DateAcquired = DateTime.Now.AddMonths(-3),
+                InternalNotes = "Strogo interno – čekati minimalno dvije godine rasta.",
+                LocationInNursery = "Terrarium odjel",
+                CurrentStage = PlantStage.Seedling, HealthStatus = HealthState.Good,
+                PotDiameterCm = 6.0m, PotHeightCm = 6.0m,
+                EstimatedAgeAtAcquiryYears = 0
+            };
 
-            Plants = new List<Plant> { plant1, plant2, plant3, plant4, plant5 };
+            Plants = new List<Plant> { plant1, plant2, plant3, plant4, plant5, plant6, plant7, plant8, plant9 };
 
             // Seed Batches
             var seeds1 = new SeedBatch
@@ -232,8 +307,58 @@ namespace Carnivorous_Plant_Nursery.Repositories
                 RequiresStratification = false, EstimatedGerminationRate = 0.70m,
                 ExpectedViabilityMonths = 6
             };
+            var seeds4 = new SeedBatch
+            {
+                Id = 13, TaxonomyId = 6, Taxonomy = heliamphora,
+                ListingTitle = "Sjemenke H. nutans (5 kom)", SKU = "SD-HEL-001",
+                Price = 12.00m, IsAvailableInWebshop = true,
+                Description = "Rijetke sjemenke Heliamphorae; siju se svježe, ne čuvaju dobro.",
+                DateAcquired = new DateTime(2024, 7, 1),
+                LocationInNursery = "Hladnjak C",
+                SeedCount = 5, HarvestDate = new DateTime(2024, 6, 25),
+                RequiresStratification = false, EstimatedGerminationRate = 0.50m,
+                ExpectedViabilityMonths = 3
+            };
+            var seeds5 = new SeedBatch
+            {
+                Id = 14, TaxonomyId = 7, Taxonomy = darlingtonia,
+                ListingTitle = "Sjemenke D. californica (15 kom)", SKU = "SD-DAR-001",
+                Price = 5.50m, IsAvailableInWebshop = false,
+                Description = "Sjemenke kobrinog ljiljana; zahtijevaju hladnu stratifikaciju – batch još nije spreman za isporuku.",
+                DateAcquired = new DateTime(2024, 11, 10),
+                InternalNotes = "Stratifikacija traje do veljače 2025.",
+                LocationInNursery = "Hladnjak C",
+                SeedCount = 15, HarvestDate = new DateTime(2024, 10, 30),
+                RequiresStratification = true, EstimatedGerminationRate = 0.60m,
+                ExpectedViabilityMonths = 24
+            };
+            var seeds6 = new SeedBatch
+            {
+                Id = 15, TaxonomyId = 8, Taxonomy = droseraBinata,
+                ListingTitle = "Sjemenke D. binata 'M.E.' (200+)", SKU = "SD-DRO-002",
+                Price = 3.00m, IsAvailableInWebshop = true,
+                Description = "Sitno, lako klijavo sjeme vilaste rosike; idealno za početnike.",
+                DateAcquired = new DateTime(2025, 1, 20),
+                LocationInNursery = "Soba za klijanje",
+                SeedCount = 250, HarvestDate = new DateTime(2025, 1, 10),
+                RequiresStratification = false, EstimatedGerminationRate = 0.90m,
+                ExpectedViabilityMonths = 12
+            };
+            var seeds7 = new SeedBatch
+            {
+                Id = 16, TaxonomyId = 9, Taxonomy = cephalotus,
+                ListingTitle = "Sjemenke C. follicularis (8 kom)", SKU = "SD-CEP-001",
+                Price = 18.00m, IsAvailableInWebshop = false,
+                Description = "Iznimno rijetke sjemenke australske vrčarice; namijenjene isključivo internom razmnožavanju.",
+                DateAcquired = new DateTime(2025, 2, 14),
+                InternalNotes = "Nije za prodaju – interni razmnožavački program.",
+                LocationInNursery = "Hladnjak C",
+                SeedCount = 8, HarvestDate = new DateTime(2025, 2, 1),
+                RequiresStratification = false, EstimatedGerminationRate = 0.35m,
+                ExpectedViabilityMonths = 4
+            };
 
-            SeedBatches = new List<SeedBatch> { seeds1, seeds2, seeds3 };
+            SeedBatches = new List<SeedBatch> { seeds1, seeds2, seeds3, seeds4, seeds5, seeds6, seeds7 };
 
             // Wire up navigation collections on Taxonomy
             foreach (var plant in Plants)

@@ -12,6 +12,8 @@
     <span>Item #@Model.Id</span>
 </div>
 
+<partial name="_BackButton" />
+
 <div class="entity-details-wrapper">
     <div class="details-header" style="background: linear-gradient(135deg, #104e8b 0%, #4682b4 100%);">
         <h1>@(Model.Taxonomy?.CommonName ?? Model.ListingTitle)</h1>
