@@ -54,6 +54,14 @@
                 <p><span class="card-label">Price:</span> $@item.Price?.ToString("0.00")</p>
                 <p><span class="card-label">Location:</span> @item.LocationInNursery</p>
                 
+                @if (item is Carnivorous_Plant_Nursery.Models.SeedBatch sb)
+                {
+                    <div style="margin-top: 0.5rem; padding: 0.5rem; background-color: rgba(70, 130, 180, 0.1); border-radius: 4px; border-left: 3px solid #4682b4;">
+                        <p style="margin: 0; font-size: 0.9rem; color: #104e8b;"><strong>Type:</strong> Seed Batch</p>
+                        <p style="margin: 0; font-size: 0.9rem;"><span class="card-label">Count:</span> @(sb.SeedCount?.ToString() ?? "Unknown") seeds</p>
+                    </div>
+                }
+
                 <div style="margin-top: 1rem; border-top: 1px dashed #4682b4; padding-top: 1rem;">
                     <span class="status-badge @statusClass">@statusText</span>
                 </div>

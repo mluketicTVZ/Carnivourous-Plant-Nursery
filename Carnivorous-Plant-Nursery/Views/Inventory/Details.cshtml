@@ -53,6 +53,31 @@
                         <a asp-controller="Plant" asp-action="Details" asp-route-id="@p.Id" class="btn-leaf" style="font-size: 0.8rem; padding: 0.25rem 0.5rem; margin:0;">View Plant Record &raquo;</a>
                     </span>
                 </div>
+            } else if (Model is Carnivorous_Plant_Nursery.Models.SeedBatch sb) {
+                <div class="data-row" style="margin-top: 1rem; border-top: 1px dashed #4682b4; padding-top: 0.5rem;">
+                    <span class="card-label" style="color: #104e8b;">Batch Type</span>
+                    <span style="font-weight: bold; color: #104e8b;">Seed Batch</span>
+                </div>
+                <div class="data-row">
+                    <span class="card-label">Seed Count</span>
+                    <span>@(sb.SeedCount?.ToString() ?? "N/A")</span>
+                </div>
+                <div class="data-row">
+                    <span class="card-label">Harvest Date</span>
+                    <span>@(sb.HarvestDate?.ToString("MMM dd, yyyy") ?? "Unknown")</span>
+                </div>
+                <div class="data-row">
+                    <span class="card-label">Est. Viability</span>
+                    <span>@(sb.ExpectedViabilityMonths?.ToString() ?? "N/A") months</span>
+                </div>
+                <div class="data-row">
+                    <span class="card-label">Est. Germination</span>
+                    <span>@(sb.EstimatedGerminationRate.HasValue ? (sb.EstimatedGerminationRate.Value * 100).ToString("0") + "%" : "N/A")</span>
+                </div>
+                <div class="data-row">
+                    <span class="card-label">Stratification Req.</span>
+                    <span>@(sb.RequiresStratification == true ? "Yes" : "No")</span>
+                </div>
             }
         </div>
 
