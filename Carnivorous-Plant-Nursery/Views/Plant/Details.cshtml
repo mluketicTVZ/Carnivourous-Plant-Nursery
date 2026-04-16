@@ -1,0 +1,64 @@
+@model Carnivorous_Plant_Nursery.Models.Plant
+
+@{
+    ViewData["Title"] = Model.Taxonomy?.CommonName + " - Details";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&raquo;</span>
+    <a asp-action="Index">Plants</a> <span class="separator">&raquo;</span>
+    <span>@Model.Taxonomy?.CommonName</span>
+</div>
+
+<div class="entity-details-wrapper">
+    <div class="details-header">
+        <h1>@Model.Taxonomy?.CommonName</h1>
+        <div class="scientific-name">@Model.Taxonomy?.FullName</div>
+    </div>
+    
+    <div class="details-content">
+        <div class="details-section">
+            <h3>Botanical Classification</h3>
+            <div class="data-row">
+                <span class="card-label">Genus</span>
+                <span>@Model.Taxonomy?.Genus</span>
+            </div>
+            <div class="data-row">
+                <span class="card-label">Species</span>
+                <span>@Model.Taxonomy?.Species</span>
+            </div>
+            <div class="data-row">
+                <span class="card-label">Cultivar</span>
+                <span>@(string.IsNullOrEmpty(Model.Taxonomy?.Cultivar) ? "Natural Species (None)" : Model.Taxonomy?.Cultivar)</span>
+            </div>
+            <div class="data-row">
+                <span class="card-label">Health</span>
+                <span>@Model.HealthStatus</span>
+            </div>
+        </div>
+
+        <div class="details-section">
+            <h3>Care & Habitat Profile</h3>
+            <div class="data-row">
+                <span class="card-label">Light</span>
+                <span>@Model.Taxonomy?.CareProfile?.RequiredLight</span>
+            </div>
+            <div class="data-row">
+                <span class="card-label">Humidity</span>
+                <span>@Model.Taxonomy?.CareProfile?.RequiredHumidity</span>
+            </div>
+            <div class="data-row">
+                <span class="card-label">Soil/Media</span>
+                <span>@Model.Taxonomy?.CareProfile?.SoilMix</span>
+            </div>
+            <div class="action-panel" style="margin-top: 2rem;">
+                <a asp-action="Index" class="btn-leaf" style="background-color: var(--text-muted);">
+                    &laquo; Back to List
+                </a>
+                <a asp-controller="Inventory" asp-action="Index" class="btn-leaf">
+                    Check Availability
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,72 @@
+@model Carnivorous_Plant_Nursery.Models.InventoryItem
+
+@{
+    ViewData["Title"] = "Inventory Detail - " + (Model.Taxonomy?.CommonName ?? Model.ListingTitle);
+    var statusClass = Model.IsAvailableInWebshop ? "status-instock" : "status-out";
+    var statusText = Model.IsAvailableInWebshop ? "Available" : "Not Listed";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&raquo;</span>
+    <a asp-action="Index">Inventory Stock</a> <span class="separator">&raquo;</span>
+    <span>Item #@Model.Id</span>
+</div>
+
+<div class="entity-details-wrapper">
+    <div class="details-header" style="background: linear-gradient(135deg, #104e8b 0%, #4682b4 100%);">
+        <h1>@(Model.Taxonomy?.CommonName ?? Model.ListingTitle)</h1>
+        <div class="scientific-name">Inventory Item SKU: @Model.SKU</div>
+        <div style="margin-top: 1rem;">
+            <span class="status-badge @statusClass" style="font-size: 1rem; padding: 0.5rem 1rem;">@statusText</span>
+        </div>
+    </div>
+    
+    <div class="details-content">
+        <div class="details-section" style="border-left-color: #4682b4;">
+            <h3 style="color: #104e8b; border-bottom-color: #b0c4de;">Stock Information</h3>
+            <div class="data-row">
+                <span class="card-label">Associated Taxonomy</span>
+                <span>
+                    @if (Model.TaxonomyId.HasValue) {
+                        <span style="color: var(--primary-green); font-weight: 600;">
+                            @Model.Taxonomy?.FullName
+                        </span>
+                    } else {
+                        <span>N/A</span>
+                    }
+                </span>
+            </div>
+            <div class="data-row">
+                <span class="card-label">Location</span>
+                <span>@Model.LocationInNursery</span>
+            </div>
+            <div class="data-row">
+                <span class="card-label">Webshop</span>
+                <span style="font-weight: bold; font-size: 1.1rem; color: var(--text-dark);">@(Model.IsAvailableInWebshop ? "Yes" : "No")</span>
+            </div>
+            @if (Model is Carnivorous_Plant_Nursery.Models.Plant p) {
+                <div class="data-row" style="margin-top: 1rem;">
+                    <span class="card-label">Plant Details</span>
+                    <span>
+                        <a asp-controller="Plant" asp-action="Details" asp-route-id="@p.Id" class="btn-leaf" style="font-size: 0.8rem; padding: 0.25rem 0.5rem; margin:0;">View Plant Record &raquo;</a>
+                    </span>
+                </div>
+            }
+        </div>
+
+        <div class="details-section" style="border-left-color: #4682b4;">
+            <h3 style="color: #104e8b; border-bottom-color: #b0c4de;">Pricing & Procurement</h3>
+            <div class="data-row">
+                <span class="card-label">Unit Price</span>
+                <span style="font-size: 1.25rem; font-weight: bold; color: #104e8b;">
+                    @(Model.Price.HasValue ? $"${Model.Price.Value.ToString("0.00")}" : "Quote needed")
+                </span>
+            </div>
+            <div class="action-panel" style="margin-top: 2rem;">
+                <a asp-action="Index" class="btn-inventory" style="background-color: var(--text-muted);">
+                    &laquo; Back to Inventory
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

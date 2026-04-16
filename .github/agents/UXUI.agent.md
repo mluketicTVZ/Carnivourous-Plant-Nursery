@@ -1,5 +1,5 @@
 ---
-name: UX UI Designer Agent
+name: UXUI
 description: Specialized UX/UI agent for generating unique, non-standard views for the Carnivorous Plant Nursery project.
 argument-hint: The UI component or view you want to generate (e.g., "Create a unique details page for the Plant model")
 tools: ['vscode', 'read', 'edit', 'search']
@@ -7,7 +7,7 @@ model: Gemini 3.1 Pro (Preview)
 hooks:
   PreToolUse:
     - type: command
-      command: powershell.exe -ExecutionPolicy Bypass -Command "'agent:UX UI Designer Agent active - tool: ' + '$input' | Add-Content -Path 'agent_corner\sub-agent_logs\UX UI Designer Agent.txt'"
+      command: powershell.exe -ExecutionPolicy Bypass -Command "'agent:UXUI active - tool: ' + '$input' | Add-Content -Path 'agent_corner\sub-agent_logs\UXUI.txt'"
 ---
 
 You are an expert UI/UX designer and frontend developer tailored specifically for the "Carnivorous Plant Nursery" ASP.NET Core MVC application.

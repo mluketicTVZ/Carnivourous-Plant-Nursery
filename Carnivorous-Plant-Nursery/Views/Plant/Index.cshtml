@@ -1,0 +1,38 @@
+@model IEnumerable<Carnivorous_Plant_Nursery.Models.Plant>
+
+@{
+    ViewData["Title"] = "Botanical Specimens";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&raquo;</span>
+    <span>Plants</span>
+</div>
+
+<div style="margin-bottom: 2rem;">
+    <h1 style="color: var(--dark-green); border-bottom: 3px solid var(--accent-color); padding-bottom: 10px; display: inline-block;">Botanical Specimens</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 10px;">
+        Browse our extensive collection of uniquely adapted carnivorous plants.
+    </p>
+</div>
+
+<div class="entity-catalog">
+    @foreach (var p in Model)
+    {
+        <div class="nursery-card">
+            <div class="nursery-card-header">
+                <h2 class="nursery-card-title">@p.Taxonomy?.CommonName</h2>
+                <div class="nursery-card-subtitle">@p.Taxonomy?.FullName</div>
+            </div>
+            <div class="nursery-card-body">
+                <p><span class="card-label">Genus:</span> @p.Taxonomy?.Genus</p>
+                <p><span class="card-label">Species:</span> @p.Taxonomy?.Species</p>
+                <p><span class="card-label">Cultivar:</span> @(string.IsNullOrEmpty(p.Taxonomy?.Cultivar) ? "N/A" : p.Taxonomy?.Cultivar)</p>
+                <p><span class="card-label">Light Requirements:</span> @p.Taxonomy?.CareProfile?.RequiredLight</p>
+            </div>
+            <div class="nursery-card-footer">
+                <a asp-action="Details" asp-route-id="@p.Id" class="btn-leaf">View Details &raquo;</a>
+            </div>
+        </div>
+    }
+</div>

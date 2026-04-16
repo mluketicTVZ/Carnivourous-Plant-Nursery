@@ -1,0 +1,38 @@
+@model IEnumerable<Carnivorous_Plant_Nursery.Models.SeedBatch>
+
+@{
+    ViewData["Title"] = "Seed Bank";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&raquo;</span>
+    <span>Seed Bank</span>
+</div>
+
+<div style="margin-bottom: 2rem;">
+    <h1 style="color: var(--dark-green); border-bottom: 3px solid var(--accent-color); padding-bottom: 10px; display: inline-block;">Seed Bank & Propagation</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 10px;">
+        Explore our curated collection of responsibly harvested carnivorous plant seeds.
+    </p>
+</div>
+
+<div class="entity-catalog">
+    @foreach (var s in Model)
+    {
+        <div class="nursery-card">
+            <div class="nursery-card-header">
+                <h2 class="nursery-card-title">@(string.IsNullOrEmpty(s.ListingTitle) ? s.Taxonomy?.CommonName + " Seeds" : s.ListingTitle)</h2>
+                <div class="nursery-card-subtitle">@s.Taxonomy?.FullName</div>
+            </div>
+            <div class="nursery-card-body">
+                <p><span class="card-label">Genus:</span> @s.Taxonomy?.Genus</p>
+                <p><span class="card-label">Species:</span> @s.Taxonomy?.Species</p>
+                <p><span class="card-label">Seeds:</span> @(s.SeedCount.HasValue ? s.SeedCount.Value.ToString() : "Unknown")</p>
+                <p><span class="card-label">Harvested:</span> @(s.HarvestDate.HasValue ? s.HarvestDate.Value.ToString("d") : "N/A")</p>
+            </div>
+            <div class="nursery-card-footer">
+                <a asp-action="Details" asp-route-id="@s.Id" class="btn-leaf">View Details &raquo;</a>
+            </div>
+        </div>
+    }
+</div>

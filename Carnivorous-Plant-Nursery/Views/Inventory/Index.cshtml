@@ -1,0 +1,45 @@
+@model IEnumerable<Carnivorous_Plant_Nursery.Models.InventoryItem>
+
+@{
+    ViewData["Title"] = "Nursery Check Stock";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&raquo;</span>
+    <span>Inventory Stock</span>
+</div>
+
+<div style="margin-bottom: 2rem;">
+    <h1 style="color: #104e8b; border-bottom: 3px solid #4682b4; padding-bottom: 10px; display: inline-block;">Current Stock</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 10px;">
+        Monitor our nursery availability, from young seedlings to mature specimens.
+    </p>
+</div>
+
+<div class="entity-catalog">
+    @foreach (var item in Model)
+    {
+        <!-- Evaluate status class based on quantity -->
+        var statusClass = item.IsAvailableInWebshop ? "status-instock" : "status-out";
+        var statusText = item.IsAvailableInWebshop ? "Available" : "Not listed";
+
+        <div class="inventory-card">
+            <div class="inventory-card-header">
+                <h2 class="inventory-card-title">@(item.Taxonomy?.CommonName ?? item.ListingTitle)</h2>
+                <div class="inventory-card-subtitle">SKU: @item.SKU</div>
+            </div>
+            <div class="inventory-card-body">
+                <p><span class="card-label">Item ID:</span> #@item.Id</p>
+                <p><span class="card-label">Price:</span> $@item.Price?.ToString("0.00")</p>
+                <p><span class="card-label">Location:</span> @item.LocationInNursery</p>
+                
+                <div style="margin-top: 1rem; border-top: 1px dashed #4682b4; padding-top: 1rem;">
+                    <span class="status-badge @statusClass">@statusText</span>
+                </div>
+            </div>
+            <div class="inventory-card-footer">
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn-inventory">View Status &raquo;</a>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,61 @@
+@model Carnivorous_Plant_Nursery.Models.CareProfile
+
+@{
+    ViewData["Title"] = $"Care Guide - {Model.CareProfileName}";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&raquo;</span>
+    <a asp-action="Index">Care Profiles</a> <span class="separator">&raquo;</span>
+    <span>@Model.CareProfileName Guide</span>
+</div>
+
+<div class="entity-details-wrapper care-guide-card">
+    <div class="details-header">
+        <h1 class="details-title">Care Guide: @Model.CareProfileName</h1>
+        <div class="scientific-name">
+            @if (Model.RequiresWinterDormancy == true) {
+                <span class="status-badge status-low">Requires Winter Dormancy</span>
+            }
+        </div>
+    </div>
+    
+    <div class="details-content">
+        <div class="care-stats-grid">
+            <div class="stat-box light-box">
+                <div class="stat-icon">☀️</div>
+                <h4>Lighting</h4>
+                <p>@Model.RequiredLight</p>
+            </div>
+            <div class="stat-box humidity-box">
+                <div class="stat-icon">💧</div>
+                <h4>Humidity</h4>
+                <p>@Model.RequiredHumidity</p>
+            </div>
+            <div class="stat-box soil-box">
+                <div class="stat-icon">🪴</div>
+                <h4>Soil / Substrate</h4>
+                <p>@Model.SoilMix</p>
+            </div>
+            <div class="stat-box temp-box">
+                <div class="stat-icon">🌡️</div>
+                <h4>Temperature</h4>
+                <p>Min: @Model.MinTemperature — Max: @Model.MaxTemperature</p>
+                @if (!string.IsNullOrEmpty(Model.TemperatureDescription)) {
+                    <p class="temp-desc">@Model.TemperatureDescription</p>
+                }
+            </div>
+        </div>
+
+        <div class="detail-group instructions-box" style="margin-top: 2rem;">
+            <h3 class="detail-label">Care Notes</h3>
+            <div class="instruction-content">
+                @Html.Raw(Model.CareDescription?.Replace("\n", "<br/>") ?? "Care notes are pending for this profile.")
+            </div>
+        </div>
+
+        <div class="action-panel" style="margin-top: 2rem;">
+            <a asp-action="Index" class="btn-leaf" style="background-color: var(--text-muted);">&laquo; Back to Care Profiles</a>
+        </div>
+    </div>
+</div>

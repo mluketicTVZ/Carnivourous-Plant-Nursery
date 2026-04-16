@@ -13,6 +13,7 @@ builder.Services.AddSingleton<TaxonomyMockRepository>();
 builder.Services.AddSingleton<PlantMockRepository>();
 builder.Services.AddSingleton<SeedBatchMockRepository>();
 builder.Services.AddSingleton<InventoryMockRepository>();
+builder.Services.AddSingleton<CareProfileMockRepository>();
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
