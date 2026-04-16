@@ -1,8 +1,50 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Welcome";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero-carousel">
+    <!-- Slide 1: Replace background in CSS later -->
+    <div class="carousel-slide slide-1">
+        <div class="carousel-content">
+            <h1>Beautiful Carnivorous Plants</h1>
+            <p>For Your Home and Garden</p>
+
+        </div>
+    </div>
+    
+    <!-- Slide 2: Replace background in CSS later -->
+    <div class="carousel-slide slide-2">
+        <div class="carousel-content">
+            <h1>Fascinating Botanical Marvels</h1>
+            <p>Discover the mechanisms of nature's predators.</p>
+
+        </div>
+    </div>
+
+    <!-- Slide 3: Replace background in CSS later -->
+    <div class="carousel-slide slide-3">
+        <div class="carousel-content">
+            <h1>Expert Care & Guidance</h1>
+            <p>Learn to mimic their natural habitats.</p>
+
+        </div>
+    </div>
+</div>
+
+<div class="card-grid">
+    <div class="info-card">
+        <h3>Explore Our Collection</h3>
+        <p>From Sarracenia to Dionaea, browse our wide selection of healthy, nursery-grown carnivorous plants.</p>
+        <a href="/Plant" class="btn-primary">View Plants</a>
+    </div>
+    <div class="info-card">
+        <h3>Plant Care Guides</h3>
+        <p>Learn the natural processes and requirements needed to keep your plants thriving by mimicking their natural habitats.</p>
+        <a href="/CareProfile" class="btn-primary">Read Guides</a>
+    </div>
+    <div class="info-card">
+        <h3>Nursery Inventory</h3>
+        <p>Check the availability of our seasonal plants, seeds, and specialized growing media.</p>
+        <a href="/Inventory" class="btn-primary">Check Stock</a>
+    </div>
 </div>
