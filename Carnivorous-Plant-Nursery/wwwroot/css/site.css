@@ -1,22 +1,664 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+﻿:root {
+    --primary-green: #4caf50;
+    --dark-green: #2e7d32;
+    --light-green: #dcedc8;
+    --accent-color: #8bc34a;
+    --text-dark: #333333;
+    --text-muted: #666666;
+    --bg-light: #f9fbf9;
+    --bg-white: #ffffff;
+    --border-color: #e0e0e0;
 }
 
 body {
-  margin-bottom: 60px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    margin: 0;
+    padding: 0;
 }
+
+.nursery-header {
+    background-color: var(--bg-white);
+    border-bottom: 2px solid var(--accent-color);
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.brand-title {
+    color: var(--dark-green);
+    text-decoration: none;
+    font-size: 1.8rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nursery-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+}
+
+.nursery-nav a {
+    color: var(--dark-green);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nursery-nav a:hover {
+    color: var(--accent-color);
+}
+
+.main-container {
+    padding: 2rem 5%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.hero-banner {
+    background-color: var(--light-green);
+    padding: 4rem 2rem;
+    text-align: center;
+    border-radius: 8px;
+    margin-bottom: 3rem;
+    border: 1px solid var(--accent-color);
+}
+
+.hero-banner h1 {
+    color: var(--dark-green);
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.info-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.info-card h3 {
+    color: var(--dark-green);
+    border-bottom: 2px solid var(--light-green);
+    padding-bottom: 0.5rem;
+}
+
+.btn-primary {
+    display: inline-block;
+    background-color: var(--primary-green);
+    color: white;
+    padding: 0.5rem 1.5rem;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-top: 1rem;
+    font-weight: bold;
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-green);
+}
+.hero-carousel {
+    position: relative;
+    height: 400px;
+    width: 100%;
+    margin-bottom: 3rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 2px solid var(--light-green);
+}
+
+.carousel-slide {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    animation: fadeCycle 24s infinite;
+    background-size: cover;
+    background-position: center;
+}
+
+/* Base styles for the content over the image */
+.carousel-content {
+    background: rgba(255, 255, 255, 0.85); /* Semi-transparent overlay to ensure text is readable on photos */
+    padding: 2rem 3rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
+}
+
+.carousel-content h1 {
+    color: var(--dark-green);
+    margin-top: 0;
+    font-size: 2.2rem;
+}
+
+.carousel-content p {
+    font-size: 1.2rem;
+    color: var(--text-dark);
+}
+
+.placeholder-tag {
+    margin-top: 1rem;
+    display: inline-block;
+    background-color: var(--light-green);
+    color: var(--dark-green);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* 
+    PLACEHOLDER BACKGROUNDS 
+    Replace these linear-gradients with url('your-image.jpg') later!
+*/
+.slide-1 { 
+    background: url('../images/Drosera%201.jpg') center/cover;
+    animation-delay: 0s; 
+}
+.slide-2 { 
+    background: url('../images/Venus%201.jpg') center/cover;
+    animation-delay: 8s; 
+}
+.slide-3 { 
+    background: url('../images/Purpurea%201.jpg') center/cover;
+    animation-delay: 16s; 
+}
+
+@keyframes fadeCycle {
+    0%   { opacity: 0; }
+    5%   { opacity: 1; }
+    33%  { opacity: 1; }
+    38%  { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+/* --- Carnivorous Plant Nursery Module Styles --- */
+
+/* Botanical Back Button (Keeps State/Filters) */
+.back-btn-botanical {
+    display: inline-flex;
+    align-items: center;
+    background-color: #8d6e63; /* Earthy brown, distinct from primary green */
+    color: #ffffff;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid #6d4c41;
+}
+.back-btn-botanical:hover {
+    background-color: #6d4c41;
+    color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.back-btn-botanical .back-arrow {
+    margin-right: 8px;
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+.back-btn-botanical:hover .back-arrow {
+    transform: translateX(-5px);
+}
+
+.nursery-breadcrumb {
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+.nursery-breadcrumb a {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: 600;
+}
+.nursery-breadcrumb a:hover {
+    text-decoration: underline;
+    color: var(--dark-green);
+}
+.nursery-breadcrumb .separator {
+    margin: 0 0.5rem;
+    color: #ccc;
+}
+
+/* Plant & Inventory Lists */
+.entity-catalog {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+.nursery-card {
+    background: var(--bg-white);
+    border: 1px solid #dcdcdc;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.04);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.nursery-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    border-color: var(--accent-color);
+}
+.nursery-card-header {
+    background: var(--light-green);
+    padding: 1.2rem;
+    border-bottom: 2px solid var(--accent-color);
+}
+.nursery-card-title {
+    margin: 0;
+    color: var(--dark-green);
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+.nursery-card-subtitle {
+    margin: 0.3rem 0 0 0;
+    font-size: 0.95rem;
+    color: #444;
+    font-style: italic;
+}
+.nursery-card-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+}
+.nursery-card-body p {
+    margin: 0.5rem 0;
+    color: var(--text-dark);
+    line-height: 1.5;
+}
+.card-label {
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-right: 5px;
+}
+.nursery-card-footer {
+    padding: 1.2rem;
+    background: #fafafa;
+    border-top: 1px solid #eaeaea;
+    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+}
+.btn-leaf {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-green);
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    border: none;
+    cursor: pointer;
+}
+.btn-leaf:hover {
+    background-color: var(--dark-green);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+}
+
+/* Detail Pages */
+.entity-details-wrapper {
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    margin-bottom: 4rem;
+}
+.details-header {
+    background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
+    padding: 2.5rem 2rem;
+    color: #fff;
+}
+.details-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+}
+.details-header .scientific-name {
+    font-size: 1.2rem;
+    font-style: italic;
+    opacity: 0.9;
+    margin-top: 0.5rem;
+}
+.details-content {
+    padding: 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+@media (min-width: 768px) {
+    .details-content {
+        grid-template-columns: 2fr 1fr;
+    }
+}
+.details-section {
+    background: #fdfdfd;
+    border: 1px solid #eee;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-color);
+}
+.details-section h3 {
+    color: var(--dark-green);
+    margin-top: 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 0.5rem;
+}
+.data-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+.data-row:last-child {
+    border-bottom: none;
+}
+.status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.status-instock {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+.status-low {
+    background-color: #fff3e0;
+    color: #ef6c00;
+    border: 1px solid #ffcc80;
+}
+.status-out {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
+.action-panel {
+    display: flex;
+    gap: 10px;
+    margin-top: 1rem;
+}
+
+/* --- Inventory Theme (Blueish) --- */
+.inventory-stock-wrapper {
+    background-color: #f0f8ff;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #b0c4de;
+}
+
+.inventory-card {
+    background: #ffffff;
+    border: 1px solid #b0c4de;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.04);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.inventory-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(70, 130, 180, 0.2);
+    border-color: #4682b4;
+}
+.inventory-card-header {
+    background: #e6f2ff;
+    padding: 1.2rem;
+    border-bottom: 2px solid #4682b4;
+}
+.inventory-card-title {
+    margin: 0;
+    color: #104e8b;
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+.inventory-card-subtitle {
+    margin: 0.3rem 0 0 0;
+    font-size: 0.95rem;
+    color: #444;
+    font-style: italic;
+}
+.inventory-card-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+}
+.inventory-card-body p {
+    margin: 0.5rem 0;
+    color: var(--text-dark);
+    line-height: 1.5;
+}
+.inventory-card-footer {
+    padding: 1.2rem;
+    background: #f8fbff;
+    border-top: 1px solid #dbe2ef;
+    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+}
+.btn-inventory {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #4682b4;
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    border: none;
+    cursor: pointer;
+}
+.btn-inventory:hover {
+    background-color: #315f86;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(70, 130, 180, 0.3);
+}
+
+/* Care Profile Stats Grid */
+.care-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.stat-box {
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+.stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+.stat-box h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--dark-green);
+    font-size: 1.1rem;
+}
+.instructions-box {
+    background: #fafcf8;
+    border: 1px solid var(--accent-color);
+    padding: 2rem;
+    border-radius: 8px;
+}
+.instruction-content {
+    line-height: 1.6;
+    color: var(--text-dark);
+}
+.detail-label {
+    color: var(--dark-green);
+    margin-top: 0;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--light-green);
+    padding-bottom: 0.5rem;
+}
+
+/* Custom Filter Forms */
+.botanical-filter-form {
+    background: var(--bg-white);
+    border: 1px solid var(--accent-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.inventory-filter-form {
+    background: #ffffff;
+    border: 1px solid #b0c4de;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.filter-group input[type="text"],
+.filter-group select {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--text-dark);
+    background-color: var(--bg-light);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-group-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    padding-bottom: 0.6rem;
+}
+
+.filter-group-checkbox input[type="checkbox"] {
+    width: 1.2rem;
+    height: 1.2rem;
+    cursor: pointer;
+}
+
+.botanical-filter-form .filter-group input:focus,
+.botanical-filter-form .filter-group select:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.inventory-filter-form .filter-group input:focus,
+.inventory-filter-form .filter-group select:focus {
+    outline: none;
+    border-color: #4682b4;
+    box-shadow: 0 0 0 2px rgba(70, 130, 180, 0.2);
+}
+
+.btn-filter, .btn-filter-inventory {
+    padding: 0.6rem 1.5rem;
+    border: none;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.btn-filter {
+    background-color: var(--primary-green);
+    color: white;
+}
+.btn-filter:hover {
+    background-color: var(--dark-green);
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+}
+
+.btn-filter-inventory {
+    background-color: #4682b4;
+    color: white;
+}
+.btn-filter-inventory:hover {
+    background-color: #315f86;
+    box-shadow: 0 4px 10px rgba(70, 130, 180, 0.3);
+}
+
+.btn-clear {
+    background-color: #f0f0f0;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 20px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+    border: 1px solid #dcdcdc;
+    display: inline-block;
+    cursor: pointer;
+}
+.btn-clear:hover {
+    background-color: #e0e0e0;
+    color: var(--text-dark);
+}
+

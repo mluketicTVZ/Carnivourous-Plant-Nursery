@@ -1,0 +1,46 @@
+@model IEnumerable<Carnivorous_Plant_Nursery.Models.CareProfile>
+
+@{
+    ViewData["Title"] = "Care Requirements";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&raquo;</span>
+    <span>Care Profiles</span>
+</div>
+
+<partial name="_BackButton" />
+
+<div style="margin-bottom: 2rem;">
+    <h1 style="color: var(--dark-green); border-bottom: 3px solid var(--accent-color); padding-bottom: 10px; display: inline-block;">Carnivorous Plant Care Profiles</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 10px;">
+        Learn the specific requirements to keep your botanical wonders thriving.
+    </p>
+</div>
+
+<div class="entity-catalog">
+    @if (Model != null && Model.Any()) {
+        foreach (var item in Model) {
+            <div class="nursery-card">
+                <div class="nursery-card-header">
+                    <h2 class="nursery-card-title">@item.CareProfileName</h2>
+                    @if (item.RequiresWinterDormancy == true) {
+                        <div style="margin-top: 0.5rem;">
+                            <span class="status-badge status-low">Dormancy Required</span>
+                        </div>
+                    }
+                </div>
+                <div class="nursery-card-body">
+                    <p><span class="card-label">Light:</span> @item.RequiredLight</p>
+                    <p><span class="card-label">Humidity:</span> @item.RequiredHumidity</p>
+                    <p class="brief-desc">@item.CareDescription</p>
+                </div>
+                <div class="nursery-card-footer">
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn-leaf">Full Care Guide &raquo;</a>
+                </div>
+            </div>
+        }
+    } else {
+        <p>No care profiles found.</p>
+    }
+</div>

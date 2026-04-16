@@ -1,0 +1,47 @@
+@model IEnumerable<Carnivorous_Plant_Nursery.Models.Taxonomy>
+
+@{
+    ViewData["Title"] = "Taxonomy Catalog";
+}
+
+<div class="entity-catalog">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Taxonomies</li>
+        </ol>
+    </nav>
+
+    <partial name="_BackButton" />
+
+    <h1 class="page-title">Taxonomy Classification</h1>
+
+    <div class="search-container">
+        <form action="/Taxonomy" method="get" class="search-form">
+            <input type="text" name="searchTerm" class="search-input" placeholder="Search taxonomies (e.g., Genus, Family)..." value="@ViewData["CurrentFilter"]" />
+            <button type="submit" class="nursery-btn nursery-btn-primary">Search</button>
+            <a asp-action="Index" class="nursery-btn nursery-btn-secondary">Clear</a>
+        </form>
+    </div>
+
+    <div class="card-grid">
+        @foreach (var item in Model) {
+            <div class="nursery-card">
+                <div class="card-header">
+                    <h2 class="card-title"><i>@item.Genus</i> @item.Species</h2>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(item.CommonName)) {
+                        <p><strong>Common Name:</strong> @item.CommonName</p>
+                    }
+                    @if (!string.IsNullOrEmpty(item.Cultivar)) {
+                        <p><strong>Cultivar:</strong> @item.Cultivar</p>
+                    }
+                </div>
+                <div class="card-footer">
+                    <a asp-action="Details" asp-route-id="@item.Id" class="nursery-btn nursery-btn-primary">View Pedigree</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

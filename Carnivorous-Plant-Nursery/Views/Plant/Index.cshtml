@@ -1,0 +1,97 @@
+@model IEnumerable<Carnivorous_Plant_Nursery.Models.Plant>
+@using Carnivorous_Plant_Nursery.Models
+
+@{
+    ViewData["Title"] = "Botanical Specimens";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&raquo;</span>
+    <span>Plants</span>
+</div>
+
+<partial name="_BackButton" />
+
+<div style="margin-bottom: 2rem;">
+    <h1 style="color: var(--dark-green); border-bottom: 3px solid var(--accent-color); padding-bottom: 10px; display: inline-block;">Botanical Specimens</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 10px;">
+        Browse our extensive collection of uniquely adapted carnivorous plants.
+    </p>
+</div>
+
+<form method="get" asp-action="Index" class="botanical-filter-form">
+    <div class="filter-group">
+        <label for="searchTerm">Search by Name or Keyword</label>
+        <input type="text" id="searchTerm" name="searchTerm" value="@ViewBag.SearchTerm" placeholder="e.g. Venus Flytrap" />
+    </div>
+
+    <div class="filter-group">
+        <label for="stage">Growth Stage</label>
+        <select id="stage" name="stage">
+            <option value="">-- All Stages --</option>
+            @foreach (var s in Enum.GetValues(typeof(PlantStage)).Cast<PlantStage>())
+            {
+                if (ViewBag.Stage != null && (PlantStage)ViewBag.Stage == s)
+                {
+                    <option value="@s" selected="selected">@s</option>
+                }
+                else
+                {
+                    <option value="@s">@s</option>
+                }
+            }
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="healthStatus">Health Status</label>
+        <select id="healthStatus" name="healthStatus">
+            <option value="">-- All Health Profiles --</option>
+            @foreach (var hs in Enum.GetValues(typeof(HealthState)).Cast<HealthState>())
+            {
+                if (ViewBag.HealthStatus != null && (HealthState)ViewBag.HealthStatus == hs)
+                {
+                    <option value="@hs" selected="selected">@hs</option>
+                }
+                else
+                {
+                    <option value="@hs">@hs</option>
+                }
+            }
+        </select>
+    </div>
+
+    <div class="filter-group filter-group-checkbox">
+        <label>
+            <input type="checkbox" name="webshopOnly" value="true" @(ViewBag.WebshopOnly == true ? "checked" : "") />
+            Available in Webshop Only
+        </label>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+        <button type="submit" class="btn-filter">Apply Filters</button>
+        <a asp-action="Index" class="btn-clear" style="text-align: center;">Clear</a>
+    </div>
+</form>
+
+<div class="entity-catalog">
+    @foreach (var p in Model)
+    {
+        <div class="nursery-card">
+            <div class="nursery-card-header">
+                <h2 class="nursery-card-title">@p.Taxonomy?.CommonName</h2>
+                <div class="nursery-card-subtitle">@p.Taxonomy?.FullName</div>
+            </div>
+            <div class="nursery-card-body">
+                <p><span class="card-label">Genus:</span> @p.Taxonomy?.Genus</p>
+                <p><span class="card-label">Species:</span> @p.Taxonomy?.Species</p>
+                <p><span class="card-label">Cultivar:</span> @(string.IsNullOrEmpty(p.Taxonomy?.Cultivar) ? "N/A" : p.Taxonomy?.Cultivar)</p>
+                <p><span class="card-label">Growth Stage:</span> @p.CurrentStage</p>
+                <p><span class="card-label">Light Requirements:</span> @p.Taxonomy?.CareProfile?.RequiredLight</p>
+            </div>
+            <div class="nursery-card-footer">
+                <a asp-action="Details" asp-route-id="@p.Id" class="btn-leaf">View Details &raquo;</a>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,70 @@
+@model Carnivorous_Plant_Nursery.Models.SeedBatch
+
+@{
+    var displayTitle = string.IsNullOrEmpty(Model.ListingTitle) ? Model.Taxonomy?.CommonName + " Seeds" : Model.ListingTitle;
+    ViewData["Title"] = displayTitle + " - Details";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&raquo;</span>
+    <a asp-action="Index">Seed Bank</a> <span class="separator">&raquo;</span>
+    <span>@displayTitle</span>
+</div>
+
+<partial name="_BackButton" />
+
+<div class="entity-details-wrapper">
+    <div class="details-header">
+        <h1>@displayTitle</h1>
+        <div class="scientific-name">@Model.Taxonomy?.FullName</div>
+    </div>
+    
+    <div class="details-content">
+        <div class="details-section">
+            <h3>Batch Information</h3>
+            <div class="data-row">
+                <span class="card-label">SKU</span>
+                <span>@(string.IsNullOrEmpty(Model.SKU) ? "N/A" : Model.SKU)</span>
+            </div>
+            <div class="data-row">
+                <span class="card-label">Seed Count</span>
+                <span>@(Model.SeedCount.HasValue ? Model.SeedCount.Value.ToString() : "Unknown")</span>
+            </div>
+            <div class="data-row">
+                <span class="card-label">Harvest Date</span>
+                <span>@(Model.HarvestDate.HasValue ? Model.HarvestDate.Value.ToString("d") : "Not recorded")</span>
+            </div>
+            <div class="data-row">
+                <span class="card-label">Viability (Months)</span>
+                <span>@(Model.ExpectedViabilityMonths.HasValue ? Model.ExpectedViabilityMonths.ToString() : "N/A")</span>
+            </div>
+        </div>
+
+        <div class="details-section">
+            <h3>Cultivation & Germination</h3>
+            <div class="data-row">
+                <span class="card-label">Stratification Required</span>
+                <span>@(Model.RequiresStratification.HasValue ? (Model.RequiresStratification.Value ? "Yes" : "No") : "Unknown")</span>
+            </div>
+            <div class="data-row">
+                <span class="card-label">Est. Germination Rate</span>
+                <span>@(Model.EstimatedGerminationRate.HasValue ? (Model.EstimatedGerminationRate.Value * 100).ToString("F0") + "%" : "Unknown")</span>
+            </div>
+            <div class="data-row">
+                <span class="card-label">Price</span>
+                <span>@(Model.Price.HasValue ? "$" + Model.Price.Value.ToString("F2") : "Not for sale")</span>
+            </div>
+            <div class="action-panel" style="margin-top: 2rem;">
+                <a asp-action="Index" class="btn-leaf" style="background-color: var(--text-muted);">
+                    &laquo; Back to List
+                </a>
+                @if (Model.IsAvailableInWebshop)
+                {
+                    <a href="#" class="btn-leaf">
+                        Add to Cart
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
