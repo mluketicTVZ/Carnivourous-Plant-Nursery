@@ -337,6 +337,19 @@ body {
     box-shadow: 0 8px 20px rgba(0,0,0,0.05);
     margin-bottom: 4rem;
 }
+
+/* Fallback spacing for detail views missing a .details-content wrapper (like Taxonomy) */
+.entity-details-wrapper:not(:has(.details-header)) {
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.entity-details-wrapper:not(:has(.details-header)) > div[style*="margin-top"] {
+    margin-top: 0 !important; /* Reset inline margin so gap controls spacing */
+}
+
 .details-header {
     background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
     padding: 2.5rem 2rem;
@@ -364,6 +377,32 @@ body {
         grid-template-columns: 2fr 1fr;
     }
 }
+/* ── Form wrapper (Create / Edit pages) ─────────────────────────────────── */
+.entity-form-wrapper {
+    background-color: var(--bg-white);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    padding: 2rem 2.5rem 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.entity-form-wrapper h1.form-title {
+    color: var(--dark-green);
+    border-bottom: 3px solid var(--accent-color);
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+.entity-form-wrapper .filter-group {
+    margin-bottom: 1.2rem;
+}
+
+.entity-form-wrapper fieldset.details-section {
+    margin-bottom: 1.5rem;
+}
+
 .details-section {
     background: #fdfdfd;
     border: 1px solid #eee;

@@ -49,15 +49,31 @@
             </div>
         </div>
 
-        <div class="detail-group instructions-box" style="margin-top: 2rem;">
+        <div class="detail-group instructions-box">
             <h3 class="detail-label">Care Notes</h3>
             <div class="instruction-content">
                 @Html.Raw(Model.CareDescription?.Replace("\n", "<br/>") ?? "Care notes are pending for this profile.")
             </div>
         </div>
 
+        @if (TempData["DeleteError"] != null)
+        {
+            <div style="background-color: #fdecea; border: 1px solid #f44336; border-left: 4px solid #c0392b; border-radius: 6px; padding: 1rem 1.2rem; margin-bottom: 1rem;">
+                <strong style="color: #c0392b;">Cannot delete:</strong>
+                <span style="color: #333;">@TempData["DeleteError"]</span>
+            </div>
+        }
         <div class="action-panel" style="margin-top: 2rem;">
             <a asp-action="Index" class="btn-leaf" style="background-color: var(--text-muted);">&laquo; Back to Care Profiles</a>
+            @if (Context.Session.GetString("IsAdmin") == "true")
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-leaf">&#9998; Edit</a>
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" style="display: inline;"
+                      onsubmit="return confirm('Delete this care profile? This cannot be undone.');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-leaf" style="background-color: #c0392b; border-color: #c0392b;">&#128465; Delete</button>
+                </form>
+            }
         </div>
     </div>
 </div>

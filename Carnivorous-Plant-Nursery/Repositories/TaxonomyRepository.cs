@@ -53,5 +53,33 @@ namespace Carnivorous_Plant_Nursery.Repositories
                 .Include(t => t.CareProfile)
                 .Where(t => t.CareProfile != null && t.CareProfile.RequiresWinterDormancy == true)
                 .ToList();
+
+        public void Add(Taxonomy taxonomy)
+        {
+            _db.Taxonomy.Add(taxonomy);
+            _db.SaveChanges();
+        }
+
+        public void Update(Taxonomy taxonomy)
+        {
+            _db.Taxonomy.Update(taxonomy);
+            _db.SaveChanges();
+        }
+
+        public void Delete(int id)
+        {
+            var entity = _db.Taxonomy.Find(id);
+            if (entity != null)
+            {
+                bool hasPlants = _db.Plant.Any(p => p.TaxonomyId == id);
+                bool hasSeedBatches = _db.SeedBatch.Any(s => s.TaxonomyId == id);
+                if (hasPlants || hasSeedBatches)
+                    throw new InvalidOperationException(
+                        "This taxonomy cannot be deleted because plants or seed batches are assigned to it. Remove or reassign those records first.");
+
+                _db.Taxonomy.Remove(entity);
+                _db.SaveChanges();
+            }
+        }
     }
 }

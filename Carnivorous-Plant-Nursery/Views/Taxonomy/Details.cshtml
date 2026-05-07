@@ -1,51 +1,78 @@
 @model Carnivorous_Plant_Nursery.Models.Taxonomy
 
 @{
-    ViewData["Title"] = $"Taxonomy - {Model.FullName}";
+    ViewData["Title"] = $"Taxonomy \u2014 {Model.FullName}";
 }
 
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> &rsaquo;
+    <a asp-action="Index">Taxonomies</a> &rsaquo;
+    <span>@Model.FullName</span>
+</div>
+
+<partial name="_BackButton" />
+
+<h1 style="color: var(--dark-green); border-bottom: 3px solid var(--accent-color); padding-bottom: 8px;">
+    <i>@Model.FullName</i>
+</h1>
+
 <div class="entity-details-wrapper">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
-            <li class="breadcrumb-item"><a asp-action="Index">Taxonomies</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Details</li>
-        </ol>
-    </nav>
 
-    <partial name="_BackButton" />
-
-    <div class="details-card">
-        <div class="details-header">
-            <h1 class="details-title"><i>@Model.FullName</i></h1>
-            <span class="badge taxonomy-badge">Taxonomy ID: @Model.Id</span>
-        </div>
-        
-        <div class="details-content">
-            <div class="detail-group">
-                <h3 class="detail-label">Nomenclature</h3>
-                <p class="detail-value"><strong>Genus:</strong> <i>@Model.Genus</i></p>
-                <p class="detail-value"><strong>Species:</strong> <i>@Model.Species</i></p>
-                @if (!string.IsNullOrEmpty(Model.Cultivar)) {
-                    <p class="detail-value"><strong>Cultivar:</strong> @Model.Cultivar</p>
-                }
-                @if (!string.IsNullOrEmpty(Model.CommonName)) {
-                    <p class="detail-value"><strong>Common Name:</strong> @Model.CommonName</p>
-                }
-            </div>
-
-            @if (Model.CareProfile != null) {
-                <div class="detail-group">
-                    <h3 class="detail-label">Care Profile</h3>
-                    <p class="detail-value"><strong>Profile:</strong> <a asp-controller="CareProfile" asp-action="Details" asp-route-id="@Model.CareProfileId">@Model.CareProfile.CareProfileName</a></p>
-                    <p class="detail-value"><strong>Light:</strong> @Model.CareProfile.RequiredLight</p>
-                    <p class="detail-value"><strong>Humidity:</strong> @Model.CareProfile.RequiredHumidity</p>
-                </div>
-            }
-        </div>
-
-        <div class="details-actions">
-            <a asp-action="Index" class="nursery-btn nursery-btn-secondary">Back to Catalog</a>
-        </div>
+    <div class="details-section">
+        <h3>Nomenclature</h3>
+        <p><span class="card-label">Genus:</span> <i>@Model.Genus</i></p>
+        <p><span class="card-label">Species:</span> <i>@Model.Species</i></p>
+        @if (!string.IsNullOrEmpty(Model.Cultivar))
+        {
+            <p><span class="card-label">Cultivar:</span> @Model.Cultivar</p>
+        }
+        @if (!string.IsNullOrEmpty(Model.CommonName))
+        {
+            <p><span class="card-label">Common Name:</span> @Model.CommonName</p>
+        }
     </div>
+
+    @if (Model.CareProfile != null)
+    {
+        <div class="details-section">
+            <h3>Care Profile</h3>
+            <p>
+                <span class="card-label">Profile:</span>
+                <a asp-controller="CareProfile" asp-action="Details" asp-route-id="@Model.CareProfileId"
+                   style="color: var(--primary-green); font-weight: bold;">@Model.CareProfile.CareProfileName</a>
+            </p>
+            <p><span class="card-label">Required Light:</span> @Model.CareProfile.RequiredLight</p>
+            <p><span class="card-label">Required Humidity:</span> @Model.CareProfile.RequiredHumidity</p>
+            <p><span class="card-label">Winter Dormancy:</span> @(Model.CareProfile.RequiresWinterDormancy == true ? "Required" : "Not required")</p>
+        </div>
+    }
+
+    @if (Model.InventoryItems != null && Model.InventoryItems.Any())
+    {
+        <div class="details-section">
+            <h3>Specimens</h3>
+            <p><span class="card-label">In nursery:</span> @Model.InventoryItems.Count specimen(s)</p>
+        </div>
+    }
+
+    @if (TempData["DeleteError"] != null)
+    {
+        <div style="background-color: #fdecea; border: 1px solid #f44336; border-left: 4px solid #c0392b; border-radius: 6px; padding: 1rem 1.2rem; margin-bottom: 1rem;">
+            <strong style="color: #c0392b;">Cannot delete:</strong>
+            <span style="color: #333;">@TempData["DeleteError"]</span>
+        </div>
+    }
+    <div style="margin-top: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap;">
+        <a asp-action="Index" class="btn-leaf" style="background-color: var(--text-muted);">Back to Catalog</a>
+        @if (Context.Session.GetString("IsAdmin") == "true")
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-leaf">&#9998; Edit</a>
+            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" style="display: inline;"
+                  onsubmit="return confirm('Delete this taxonomy? This cannot be undone.');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-leaf" style="background-color: #c0392b; border-color: #c0392b;">&#128465; Delete</button>
+            </form>
+        }
+    </div>
+
 </div>

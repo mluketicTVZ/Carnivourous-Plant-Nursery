@@ -60,5 +60,30 @@ namespace Carnivorous_Plant_Nursery.Repositories
                     s.ExpectedViabilityMonths.HasValue &&
                     s.HarvestDate.Value.AddMonths(s.ExpectedViabilityMonths.Value) >= DateTime.Today)
                 .ToList();
-    }
+        public void Add(SeedBatch seedBatch)
+        {
+            _db.SeedBatch.Add(seedBatch);
+            _db.SaveChanges();
+        }
+
+        public void Update(SeedBatch seedBatch)
+        {
+            _db.SeedBatch.Update(seedBatch);
+            _db.SaveChanges();
+        }
+
+        public void Delete(int id)
+        {
+            var entity = _db.SeedBatch.Find(id);
+            if (entity != null)
+            {
+                bool usedInLineage = _db.Lineage.Any(l => l.MotherId == id || l.FatherId == id);
+                if (usedInLineage)
+                    throw new InvalidOperationException(
+                        "This seed batch cannot be deleted because it is recorded as a parent in one or more lineage entries. Remove those lineage records first.");
+
+                _db.SeedBatch.Remove(entity);
+                _db.SaveChanges();
+            }
+        }    }
 }

@@ -11,6 +11,13 @@
 
 <partial name="_BackButton" />
 
+@if (Context.Session.GetString("IsAdmin") == "true")
+{
+    <div style="margin-bottom: 1rem;">
+        <a asp-action="Create" class="btn-leaf">+ Add New Care Profile</a>
+    </div>
+}
+
 <div style="margin-bottom: 2rem;">
     <h1 style="color: var(--dark-green); border-bottom: 3px solid var(--accent-color); padding-bottom: 10px; display: inline-block;">Carnivorous Plant Care Profiles</h1>
     <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 10px;">

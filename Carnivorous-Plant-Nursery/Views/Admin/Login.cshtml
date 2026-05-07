@@ -1,0 +1,37 @@
+@{
+    ViewData["Title"] = "Admin Login";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&rsaquo;</span>
+    <span>Admin</span>
+</div>
+
+<partial name="_BackButton" />
+
+<div class="entity-form-wrapper" style="max-width: 480px;">
+    <h1 class="form-title">Admin Login</h1>
+    <form asp-controller="Admin" asp-action="Login" method="post">
+        @Html.AntiForgeryToken()
+
+        <fieldset class="details-section">
+            <legend>Admin Access</legend>
+
+            @if (ViewBag.Error != null)
+            {
+                <p class="val-error">@ViewBag.Error</p>
+            }
+
+            <div class="filter-group" style="margin-top: 1rem;">
+                <label for="passkey">Passkey</label>
+                <input type="password" id="passkey" name="passkey" />
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <button type="submit" class="btn-leaf">Enter</button>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+<p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem; max-width: 480px;">Admin access is required to create, edit, or delete records.</p>

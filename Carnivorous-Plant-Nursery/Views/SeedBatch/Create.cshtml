@@ -1,0 +1,131 @@
+@using Carnivorous_Plant_Nursery.Models
+@model Carnivorous_Plant_Nursery.Models.SeedBatch
+
+@{
+    ViewData["Title"] = "Add New Seed Batch";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&rsaquo;</span>
+    <a asp-action="Index">Seed Bank</a> <span class="separator">&rsaquo;</span>
+    <span>New</span>
+</div>
+
+<partial name="_BackButton" />
+
+<div class="entity-form-wrapper">
+    <h1 class="form-title">Add New Seed Batch</h1>
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <fieldset class="details-section">
+            <legend>Listing Info</legend>
+            <div class="filter-group">
+                <label asp-for="SKU" class="card-label"></label>
+                <input asp-for="SKU" />
+                <span asp-validation-for="SKU" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="ListingTitle" class="card-label"></label>
+                <input asp-for="ListingTitle" />
+                <span asp-validation-for="ListingTitle" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="Price" class="card-label"></label>
+                <input type="number" asp-for="Price" step="0.01" min="0" />
+                <span asp-validation-for="Price" class="val-error"></span>
+            </div>
+            <div class="filter-group filter-group-checkbox">
+                <label>
+                    <input type="checkbox" asp-for="IsAvailableInWebshop" />
+                    @Html.DisplayNameFor(m => m.IsAvailableInWebshop)
+                </label>
+                <span asp-validation-for="IsAvailableInWebshop" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="Description" class="card-label"></label>
+                <textarea asp-for="Description" rows="3"></textarea>
+                <span asp-validation-for="Description" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <fieldset class="details-section">
+            <legend>Acquisition</legend>
+            <div class="filter-group">
+                <label asp-for="TaxonomyId" class="card-label"></label>
+                <select asp-for="TaxonomyId">
+                    <option value="">-- None --</option>
+                    @if (ViewBag.Taxonomies != null)
+                    {
+                        foreach (var t in (List<Carnivorous_Plant_Nursery.Models.Taxonomy>)ViewBag.Taxonomies)
+                        {
+                            <option value="@t.Id">@t.FullName</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="TaxonomyId" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="LineageId" class="card-label"></label>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">(optional - enter Lineage ID)</div>
+                <input type="number" asp-for="LineageId" min="1" />
+                <span asp-validation-for="LineageId" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="DateAcquired" class="card-label"></label>
+                <input type="date" asp-for="DateAcquired" />
+                <span asp-validation-for="DateAcquired" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="LocationInNursery" class="card-label"></label>
+                <input asp-for="LocationInNursery" />
+                <span asp-validation-for="LocationInNursery" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="InternalNotes" class="card-label"></label>
+                <textarea asp-for="InternalNotes" rows="2"></textarea>
+                <span asp-validation-for="InternalNotes" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <fieldset class="details-section">
+            <legend>Seed Metadata</legend>
+            <div class="filter-group">
+                <label asp-for="SeedCount" class="card-label"></label>
+                <input type="number" asp-for="SeedCount" min="0" />
+                <span asp-validation-for="SeedCount" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="HarvestDate" class="card-label"></label>
+                <input type="date" asp-for="HarvestDate" />
+                <span asp-validation-for="HarvestDate" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="ExpectedViabilityMonths" class="card-label"></label>
+                <input type="number" asp-for="ExpectedViabilityMonths" min="0" />
+                <span asp-validation-for="ExpectedViabilityMonths" class="val-error"></span>
+            </div>
+            <div class="filter-group filter-group-checkbox">
+                <label>
+                    <input type="checkbox" id="RequiresStratification" name="RequiresStratification" value="true" />
+                    Requires Stratification
+                </label>
+                <span asp-validation-for="RequiresStratification" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="EstimatedGerminationRate" class="card-label"></label>
+                <input type="number" asp-for="EstimatedGerminationRate" step="0.01" min="0" max="1" placeholder="0.00 – 1.00" />
+                <span asp-validation-for="EstimatedGerminationRate" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="btn-leaf">Save Batch</button>
+            <a asp-action="Index" class="btn-clear">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -73,5 +73,30 @@ namespace Carnivorous_Plant_Nursery.Repositories
                     )))
                 .ToList();
         }
-    }
+        public void Add(Plant plant)
+        {
+            _db.Plant.Add(plant);
+            _db.SaveChanges();
+        }
+
+        public void Update(Plant plant)
+        {
+            _db.Plant.Update(plant);
+            _db.SaveChanges();
+        }
+
+        public void Delete(int id)
+        {
+            var entity = _db.Plant.Find(id);
+            if (entity != null)
+            {
+                bool usedInLineage = _db.Lineage.Any(l => l.MotherId == id || l.FatherId == id);
+                if (usedInLineage)
+                    throw new InvalidOperationException(
+                        "This plant cannot be deleted because it is recorded as a parent in one or more lineage entries. Remove those lineage records first.");
+
+                _db.Plant.Remove(entity);
+                _db.SaveChanges();
+            }
+        }    }
 }
