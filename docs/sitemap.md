@@ -35,8 +35,13 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/plants?stage=Mature` | GET | PlantController | Index(PlantStage? stage) | Views/Plant/Index.cshtml |
 | `/plants?healthStatus=Good` | GET | PlantController | Index(HealthState? healthStatus) | Views/Plant/Index.cshtml |
 | `/plants/{id}` | GET | PlantController | Details(int id) | Views/Plant/Details.cshtml |
+| `/plants/create` | GET | PlantController | Create() | Views/Plant/Create.cshtml |
+| `/plants/create` | POST | PlantController | Create(Plant model) | Redirects to Details on success |
+| `/plants/edit/{id}` | GET | PlantController | Edit(int id) | Views/Plant/Edit.cshtml |
+| `/plants/edit/{id}` | POST | PlantController | Edit(int id, Plant model) | Redirects to Details on success |
+| `/plants/delete/{id}` | POST | PlantController | Delete(int id) | Redirects to Index on success, Details on FK error |
 
-**Notes**: `Details()` returns `NotFound()` if no plant with the given id exists.
+**Notes**: `Details()` returns `NotFound()` if no plant with the given id exists. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this plant.
 
 ---
 
@@ -59,8 +64,13 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 |---|---|---|---|---|
 | `/care` | GET | CareProfileController | Index() | Views/CareProfile/Index.cshtml |
 | `/care/{id}` | GET | CareProfileController | Details(int id) | Views/CareProfile/Details.cshtml |
+| `/care/create` | GET | CareProfileController | Create() | Views/CareProfile/Create.cshtml |
+| `/care/create` | POST | CareProfileController | Create(CareProfile model) | Redirects to Details on success |
+| `/care/edit/{id}` | GET | CareProfileController | Edit(int id) | Views/CareProfile/Edit.cshtml |
+| `/care/edit/{id}` | POST | CareProfileController | Edit(int id, CareProfile model) | Redirects to Details on success |
+| `/care/delete/{id}` | POST | CareProfileController | Delete(int id) | Redirects to Index on success, Details on FK error |
 
-**Notes**: `Details()` returns `NotFound()` if id is not found.
+**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a taxonomy references this care profile.
 
 ---
 
@@ -70,8 +80,13 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 |---|---|---|---|---|
 | `/seeds` | GET | SeedBatchController | Index() | Views/SeedBatch/Index.cshtml |
 | `/seeds/{id}` | GET | SeedBatchController | Details(int id) | Views/SeedBatch/Details.cshtml |
+| `/seeds/create` | GET | SeedBatchController | Create() | Views/SeedBatch/Create.cshtml |
+| `/seeds/create` | POST | SeedBatchController | Create(SeedBatch model) | Redirects to Details on success |
+| `/seeds/edit/{id}` | GET | SeedBatchController | Edit(int id) | Views/SeedBatch/Edit.cshtml |
+| `/seeds/edit/{id}` | POST | SeedBatchController | Edit(int id, SeedBatch model) | Redirects to Details on success |
+| `/seeds/delete/{id}` | POST | SeedBatchController | Delete(int id) | Redirects to Index on success, Details on FK error |
 
-**Notes**: `Details()` returns `NotFound()` if id is not found.
+**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this seed batch.
 
 ---
 
@@ -82,8 +97,25 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/taxonomy` | GET | TaxonomyController | Index() | Views/Taxonomy/Index.cshtml |
 | `/taxonomy?searchTerm=X` | GET | TaxonomyController | Index(string searchTerm) | Views/Taxonomy/Index.cshtml |
 | `/taxonomy/{id}` | GET | TaxonomyController | Details(int id) | Views/Taxonomy/Details.cshtml |
+| `/taxonomy/create` | GET | TaxonomyController | Create() | Views/Taxonomy/Create.cshtml |
+| `/taxonomy/create` | POST | TaxonomyController | Create(Taxonomy model) | Redirects to Details on success |
+| `/taxonomy/edit/{id}` | GET | TaxonomyController | Edit(int id) | Views/Taxonomy/Edit.cshtml |
+| `/taxonomy/edit/{id}` | POST | TaxonomyController | Edit(int id, Taxonomy model) | Redirects to Details on success |
+| `/taxonomy/delete/{id}` | POST | TaxonomyController | Delete(int id) | Redirects to Index on success, Details on FK error |
 
-**Notes**: `Details()` returns `NotFound()` if id is not found.
+**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a plant or seed batch references this taxonomy.
+
+---
+
+## AdminController `[Route("admin")]`
+
+| URL | HTTP | Controller | Action | View |
+|---|---|---|---|---|
+| `/admin` | GET | AdminController | Index() | Views/Admin/Login.cshtml |
+| `/admin` | POST | AdminController | Login(string passkey) | Redirects to `/` on success, re-renders Login on failure |
+| `/admin/logout` | POST | AdminController | Logout() | Redirects to `/` |
+
+**Notes**: Login checks `passkey` against `appsettings.json "AdminPasskey"`. On success sets `HttpContext.Session["IsAdmin"] = "true"`. Logout removes that session key. Admin state gates Create/Edit/Delete actions across all entity controllers.
 
 ---
 
@@ -104,8 +136,9 @@ These are rendered inside other views and do not have their own URLs:
 | Section | Base URL | Actions | Query Filters |
 |---|---|---|---|
 | Home | `/` or `/home` | Index, Privacy, Error | — |
-| Plants | `/plants` | Index, Details | searchTerm, webshopOnly, stage, healthStatus |
+| Admin | `/admin` | Index (login), Login, Logout | — |
+| Plants | `/plants` | Index, Details, Create, Edit, Delete | searchTerm, webshopOnly, stage, healthStatus |
 | Inventory | `/inventory` | Index, Details | searchTerm, webshopOnly |
-| Care Profiles | `/care` | Index, Details | — |
-| Seed Batches | `/seeds` | Index, Details | — |
-| Taxonomy | `/taxonomy` | Index, Details | searchTerm |
+| Care Profiles | `/care` | Index, Details, Create, Edit, Delete | — |
+| Seed Batches | `/seeds` | Index, Details, Create, Edit, Delete | — |
+| Taxonomy | `/taxonomy` | Index, Details, Create, Edit, Delete | searchTerm |
