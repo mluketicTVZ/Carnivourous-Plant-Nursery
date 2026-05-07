@@ -6,9 +6,9 @@ namespace Carnivorous_Plant_Nursery.Controllers
 {
     public class PlantController : Controller
     {
-        private readonly PlantMockRepository _plantRepository;
+        private readonly PlantRepository _plantRepository;
 
-        public PlantController(PlantMockRepository plantRepository)
+        public PlantController(PlantRepository plantRepository)
         {
             _plantRepository = plantRepository;
         }

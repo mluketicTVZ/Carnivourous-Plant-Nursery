@@ -1,16 +1,29 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Carnivorous_Plant_Nursery.Models
 {
     public class Taxonomy
     {
+        [Key]
         public int Id { get; set; }
+
+        [MaxLength(200)]
         public string? Genus { get; set; }
+
+        [MaxLength(200)]
         public string? Species { get; set; }
+
+        [MaxLength(200)]
         public string? Cultivar { get; set; }
+
+        [MaxLength(200)]
         public string? CommonName { get; set; }
+
+        [ForeignKey("CareProfile")]
         public int? CareProfileId { get; set; }
-        public CareProfile? CareProfile { get; set; }
+        public virtual CareProfile? CareProfile { get; set; }
 
         public string FullName 
         {
@@ -25,6 +38,6 @@ namespace Carnivorous_Plant_Nursery.Models
             }
         }
 
-        public List<InventoryItem> InventoryItems { get; set; } = new List<InventoryItem>();
+        public virtual ICollection<InventoryItem> InventoryItems { get; set; } = new List<InventoryItem>();
     }
 }

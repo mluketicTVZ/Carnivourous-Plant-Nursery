@@ -5,9 +5,9 @@ namespace Carnivorous_Plant_Nursery.Controllers
 {
     public class TaxonomyController : Controller
     {
-        private readonly TaxonomyMockRepository _taxonomyRepository;
+        private readonly TaxonomyRepository _taxonomyRepository;
 
-        public TaxonomyController(TaxonomyMockRepository taxonomyRepository)
+        public TaxonomyController(TaxonomyRepository taxonomyRepository)
         {
             _taxonomyRepository = taxonomyRepository;
         }
