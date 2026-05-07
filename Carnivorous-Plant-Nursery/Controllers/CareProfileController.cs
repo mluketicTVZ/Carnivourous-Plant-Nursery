@@ -5,9 +5,9 @@ namespace Carnivorous_Plant_Nursery.Controllers
 {
     public class CareProfileController : Controller
     {
-        private readonly CareProfileMockRepository _careProfileRepository;
+        private readonly CareProfileRepository _careProfileRepository;
 
-        public CareProfileController(CareProfileMockRepository careProfileRepository)
+        public CareProfileController(CareProfileRepository careProfileRepository)
         {
             _careProfileRepository = careProfileRepository;
         }

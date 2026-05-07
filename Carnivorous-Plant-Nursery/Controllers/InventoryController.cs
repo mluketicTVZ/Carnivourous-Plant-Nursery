@@ -6,9 +6,9 @@ namespace Carnivorous_Plant_Nursery.Controllers
 {
     public class InventoryController : Controller
     {
-        private readonly InventoryMockRepository _inventoryRepository;
+        private readonly InventoryRepository _inventoryRepository;
 
-        public InventoryController(InventoryMockRepository inventoryRepository)
+        public InventoryController(InventoryRepository inventoryRepository)
         {
             _inventoryRepository = inventoryRepository;
         }

@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Carnivorous_Plant_Nursery.Models
 {
@@ -21,6 +22,7 @@ namespace Carnivorous_Plant_Nursery.Models
         public bool? RequiresStratification { get; set; }
 
         private decimal? _estimatedGerminationRate;
+        [Column(TypeName = "decimal(18,2)")]
         public decimal? EstimatedGerminationRate
         {
             get => _estimatedGerminationRate;

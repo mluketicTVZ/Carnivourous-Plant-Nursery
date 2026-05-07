@@ -1,5 +1,7 @@
-﻿using Carnivorous_Plant_Nursery.Models;
+﻿using Carnivorous_Plant_Nursery.Data;
+using Carnivorous_Plant_Nursery.Models;
 using Carnivorous_Plant_Nursery.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,14 +9,22 @@ using System.Threading.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ── Mock Repositories (replace with real implementations later) ──────────────
-builder.Services.AddSingleton<TaxonomyMockRepository>();
-builder.Services.AddSingleton<PlantMockRepository>();
-builder.Services.AddSingleton<SeedBatchMockRepository>();
-builder.Services.AddSingleton<InventoryMockRepository>();
-builder.Services.AddSingleton<CareProfileMockRepository>();
+// ── EF Core Repositories ─────────────────────────────────────────────────────
+builder.Services.AddScoped<PlantRepository>();
+builder.Services.AddScoped<TaxonomyRepository>();
+builder.Services.AddScoped<CareProfileRepository>();
+builder.Services.AddScoped<SeedBatchRepository>();
+builder.Services.AddScoped<InventoryRepository>();
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    DbSeeder.Seed(db);
+}
 
 if (!app.Environment.IsDevelopment())
 {

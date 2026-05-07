@@ -5,9 +5,9 @@ namespace Carnivorous_Plant_Nursery.Controllers
 {
     public class SeedBatchController : Controller
     {
-        private readonly SeedBatchMockRepository _seedBatchRepository;
+        private readonly SeedBatchRepository _seedBatchRepository;
 
-        public SeedBatchController(SeedBatchMockRepository seedBatchRepository)
+        public SeedBatchController(SeedBatchRepository seedBatchRepository)
         {
             _seedBatchRepository = seedBatchRepository;
         }
