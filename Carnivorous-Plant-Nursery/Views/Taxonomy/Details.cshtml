@@ -12,6 +12,18 @@
 
 <partial name="_BackButton" />
 
+@if (TempData["DeleteError"] != null)
+{
+    <div class="toast-notification" data-autodismiss="true">
+        <div class="toast-icon">⚠️</div>
+        <div class="toast-content">
+            <h4 class="toast-title">Cannot delete</h4>
+            <p class="toast-message">@TempData["DeleteError"]</p>
+        </div>
+        <button type="button" class="toast-close" onclick="closeToast(this.closest('.toast-notification'))">&times;</button>
+    </div>
+}
+
 <h1 style="color: var(--dark-green); border-bottom: 3px solid var(--accent-color); padding-bottom: 8px;">
     <i>@Model.FullName</i>
 </h1>
@@ -67,10 +79,9 @@
         @if (Context.Session.GetString("IsAdmin") == "true")
         {
             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-leaf">&#9998; Edit</a>
-            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" style="display: inline;"
-                  onsubmit="return confirm('Delete this taxonomy? This cannot be undone.');">
+            <form id="delete-form-taxonomy" asp-action="Delete" asp-route-id="@Model.Id" method="post" style="display: inline;">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="btn-leaf" style="background-color: #c0392b; border-color: #c0392b;">&#128465; Delete</button>
+                <button type="button" class="btn-leaf" style="background-color: #c0392b; border-color: #c0392b;" onclick="openDeleteModal('delete-form-taxonomy', 'this taxonomy')">&#128465; Delete</button>
             </form>
         }
     </div>
