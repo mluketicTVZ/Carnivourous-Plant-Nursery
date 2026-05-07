@@ -4,6 +4,7 @@ using Carnivorous_Plant_Nursery.Models;
 
 namespace Carnivorous_Plant_Nursery.Controllers
 {
+    [Route("inventory")]
     public class InventoryController : Controller
     {
         private readonly InventoryRepository _inventoryRepository;
@@ -13,6 +14,7 @@ namespace Carnivorous_Plant_Nursery.Controllers
             _inventoryRepository = inventoryRepository;
         }
 
+        [Route("")]
         public IActionResult Index([FromQuery] string searchTerm, [FromQuery] bool? webshopOnly)
         {
             var inventory = _inventoryRepository.GetAll();
@@ -39,6 +41,7 @@ namespace Carnivorous_Plant_Nursery.Controllers
             return View(inventory);
         }
 
+        [Route("{id:int}")]
         public IActionResult Details(int id)
         {
             var item = _inventoryRepository.GetById(id);

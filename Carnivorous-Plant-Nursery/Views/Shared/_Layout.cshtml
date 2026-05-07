@@ -8,14 +8,30 @@
 </head>
 <body>
     <header class="nursery-header">
-        <a href="/" class="brand-title">
-            <img src="~/images/Drosera Logo.jpg" alt="Carnivorous Plant Nursery Logo" style="height: 50px; width: 50px; border-radius: 50%; object-fit: cover; margin-right: 10px; border: 2px solid var(--primary-green);" />
-            Carnivorous Plant Nursery
-        </a>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="/" class="brand-title">
+                <img src="~/images/Drosera Logo.jpg" alt="Carnivorous Plant Nursery Logo" style="height: 50px; width: 50px; border-radius: 50%; object-fit: cover; margin-right: 10px; border: 2px solid var(--primary-green);" />
+                Carnivorous Plant Nursery
+            </a>
+            <div style="display: flex; align-items: center;">
+                @if (Context.Session.GetString("IsAdmin") == "true")
+                {
+                    <form asp-controller="Admin" asp-action="Logout" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" style="background: none; border: 1px solid var(--accent-color); color: var(--accent-color); border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 0.8rem;">&#128274; Logout</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Admin" asp-action="Index" style="font-size: 0.8rem; color: var(--text-muted); text-decoration: none;">&#128272; Admin</a>
+                }
+            </div>
+        </div>
         <nav class="nursery-nav">
             <ul>
                 <li><a asp-controller="Home" asp-action="Index">Home</a></li>
                 <li><a asp-controller="Plant" asp-action="Index">Plants</a></li>
+                <li><a asp-controller="Taxonomy" asp-action="Index">Taxonomy</a></li>
                 <li><a asp-controller="CareProfile" asp-action="Index">Care Guide</a></li>
                 <li><a asp-controller="Inventory" asp-action="Index">Inventory</a></li>
             </ul>
@@ -29,5 +45,23 @@
     <footer style="text-align: center; padding: 2rem; color: #666; margin-top: 2rem; border-top: 1px solid #eee;">
         &copy; @DateTime.Now.Year - Carnivorous Plant Nursery. Fostering a love for botanical wonders.
     </footer>
+
+    <!-- Global Delete Modal -->
+    <div id="global-delete-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h2 class="modal-title">Confirm Deletion</h2>
+            <div class="modal-body">
+                Are you sure you want to delete <strong><span>this item</span></strong>? This action cannot be undone.
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-leaf" style="background-color: var(--text-muted); border-color: var(--text-muted);" onclick="closeDeleteModal()">Cancel</button>
+                <button type="button" class="btn-leaf" style="background-color: #c0392b; border-color: #c0392b;" onclick="confirmDelete()">&#128465; Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

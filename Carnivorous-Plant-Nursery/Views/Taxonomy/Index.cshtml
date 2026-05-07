@@ -1,47 +1,79 @@
-@model IEnumerable<Carnivorous_Plant_Nursery.Models.Taxonomy>
+@model List<Carnivorous_Plant_Nursery.Models.Taxonomy>
 
 @{
     ViewData["Title"] = "Taxonomy Catalog";
 }
 
-<div class="entity-catalog">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Taxonomies</li>
-        </ol>
-    </nav>
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> &rsaquo; Taxonomies
+</div>
 
-    <partial name="_BackButton" />
+<partial name="_BackButton" />
 
-    <h1 class="page-title">Taxonomy Classification</h1>
-
-    <div class="search-container">
-        <form action="/Taxonomy" method="get" class="search-form">
-            <input type="text" name="searchTerm" class="search-input" placeholder="Search taxonomies (e.g., Genus, Family)..." value="@ViewData["CurrentFilter"]" />
-            <button type="submit" class="nursery-btn nursery-btn-primary">Search</button>
-            <a asp-action="Index" class="nursery-btn nursery-btn-secondary">Clear</a>
-        </form>
+@if (Context.Session.GetString("IsAdmin") == "true")
+{
+    <div style="margin-bottom: 1rem;">
+        <a asp-action="Create" class="btn-leaf">+ Add New Taxonomy</a>
     </div>
+}
 
-    <div class="card-grid">
-        @foreach (var item in Model) {
+<h1 style="color: var(--dark-green); border-bottom: 3px solid var(--accent-color); padding-bottom: 8px;">
+    Taxonomy Catalog
+</h1>
+<p>Browse the scientific classification of all carnivorous plant species and cultivars in the nursery.</p>
+
+<form method="get" class="botanical-filter-form">
+    <div class="filter-group">
+        <label for="searchTerm">Search</label>
+        <input type="text" id="searchTerm" name="searchTerm" value="@ViewData["SearchTerm"]" placeholder="Search by genus, species, cultivar or common name..." />
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <button type="submit" class="btn-filter">Filter</button>
+        <a asp-action="Index" class="btn-clear">Clear</a>
+    </div>
+</form>
+
+@if (Model != null && Model.Any())
+{
+    <div class="entity-catalog">
+        @foreach (var item in Model)
+        {
             <div class="nursery-card">
-                <div class="card-header">
-                    <h2 class="card-title"><i>@item.Genus</i> @item.Species</h2>
-                </div>
-                <div class="card-body">
-                    @if (!string.IsNullOrEmpty(item.CommonName)) {
-                        <p><strong>Common Name:</strong> @item.CommonName</p>
-                    }
-                    @if (!string.IsNullOrEmpty(item.Cultivar)) {
-                        <p><strong>Cultivar:</strong> @item.Cultivar</p>
+                <div class="nursery-card-header">
+                    <h2 class="nursery-card-title"><i>@item.FullName</i></h2>
+                    @if (!string.IsNullOrEmpty(item.CommonName))
+                    {
+                        <span>@item.CommonName</span>
                     }
                 </div>
-                <div class="card-footer">
-                    <a asp-action="Details" asp-route-id="@item.Id" class="nursery-btn nursery-btn-primary">View Pedigree</a>
+                <div class="nursery-card-body">
+                    @if (!string.IsNullOrEmpty(item.Cultivar))
+                    {
+                        <p><span class="card-label">Cultivar:</span> @item.Cultivar</p>
+                    }
+                    @if (item.CareProfile != null)
+                    {
+                        <p><span class="card-label">Care Profile:</span> @item.CareProfile.CareProfileName</p>
+                    }
+                    <p style="margin-top: 10px;">
+                        @if (item.InventoryItems != null && item.InventoryItems.Count > 0)
+                        {
+                            <span class="status-badge status-instock">@item.InventoryItems.Count specimen(s)</span>
+                        }
+                        else
+                        {
+                            <span class="status-badge status-out">No specimens</span>
+                        }
+                    </p>
+                </div>
+                <div class="nursery-card-footer">
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn-leaf">View Details</a>
                 </div>
             </div>
         }
     </div>
-</div>
+}
+else
+{
+    <p>No taxonomies found.</p>
+}

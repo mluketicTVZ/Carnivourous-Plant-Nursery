@@ -1,0 +1,166 @@
+@using Carnivorous_Plant_Nursery.Models
+@model Carnivorous_Plant_Nursery.Models.Plant
+
+@{
+    ViewData["Title"] = "Edit Plant";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&rsaquo;</span>
+    <a asp-action="Index">Plants</a> <span class="separator">&rsaquo;</span>
+    <span>Edit</span>
+</div>
+
+<partial name="_BackButton" />
+
+<div class="entity-form-wrapper">
+    <h1 class="form-title">Edit Plant: @(Model.ListingTitle ?? Model.Taxonomy?.CommonName ?? "Plant #" + Model.Id)</h1>
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <fieldset class="details-section">
+            <legend>Listing Info</legend>
+            <div class="filter-group">
+                <label asp-for="SKU" class="card-label"></label>
+                <input asp-for="SKU" />
+                <span asp-validation-for="SKU" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="ListingTitle" class="card-label"></label>
+                <input asp-for="ListingTitle" />
+                <span asp-validation-for="ListingTitle" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="Price" class="card-label"></label>
+                <input type="number" asp-for="Price" step="0.01" min="0" />
+                <span asp-validation-for="Price" class="val-error"></span>
+            </div>
+            <div class="filter-group filter-group-checkbox">
+                <label>
+                    <input type="checkbox" asp-for="IsAvailableInWebshop" />
+                    @Html.DisplayNameFor(m => m.IsAvailableInWebshop)
+                </label>
+                <span asp-validation-for="IsAvailableInWebshop" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="Description" class="card-label"></label>
+                <textarea asp-for="Description" rows="3"></textarea>
+                <span asp-validation-for="Description" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <fieldset class="details-section">
+            <legend>Acquisition & Location</legend>
+            <div class="filter-group">
+                <label asp-for="TaxonomyId" class="card-label"></label>
+                <select asp-for="TaxonomyId">
+                    <option value="">-- None --</option>
+                    @if (ViewBag.Taxonomies != null)
+                    {
+                        foreach (var t in (List<Carnivorous_Plant_Nursery.Models.Taxonomy>)ViewBag.Taxonomies)
+                        {
+                            <option value="@t.Id">@t.FullName</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="TaxonomyId" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="LineageId" class="card-label"></label>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">(optional - enter Lineage ID)</div>
+                <input type="number" asp-for="LineageId" min="1" />
+                <span asp-validation-for="LineageId" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="DateAcquired" class="card-label"></label>
+                <input type="date" asp-for="DateAcquired" />
+                <span asp-validation-for="DateAcquired" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="LocationInNursery" class="card-label"></label>
+                <input asp-for="LocationInNursery" />
+                <span asp-validation-for="LocationInNursery" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="InternalNotes" class="card-label"></label>
+                <textarea asp-for="InternalNotes" rows="2"></textarea>
+                <span asp-validation-for="InternalNotes" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <fieldset class="details-section">
+            <legend>Botanical Info</legend>
+            <div class="filter-group">
+                <label asp-for="CurrentStage" class="card-label"></label>
+                <select asp-for="CurrentStage">
+                    <option value="">-- Select --</option>
+                    @foreach (var val in Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.PlantStage)).Cast<Carnivorous_Plant_Nursery.Models.PlantStage>())
+                    {
+                        <option value="@val">@val</option>
+                    }
+                </select>
+                <span asp-validation-for="CurrentStage" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="EstimatedAgeAtAcquiryYears" class="card-label"></label>
+                <input type="number" asp-for="EstimatedAgeAtAcquiryYears" min="0" />
+                <span asp-validation-for="EstimatedAgeAtAcquiryYears" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="PotDiameterCm" class="card-label"></label>
+                <input type="number" asp-for="PotDiameterCm" step="0.1" min="0" />
+                <span asp-validation-for="PotDiameterCm" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="PotHeightCm" class="card-label"></label>
+                <input type="number" asp-for="PotHeightCm" step="0.1" min="0" />
+                <span asp-validation-for="PotHeightCm" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="LastRepottingDate" class="card-label"></label>
+                <input type="date" asp-for="LastRepottingDate" />
+                <span asp-validation-for="LastRepottingDate" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="LastDormancyDateStart" class="card-label"></label>
+                <input type="date" asp-for="LastDormancyDateStart" />
+                <span asp-validation-for="LastDormancyDateStart" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="LastDormancyDateEnd" class="card-label"></label>
+                <input type="date" asp-for="LastDormancyDateEnd" />
+                <span asp-validation-for="LastDormancyDateEnd" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <fieldset class="details-section">
+            <legend>Health</legend>
+            <div class="filter-group">
+                <label asp-for="HealthStatus" class="card-label"></label>
+                <select asp-for="HealthStatus">
+                    <option value="">-- Select --</option>
+                    @foreach (var val in Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.HealthState)).Cast<Carnivorous_Plant_Nursery.Models.HealthState>())
+                    {
+                        <option value="@val">@val</option>
+                    }
+                </select>
+                <span asp-validation-for="HealthStatus" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="HealthDescription" class="card-label"></label>
+                <textarea asp-for="HealthDescription" rows="3"></textarea>
+                <span asp-validation-for="HealthDescription" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="btn-leaf">Save Changes</button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn-clear">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

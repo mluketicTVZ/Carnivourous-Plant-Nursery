@@ -1,0 +1,72 @@
+@model Carnivorous_Plant_Nursery.Models.Taxonomy
+
+@{
+    ViewData["Title"] = "Edit Taxonomy";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&rsaquo;</span>
+    <a asp-action="Index">Taxonomy</a> <span class="separator">&rsaquo;</span>
+    <span>Edit</span>
+</div>
+
+<partial name="_BackButton" />
+
+<div class="entity-form-wrapper">
+    <h1 class="form-title">Edit Taxonomy: @Model.FullName</h1>
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <fieldset class="details-section">
+            <legend>Classification</legend>
+            <div class="filter-group">
+                <label asp-for="Genus" class="card-label"></label>
+                <input asp-for="Genus" />
+                <span asp-validation-for="Genus" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="Species" class="card-label"></label>
+                <input asp-for="Species" />
+                <span asp-validation-for="Species" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="Cultivar" class="card-label"></label>
+                <input asp-for="Cultivar" />
+                <span asp-validation-for="Cultivar" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="CommonName" class="card-label"></label>
+                <input asp-for="CommonName" />
+                <span asp-validation-for="CommonName" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <fieldset class="details-section">
+            <legend>Care Profile</legend>
+            <div class="filter-group">
+                <label asp-for="CareProfileId" class="card-label"></label>
+                <select asp-for="CareProfileId">
+                    <option value="">-- None --</option>
+                    @if (ViewBag.CareProfiles != null)
+                    {
+                        foreach (var cp in (List<Carnivorous_Plant_Nursery.Models.CareProfile>)ViewBag.CareProfiles)
+                        {
+                            <option value="@cp.Id">@cp.CareProfileName</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="CareProfileId" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="btn-leaf">Save Changes</button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn-clear">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

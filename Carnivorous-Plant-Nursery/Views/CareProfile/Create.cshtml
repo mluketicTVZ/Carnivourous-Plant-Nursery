@@ -1,0 +1,115 @@
+@model Carnivorous_Plant_Nursery.Models.CareProfile
+
+@{
+    ViewData["Title"] = "New Care Profile";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&rsaquo;</span>
+    <a asp-action="Index">Care Profiles</a> <span class="separator">&rsaquo;</span>
+    <span>New</span>
+</div>
+
+<partial name="_BackButton" />
+
+<div class="entity-form-wrapper">
+    <h1 class="form-title">New Care Profile</h1>
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <fieldset class="details-section">
+            <legend>Profile Identity</legend>
+            <div class="filter-group">
+                <label asp-for="CareProfileName" class="card-label"></label>
+                <input asp-for="CareProfileName" required />
+                <span asp-validation-for="CareProfileName" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <fieldset class="details-section">
+            <legend>Light & Humidity</legend>
+            <div class="filter-group">
+                <label asp-for="RequiredLight" class="card-label"></label>
+                <select asp-for="RequiredLight">
+                    <option value="">-- Select --</option>
+                    @foreach (var val in Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.LightLevel)).Cast<Carnivorous_Plant_Nursery.Models.LightLevel>())
+                    {
+                        <option value="@val">@val</option>
+                    }
+                </select>
+                <span asp-validation-for="RequiredLight" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="RequiredHumidity" class="card-label"></label>
+                <select asp-for="RequiredHumidity">
+                    <option value="">-- Select --</option>
+                    @foreach (var val in Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.HumidityLevel)).Cast<Carnivorous_Plant_Nursery.Models.HumidityLevel>())
+                    {
+                        <option value="@val">@val</option>
+                    }
+                </select>
+                <span asp-validation-for="RequiredHumidity" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <fieldset class="details-section">
+            <legend>Temperature</legend>
+            <div class="filter-group">
+                <label asp-for="MinTemperature" class="card-label"></label>
+                <select asp-for="MinTemperature">
+                    <option value="">-- Select --</option>
+                    @foreach (var val in Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.TemperatureTolerance)).Cast<Carnivorous_Plant_Nursery.Models.TemperatureTolerance>())
+                    {
+                        <option value="@val">@val</option>
+                    }
+                </select>
+                <span asp-validation-for="MinTemperature" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="MaxTemperature" class="card-label"></label>
+                <select asp-for="MaxTemperature">
+                    <option value="">-- Select --</option>
+                    @foreach (var val in Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.TemperatureTolerance)).Cast<Carnivorous_Plant_Nursery.Models.TemperatureTolerance>())
+                    {
+                        <option value="@val">@val</option>
+                    }
+                </select>
+                <span asp-validation-for="MaxTemperature" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="TemperatureDescription" class="card-label"></label>
+                <input asp-for="TemperatureDescription" />
+                <span asp-validation-for="TemperatureDescription" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <fieldset class="details-section">
+            <legend>Soil & Care Notes</legend>
+            <div class="filter-group filter-group-checkbox">
+                <label>
+                    <input type="checkbox" id="RequiresWinterDormancy" name="RequiresWinterDormancy" value="true" />
+                    Requires Winter Dormancy
+                </label>
+            </div>
+            <div class="filter-group">
+                <label asp-for="SoilMix" class="card-label"></label>
+                <input asp-for="SoilMix" />
+                <span asp-validation-for="SoilMix" class="val-error"></span>
+            </div>
+            <div class="filter-group">
+                <label asp-for="CareDescription" class="card-label"></label>
+                <textarea asp-for="CareDescription" rows="4"></textarea>
+                <span asp-validation-for="CareDescription" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="btn-leaf">Save Profile</button>
+            <a asp-action="Index" class="btn-clear">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

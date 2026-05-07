@@ -1,0 +1,3 @@
+2026-05-07T16:39:50 - edit-form-page-skill loaded for: full CRUD + admin session for Plant, SeedBatch, CareProfile, Taxonomy
+2026-05-07T17:04:05 - edit-form-page-skill loaded for: fix Scripts section, nullable bool checkboxes, admin button position, login page padding
+2026-05-07T17:16:50 - edit-form-page-skill loaded for: UI fixes - title inside container, filter-group spacing, admin button position
