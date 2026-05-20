@@ -30,6 +30,9 @@ namespace Carnivorous_Plant_Nursery.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -55,7 +58,7 @@ namespace Carnivorous_Plant_Nursery.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Article", null, t =>
+                    b.ToTable("Article", t =>
                         {
                             t.HasCheckConstraint("CK_Article_Price_NonNegative", "[Price] >= 0");
                         });
@@ -82,6 +85,9 @@ namespace Carnivorous_Plant_Nursery.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("MaxTemperature")
                         .HasColumnType("int");
 
@@ -107,7 +113,7 @@ namespace Carnivorous_Plant_Nursery.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CareProfile", (string)null);
+                    b.ToTable("CareProfile");
                 });
 
             modelBuilder.Entity("Carnivorous_Plant_Nursery.Models.Lineage", b =>
@@ -141,7 +147,7 @@ namespace Carnivorous_Plant_Nursery.Migrations
 
                     b.HasIndex("MotherId");
 
-                    b.ToTable("Lineage", (string)null);
+                    b.ToTable("Lineage");
                 });
 
             modelBuilder.Entity("Carnivorous_Plant_Nursery.Models.Taxonomy", b =>
@@ -163,6 +169,9 @@ namespace Carnivorous_Plant_Nursery.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Genus")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -175,7 +184,7 @@ namespace Carnivorous_Plant_Nursery.Migrations
 
                     b.HasIndex("CareProfileId");
 
-                    b.ToTable("Taxonomy", (string)null);
+                    b.ToTable("Taxonomy");
                 });
 
             modelBuilder.Entity("Carnivorous_Plant_Nursery.Models.InventoryItem", b =>

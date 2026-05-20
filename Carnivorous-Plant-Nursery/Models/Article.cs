@@ -33,6 +33,8 @@ namespace Carnivorous_Plant_Nursery.Models
         [MaxLength(1000)]
         public string? Description { get; set; }
 
+        public DateTime? DeletedAt { get; set; }
+
         protected Article() {}
     }
 }

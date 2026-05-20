@@ -1,0 +1,17 @@
+docker container:
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong!Password123" -p 1433:1433 --name mssql-dev -d mcr.microsoft.com/mssql/server:2022-latest
+
+EF migrations - option A: run from solution root (Carnivourous-Plant-Nursery/):
+dotnet ef migrations add Initial --project Carnivorous-Plant-Nursery --context AppDbContext
+dotnet ef migrations remove --project Carnivorous-Plant-Nursery --context AppDbContext
+dotnet ef database update --project Carnivorous-Plant-Nursery --context AppDbContext
+
+EF migrations - option B: run from project folder where Carnivorous-Plant-Nursery.csproj is (Carnivorous-Plant-Nursery/):
+dotnet ef migrations add Initial --context AppDbContext
+dotnet ef migrations remove --context AppDbContext
+dotnet ef database update --context AppDbContext
+
+note: --project tells dotnet ef where the .csproj/DbContext/migrations are, allowing
+the command to be run from the solution root instead of cd-ing into the project folder.
+--startup-project would point to the project with appsettings.json (connection string);
+since both are the same project here it is redundant and omitted.

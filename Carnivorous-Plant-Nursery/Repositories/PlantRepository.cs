@@ -13,90 +13,97 @@ namespace Carnivorous_Plant_Nursery.Repositories
             _db = db;
         }
 
-        public List<Plant> GetAll() =>
-            _db.Plant
+        public async Task<List<Plant>> GetAll() =>
+            await _db.Plant
                 .Include(p => p.Taxonomy)
                 .Include(p => p.Lineage)
-                .ToList();
+                .Where(p => p.DeletedAt == null)
+                .ToListAsync();
 
-        public Plant? GetById(int id) =>
-            _db.Plant
+        public async Task<Plant?> GetById(int id) =>
+            await _db.Plant
                 .Include(p => p.Taxonomy)
                 .Include(p => p.Lineage)
-                .FirstOrDefault(p => p.Id == id);
+                .Where(p => p.DeletedAt == null)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
-        public List<Plant> GetAvailableInWebshop() =>
-            _db.Plant
+        public async Task<List<Plant>> GetAvailableInWebshop() =>
+            await _db.Plant
                 .Include(p => p.Taxonomy)
+                .Where(p => p.DeletedAt == null)
                 .Where(p => p.IsAvailableInWebshop)
                 .OrderBy(p => p.Price)
-                .ToList();
+                .ToListAsync();
 
-        public List<Plant> GetByTaxonomy(int taxonomyId) =>
-            _db.Plant
+        public async Task<List<Plant>> GetByTaxonomy(int taxonomyId) =>
+            await _db.Plant
+                .Where(p => p.DeletedAt == null)
                 .Where(p => p.TaxonomyId == taxonomyId)
-                .ToList();
+                .ToListAsync();
 
-        public List<Plant> GetWithKnownLineage() =>
-            _db.Plant
+        public async Task<List<Plant>> GetWithKnownLineage() =>
+            await _db.Plant
                 .Include(p => p.Lineage)
+                .Where(p => p.DeletedAt == null)
                 .Where(p => p.Lineage != null &&
                             (p.Lineage.MotherId != null || p.Lineage.FatherId != null))
-                .ToList();
+                .ToListAsync();
 
-        public List<Plant> GetByStage(PlantStage stage) =>
-            _db.Plant
+        public async Task<List<Plant>> GetByStage(PlantStage stage) =>
+            await _db.Plant
+                .Where(p => p.DeletedAt == null)
                 .Where(p => p.CurrentStage == stage)
-                .ToList();
+                .ToListAsync();
 
-        public List<Plant> GetByHealthStatus(HealthState status) =>
-            _db.Plant
+        public async Task<List<Plant>> GetByHealthStatus(HealthState status) =>
+            await _db.Plant
+                .Where(p => p.DeletedAt == null)
                 .Where(p => p.HealthStatus == status)
-                .ToList();
+                .ToListAsync();
 
-        public List<Plant> Search(string searchTerm)
+        public async Task<List<Plant>> Search(string searchTerm)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
-                return GetAll();
+                return await GetAll();
 
             var term = searchTerm.Trim();
-            return _db.Plant
+            return await _db.Plant
                 .Include(p => p.Taxonomy)
                 .Include(p => p.Lineage)
                 .Where(p =>
-                    (p.ListingTitle != null && p.ListingTitle.Contains(term)) ||
+                    p.DeletedAt == null &&
+                    ((p.ListingTitle != null && p.ListingTitle.Contains(term)) ||
                     (p.Description != null && p.Description.Contains(term)) ||
                     (p.Taxonomy != null && (
                         (p.Taxonomy.Genus != null && p.Taxonomy.Genus.Contains(term)) ||
                         (p.Taxonomy.Species != null && p.Taxonomy.Species.Contains(term)) ||
                         (p.Taxonomy.Cultivar != null && p.Taxonomy.Cultivar.Contains(term))
-                    )))
-                .ToList();
+                    ))))
+                .ToListAsync();
         }
-        public void Add(Plant plant)
+        public async Task Add(Plant plant)
         {
             _db.Plant.Add(plant);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public void Update(Plant plant)
+        public async Task Update(Plant plant)
         {
             _db.Plant.Update(plant);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public void Delete(int id)
+        public async Task Delete(int id)
         {
-            var entity = _db.Plant.Find(id);
+            var entity = await _db.Plant.FindAsync(id);
             if (entity != null)
             {
-                bool usedInLineage = _db.Lineage.Any(l => l.MotherId == id || l.FatherId == id);
+                bool usedInLineage = await _db.Lineage.AnyAsync(l => l.MotherId == id || l.FatherId == id);
                 if (usedInLineage)
-                    throw new InvalidOperationException(
-                        "This plant cannot be deleted because it is recorded as a parent in one or more lineage entries. Remove those lineage records first.");
+                    throw new InvalidOperationException(ErrorMessage.DeleteErrorPlantInLineage);
 
-                _db.Plant.Remove(entity);
-                _db.SaveChanges();
+                entity.DeletedAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync();
             }
         }    }
 }

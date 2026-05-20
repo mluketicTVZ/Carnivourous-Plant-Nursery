@@ -17,17 +17,17 @@ namespace Carnivorous_Plant_Nursery.Controllers
         }
 
         [Route("")]
-        public IActionResult Index(string? searchTerm)
+        public async Task<IActionResult> Index(string? searchTerm)
         {
-            var taxonomies = _taxonomyRepository.Search(searchTerm ?? string.Empty);
+            var taxonomies = await _taxonomyRepository.Search(searchTerm ?? string.Empty);
             ViewData["SearchTerm"] = searchTerm;
             return View(taxonomies);
         }
 
         [Route("{id:int}")]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var taxonomy = _taxonomyRepository.GetById(id);
+            var taxonomy = await _taxonomyRepository.GetById(id);
             if (taxonomy == null)
                 return NotFound();
             return View(taxonomy);
@@ -35,64 +35,75 @@ namespace Carnivorous_Plant_Nursery.Controllers
 
         [HttpGet]
         [Route("create")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             if (!IsAdmin) return RequireAdmin();
-            ViewBag.CareProfiles = _careProfileRepository.GetAll();
+            ViewBag.CareProfiles = await _careProfileRepository.GetAll();
             return View();
         }
 
         [HttpPost]
         [Route("create")]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Taxonomy model)
+        public async Task<IActionResult> Create(Taxonomy model)
         {
             if (!IsAdmin) return RequireAdmin();
             if (!ModelState.IsValid)
             {
-                ViewBag.CareProfiles = _careProfileRepository.GetAll();
+                ViewBag.CareProfiles = await _careProfileRepository.GetAll();
                 return View(model);
             }
-            _taxonomyRepository.Add(model);
+            await _taxonomyRepository.Add(model);
             return RedirectToAction("Index");
         }
 
         [HttpGet]
         [Route("edit/{id:int}")]
-        public IActionResult Edit(int id)
+        [ActionName("Edit")]
+        public async Task<IActionResult> EditGet(int id)
         {
             if (!IsAdmin) return RequireAdmin();
-            var taxonomy = _taxonomyRepository.GetById(id);
+            var taxonomy = await _taxonomyRepository.GetById(id);
             if (taxonomy == null) return NotFound();
-            ViewBag.CareProfiles = _careProfileRepository.GetAll();
+            ViewBag.CareProfiles = await _careProfileRepository.GetAll();
             return View(taxonomy);
         }
 
         [HttpPost]
         [Route("edit/{id:int}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Taxonomy model)
+        [ActionName("Edit")]
+        public async Task<IActionResult> EditPost(int id)
         {
             if (!IsAdmin) return RequireAdmin();
-            if (id != model.Id) return BadRequest();
-            if (!ModelState.IsValid)
+
+            var entity = await _taxonomyRepository.GetById(id);
+            if (entity == null) return NotFound();
+
+            if (!await TryUpdateModelAsync(entity, "",
+                e => e.Genus,
+                e => e.Species,
+                e => e.Cultivar,
+                e => e.CommonName,
+                e => e.CareProfileId))
             {
-                ViewBag.CareProfiles = _careProfileRepository.GetAll();
-                return View(model);
+                ViewBag.CareProfiles = await _careProfileRepository.GetAll();
+                return View(entity);
             }
-            _taxonomyRepository.Update(model);
+
+            await _taxonomyRepository.Update(entity);
             return RedirectToAction("Details", new { id });
         }
 
         [HttpPost]
         [Route("delete/{id:int}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             if (!IsAdmin) return RequireAdmin();
             try
             {
-                _taxonomyRepository.Delete(id);
+                await _taxonomyRepository.Delete(id);
                 return RedirectToAction("Index");
             }
             catch (InvalidOperationException ex)

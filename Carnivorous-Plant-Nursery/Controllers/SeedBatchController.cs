@@ -17,16 +17,16 @@ namespace Carnivorous_Plant_Nursery.Controllers
         }
 
         [Route("")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var seedBatches = _seedBatchRepository.GetAll();
+            var seedBatches = await _seedBatchRepository.GetAll();
             return View(seedBatches);
         }
 
         [Route("{id:int}")]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var seedBatch = _seedBatchRepository.GetById(id);
+            var seedBatch = await _seedBatchRepository.GetById(id);
             if (seedBatch == null)
                 return NotFound();
             return View(seedBatch);
@@ -34,64 +34,85 @@ namespace Carnivorous_Plant_Nursery.Controllers
 
         [HttpGet]
         [Route("create")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             if (!IsAdmin) return RequireAdmin();
-            ViewBag.Taxonomies = _taxonomyRepository.GetAll();
+            ViewBag.Taxonomies = await _taxonomyRepository.GetAll();
             return View();
         }
 
         [HttpPost]
         [Route("create")]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(SeedBatch model)
+        public async Task<IActionResult> Create(SeedBatch model)
         {
             if (!IsAdmin) return RequireAdmin();
             if (!ModelState.IsValid)
             {
-                ViewBag.Taxonomies = _taxonomyRepository.GetAll();
+                ViewBag.Taxonomies = await _taxonomyRepository.GetAll();
                 return View(model);
             }
-            _seedBatchRepository.Add(model);
+            await _seedBatchRepository.Add(model);
             return RedirectToAction("Index");
         }
 
         [HttpGet]
         [Route("edit/{id:int}")]
-        public IActionResult Edit(int id)
+        [ActionName("Edit")]
+        public async Task<IActionResult> EditGet(int id)
         {
             if (!IsAdmin) return RequireAdmin();
-            var seedBatch = _seedBatchRepository.GetById(id);
+            var seedBatch = await _seedBatchRepository.GetById(id);
             if (seedBatch == null) return NotFound();
-            ViewBag.Taxonomies = _taxonomyRepository.GetAll();
+            ViewBag.Taxonomies = await _taxonomyRepository.GetAll();
             return View(seedBatch);
         }
 
         [HttpPost]
         [Route("edit/{id:int}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, SeedBatch model)
+        [ActionName("Edit")]
+        public async Task<IActionResult> EditPost(int id)
         {
             if (!IsAdmin) return RequireAdmin();
-            if (id != model.Id) return BadRequest();
-            if (!ModelState.IsValid)
+
+            var entity = await _seedBatchRepository.GetById(id);
+            if (entity == null) return NotFound();
+
+            if (!await TryUpdateModelAsync(entity, "",
+                e => e.SKU,
+                e => e.ListingTitle,
+                e => e.Price,
+                e => e.IsAvailableInWebshop,
+                e => e.Description,
+                e => e.TaxonomyId,
+                e => e.LineageId,
+                e => e.DateAcquired,
+                e => e.InternalNotes,
+                e => e.LocationInNursery,
+                e => e.SeedCount,
+                e => e.HarvestDate,
+                e => e.ExpectedViabilityMonths,
+                e => e.RequiresStratification,
+                e => e.EstimatedGerminationRate))
             {
-                ViewBag.Taxonomies = _taxonomyRepository.GetAll();
-                return View(model);
+                ViewBag.Taxonomies = await _taxonomyRepository.GetAll();
+                return View(entity);
             }
-            _seedBatchRepository.Update(model);
+
+            await _seedBatchRepository.Update(entity);
             return RedirectToAction("Details", new { id });
         }
 
         [HttpPost]
         [Route("delete/{id:int}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             if (!IsAdmin) return RequireAdmin();
             try
             {
-                _seedBatchRepository.Delete(id);
+                await _seedBatchRepository.Delete(id);
                 return RedirectToAction("Index");
             }
             catch (InvalidOperationException ex)

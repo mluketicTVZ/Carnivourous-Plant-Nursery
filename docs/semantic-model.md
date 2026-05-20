@@ -19,6 +19,7 @@ Base class for all inventory items.
 | Price | decimal? | decimal(18,2) |
 | IsAvailableInWebshop | bool | Whether listed in the webshop |
 | Description | string? | Max 1000 chars |
+| DeletedAt | DateTime? | Soft delete timestamp — `null` = active, set = deleted |
 
 ---
 
@@ -79,6 +80,7 @@ Represents the scientific/common classification of a plant species or cultivar.
 | CommonName | string? | Max 200 chars |
 | CareProfileId | int? | [ForeignKey("CareProfile")] |
 | CareProfile | CareProfile? | Navigation — many Taxonomies → one CareProfile |
+| DeletedAt | DateTime? | Soft delete timestamp — `null` = active, set = deleted |
 | FullName | string | Computed: Genus + Species + Cultivar (read-only) |
 | InventoryItems | ICollection\<InventoryItem\> | Navigation — one Taxonomy → many InventoryItems |
 
@@ -99,6 +101,7 @@ Describes the cultivation requirements for a taxonomy.
 | SoilMix | string? | Recommended soil mix, max 200 chars |
 | RequiredHumidity | HumidityLevel? | Enum: Low, Moderate, High, ExtremelyHigh |
 | CareDescription | string? | Free-text care notes, max 1000 chars |
+| DeletedAt | DateTime? | Soft delete timestamp — `null` = active, set = deleted |
 | Taxonomies | ICollection\<Taxonomy\> | Navigation — one CareProfile → many Taxonomies |
 
 ---
