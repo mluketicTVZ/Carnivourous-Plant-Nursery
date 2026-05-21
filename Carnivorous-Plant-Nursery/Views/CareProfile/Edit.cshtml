@@ -31,24 +31,24 @@
             <legend>Light & Humidity</legend>
             <div class="filter-group">
                 <label asp-for="RequiredLight" class="card-label"></label>
-                <select asp-for="RequiredLight">
-                    <option value="">-- Select --</option>
-                    @foreach (var val in Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.LightLevel)).Cast<Carnivorous_Plant_Nursery.Models.LightLevel>())
-                    {
-                        <option value="@val">@val</option>
-                    }
-                </select>
+                <partial name="_HybridDropdown"
+                    model="@(Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.LightLevel)).Cast<Carnivorous_Plant_Nursery.Models.LightLevel>().Select(e => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Text = e.ToString(), Value = e.ToString() }))"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "FieldName", "RequiredLight" },
+                        { "CurrentValue", Model?.RequiredLight?.ToString() },
+                        { "Placeholder", "-- Select Light Level --" }
+                    })' />
                 <span asp-validation-for="RequiredLight" class="val-error"></span>
             </div>
             <div class="filter-group">
                 <label asp-for="RequiredHumidity" class="card-label"></label>
-                <select asp-for="RequiredHumidity">
-                    <option value="">-- Select --</option>
-                    @foreach (var val in Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.HumidityLevel)).Cast<Carnivorous_Plant_Nursery.Models.HumidityLevel>())
-                    {
-                        <option value="@val">@val</option>
-                    }
-                </select>
+                <partial name="_HybridDropdown"
+                    model="@(Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.HumidityLevel)).Cast<Carnivorous_Plant_Nursery.Models.HumidityLevel>().Select(e => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Text = e.ToString(), Value = e.ToString() }))"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "FieldName", "RequiredHumidity" },
+                        { "CurrentValue", Model?.RequiredHumidity?.ToString() },
+                        { "Placeholder", "-- Select Humidity Level --" }
+                    })' />
                 <span asp-validation-for="RequiredHumidity" class="val-error"></span>
             </div>
         </fieldset>
@@ -57,24 +57,24 @@
             <legend>Temperature</legend>
             <div class="filter-group">
                 <label asp-for="MinTemperature" class="card-label"></label>
-                <select asp-for="MinTemperature">
-                    <option value="">-- Select --</option>
-                    @foreach (var val in Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.TemperatureTolerance)).Cast<Carnivorous_Plant_Nursery.Models.TemperatureTolerance>())
-                    {
-                        <option value="@val">@val</option>
-                    }
-                </select>
+                <partial name="_HybridDropdown"
+                    model="@(Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.TemperatureTolerance)).Cast<Carnivorous_Plant_Nursery.Models.TemperatureTolerance>().Select(e => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Text = e.ToString(), Value = e.ToString() }))"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "FieldName", "MinTemperature" },
+                        { "CurrentValue", Model?.MinTemperature?.ToString() },
+                        { "Placeholder", "-- Select Min Temp --" }
+                    })' />
                 <span asp-validation-for="MinTemperature" class="val-error"></span>
             </div>
             <div class="filter-group">
                 <label asp-for="MaxTemperature" class="card-label"></label>
-                <select asp-for="MaxTemperature">
-                    <option value="">-- Select --</option>
-                    @foreach (var val in Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.TemperatureTolerance)).Cast<Carnivorous_Plant_Nursery.Models.TemperatureTolerance>())
-                    {
-                        <option value="@val">@val</option>
-                    }
-                </select>
+                <partial name="_HybridDropdown"
+                    model="@(Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.TemperatureTolerance)).Cast<Carnivorous_Plant_Nursery.Models.TemperatureTolerance>().Select(e => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Text = e.ToString(), Value = e.ToString() }))"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "FieldName", "MaxTemperature" },
+                        { "CurrentValue", Model?.MaxTemperature?.ToString() },
+                        { "Placeholder", "-- Select Max Temp --" }
+                    })' />
                 <span asp-validation-for="MaxTemperature" class="val-error"></span>
             </div>
             <div class="filter-group">

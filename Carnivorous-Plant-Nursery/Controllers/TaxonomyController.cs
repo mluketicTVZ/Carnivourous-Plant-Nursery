@@ -112,5 +112,67 @@ namespace Carnivorous_Plant_Nursery.Controllers
                 return RedirectToAction("Details", new { id });
             }
         }
+
+        [HttpGet]
+        [Route("suggestions")]
+        public async Task<IActionResult> Suggestions([FromQuery] string term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+                return Json(Array.Empty<object>());
+
+            var taxonomies = await _taxonomyRepository.Search(term.Trim());
+            var lowerTerm = term.Trim().ToLower();
+
+            var results = taxonomies
+                .Where(t => !string.IsNullOrEmpty(t.CommonName))
+                .Select(t => new
+                {
+                    text = string.IsNullOrEmpty(t.Cultivar)
+                        ? $"{t.CommonName} ({t.Genus} {t.Species})"
+                        : $"{t.CommonName} ({t.Genus} {t.Species} '{t.Cultivar}')",
+                    value = t.CommonName!
+                })
+                .DistinctBy(x => x.value)
+                .OrderBy(x =>
+                {
+                    var idx = x.text.ToLower().IndexOf(lowerTerm);
+                    return idx < 0 ? int.MaxValue : idx;
+                })
+                .Take(8)
+                .ToList();
+
+            return Json(results);
+        }
+
+        // Returns taxonomy suggestions with ID as value — used by Plant/SeedBatch Create/Edit FK pickers
+        [HttpGet]
+        [Route("id-suggestions")]
+        public async Task<IActionResult> IdSuggestions([FromQuery] string term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+                return Json(Array.Empty<object>());
+
+            var taxonomies = await _taxonomyRepository.Search(term.Trim());
+            var lowerTerm = term.Trim().ToLower();
+
+            var results = taxonomies
+                .Where(t => !string.IsNullOrEmpty(t.CommonName))
+                .Select(t => new
+                {
+                    text = string.IsNullOrEmpty(t.Cultivar)
+                        ? $"{t.CommonName} ({t.Genus} {t.Species})"
+                        : $"{t.CommonName} ({t.Genus} {t.Species} '{t.Cultivar}')",
+                    value = t.Id.ToString()
+                })
+                .OrderBy(x =>
+                {
+                    var idx = x.text.ToLower().IndexOf(lowerTerm);
+                    return idx < 0 ? int.MaxValue : idx;
+                })
+                .Take(8)
+                .ToList();
+
+            return Json(results);
+        }
     }
 }

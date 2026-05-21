@@ -53,5 +53,10 @@ namespace Carnivorous_Plant_Nursery.Models
 
         [MaxLength(1000)]
         public string? HealthDescription { get; set; }
+
+        public int? SourceSeedBatchId { get; set; }
+
+        [ForeignKey("SourceSeedBatchId")]
+        public virtual SeedBatch? SourceSeedBatch { get; set; }
     }
 }

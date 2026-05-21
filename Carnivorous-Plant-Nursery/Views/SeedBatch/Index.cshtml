@@ -25,6 +25,28 @@
     </p>
 </div>
 
+<form method="get" asp-controller="SeedBatch" asp-action="Index" class="botanical-filter-form">
+    <div class="filter-group">
+        <label for="autocomplete-display-searchTerm">Search by Title or SKU</label>
+        <partial name="_PlantAutocomplete"
+            model="@(ViewBag.SearchTerm as string)"
+            view-data='@(new ViewDataDictionary(ViewData) {
+                { "Endpoint", "/seeds/suggestions" },
+                { "Placeholder", "Search seed batches..." }
+            })' />
+    </div>
+    <div class="filter-group filter-group-checkbox">
+        <label>
+            <input type="checkbox" name="availableInWebshop" value="true" @(ViewBag.AvailableInWebshop == true ? "checked" : "") />
+            Available in Webshop Only
+        </label>
+    </div>
+    <div style="display:flex; gap:10px; align-items:flex-end;">
+        <button type="submit" class="btn-filter" style="align-self: flex-end; padding: 0.6rem 1.4rem;">Apply</button>
+        <a asp-action="Index" class="btn-clear" style="text-align:center; align-self: flex-end; padding: 0.6rem 1.4rem;">Clear</a>
+    </div>
+</form>
+
 <div class="entity-catalog">
     @foreach (var s in Model)
     {

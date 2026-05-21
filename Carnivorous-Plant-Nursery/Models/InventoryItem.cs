@@ -6,6 +6,7 @@ namespace Carnivorous_Plant_Nursery.Models
 {
     public abstract class InventoryItem : Article
     {
+        [Display(Name = "Taxonomy")]
         [ForeignKey("Taxonomy")]
         public int? TaxonomyId { get; set; }
         public virtual Taxonomy? Taxonomy { get; set; }

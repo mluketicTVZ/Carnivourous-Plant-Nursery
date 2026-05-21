@@ -54,16 +54,15 @@
             <legend>Acquisition & Location</legend>
             <div class="filter-group">
                 <label asp-for="TaxonomyId" class="card-label"></label>
-                <select asp-for="TaxonomyId">
-                    <option value="">-- None --</option>
-                    @if (ViewBag.Taxonomies != null)
-                    {
-                        foreach (var t in (List<Carnivorous_Plant_Nursery.Models.Taxonomy>)ViewBag.Taxonomies)
-                        {
-                            <option value="@t.Id">@t.FullName</option>
-                        }
-                    }
-                </select>
+                <partial name="_PlantAutocomplete"
+                    model="@(Model?.Taxonomy?.FullName ?? "")"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "Endpoint", "/taxonomy/id-suggestions" },
+                        { "Placeholder", "Search by common name, genus or species..." },
+                        { "FieldName", "TaxonomyId" },
+                        { "InitialValue", Model?.TaxonomyId?.ToString() ?? "" },
+                        { "Mode", "select" }
+                    })' />
                 <span asp-validation-for="TaxonomyId" class="val-error"></span>
             </div>
             <div class="filter-group">
@@ -93,13 +92,13 @@
             <legend>Botanical Info</legend>
             <div class="filter-group">
                 <label asp-for="CurrentStage" class="card-label"></label>
-                <select asp-for="CurrentStage">
-                    <option value="">-- Select --</option>
-                    @foreach (var val in Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.PlantStage)).Cast<Carnivorous_Plant_Nursery.Models.PlantStage>())
-                    {
-                        <option value="@val">@val</option>
-                    }
-                </select>
+                <partial name="_HybridDropdown"
+                    model="@(Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.PlantStage)).Cast<Carnivorous_Plant_Nursery.Models.PlantStage>().Select(e => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Text = e.ToString(), Value = e.ToString() }))"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "FieldName", "CurrentStage" },
+                        { "CurrentValue", Model?.CurrentStage?.ToString() },
+                        { "Placeholder", "-- Select Stage --" }
+                    })' />
                 <span asp-validation-for="CurrentStage" class="val-error"></span>
             </div>
             <div class="filter-group">
@@ -135,16 +134,34 @@
         </fieldset>
 
         <fieldset class="details-section">
+            <legend>Propagation Source</legend>
+            <div class="filter-group">
+                <label class="card-label">Source Seed Batch</label>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">(Optionally link this plant to the seed batch it was grown from)</div>
+                <partial name="_PlantAutocomplete"
+                    model="@(Model?.SourceSeedBatch?.ListingTitle ?? "")"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "Endpoint", "/seeds/batch-suggestions" },
+                        { "Placeholder", "Search seed batches by title or SKU..." },
+                        { "FieldName", "SourceSeedBatchId" },
+                        { "InitialValue", Model?.SourceSeedBatchId?.ToString() ?? "" },
+                        { "Mode", "select" }
+                    })' />
+                <span asp-validation-for="SourceSeedBatchId" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <fieldset class="details-section">
             <legend>Health</legend>
             <div class="filter-group">
                 <label asp-for="HealthStatus" class="card-label"></label>
-                <select asp-for="HealthStatus">
-                    <option value="">-- Select --</option>
-                    @foreach (var val in Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.HealthState)).Cast<Carnivorous_Plant_Nursery.Models.HealthState>())
-                    {
-                        <option value="@val">@val</option>
-                    }
-                </select>
+                <partial name="_HybridDropdown"
+                    model="@(Enum.GetValues(typeof(Carnivorous_Plant_Nursery.Models.HealthState)).Cast<Carnivorous_Plant_Nursery.Models.HealthState>().Select(e => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Text = e.ToString(), Value = e.ToString() }))"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "FieldName", "HealthStatus" },
+                        { "CurrentValue", Model?.HealthStatus?.ToString() },
+                        { "Placeholder", "-- Select Status --" }
+                    })' />
                 <span asp-validation-for="HealthStatus" class="val-error"></span>
             </div>
             <div class="filter-group">

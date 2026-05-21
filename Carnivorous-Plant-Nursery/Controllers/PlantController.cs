@@ -9,11 +9,13 @@ namespace Carnivorous_Plant_Nursery.Controllers
     {
         private readonly PlantRepository _plantRepository;
         private readonly TaxonomyRepository _taxonomyRepository;
+        private readonly SeedBatchRepository _seedBatchRepository;
 
-        public PlantController(PlantRepository plantRepository, TaxonomyRepository taxonomyRepository)
+        public PlantController(PlantRepository plantRepository, TaxonomyRepository taxonomyRepository, SeedBatchRepository seedBatchRepository)
         {
             _plantRepository = plantRepository;
             _taxonomyRepository = taxonomyRepository;
+            _seedBatchRepository = seedBatchRepository;
         }
 
         [Route("")]
@@ -53,6 +55,7 @@ namespace Carnivorous_Plant_Nursery.Controllers
         {
             if (!IsAdmin) return RequireAdmin();
             ViewBag.Taxonomies = await _taxonomyRepository.GetAll();
+            ViewBag.SeedBatches = await _seedBatchRepository.GetAll();
             return View();
         }
 
@@ -65,6 +68,7 @@ namespace Carnivorous_Plant_Nursery.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.Taxonomies = await _taxonomyRepository.GetAll();
+                ViewBag.SeedBatches = await _seedBatchRepository.GetAll();
                 return View(model);
             }
             await _plantRepository.Add(model);
@@ -80,6 +84,7 @@ namespace Carnivorous_Plant_Nursery.Controllers
             var plant = await _plantRepository.GetById(id);
             if (plant == null) return NotFound();
             ViewBag.Taxonomies = await _taxonomyRepository.GetAll();
+            ViewBag.SeedBatches = await _seedBatchRepository.GetAll();
             return View(plant);
         }
 
@@ -113,9 +118,11 @@ namespace Carnivorous_Plant_Nursery.Controllers
                 e => e.LastDormancyDateEnd,
                 e => e.EstimatedAgeAtAcquiryYears,
                 e => e.HealthStatus,
-                e => e.HealthDescription))
+                e => e.HealthDescription,
+                e => e.SourceSeedBatchId))
             {
                 ViewBag.Taxonomies = await _taxonomyRepository.GetAll();
+                ViewBag.SeedBatches = await _seedBatchRepository.GetAll();
                 return View(entity);
             }
 
@@ -139,6 +146,37 @@ namespace Carnivorous_Plant_Nursery.Controllers
                 TempData["DeleteError"] = ex.Message;
                 return RedirectToAction("Details", new { id });
             }
+        }
+
+        [HttpGet]
+        [Route("suggestions")]
+        public async Task<IActionResult> Suggestions([FromQuery] string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Trim().Length < 1)
+                return Json(new List<object>());
+
+            var plants = await _plantRepository.Search(term.Trim());
+            var lowerTerm = term.Trim().ToLower();
+
+            var results = plants
+                .Where(p => p.Taxonomy != null && !string.IsNullOrEmpty(p.Taxonomy.CommonName))
+                .Select(p => new
+                {
+                    text = string.IsNullOrEmpty(p.Taxonomy!.Cultivar)
+                        ? $"{p.Taxonomy.CommonName} ({p.Taxonomy.Genus} {p.Taxonomy.Species})"
+                        : $"{p.Taxonomy.CommonName} ({p.Taxonomy.Genus} {p.Taxonomy.Species} '{p.Taxonomy.Cultivar}')",
+                    value = p.Taxonomy.CommonName!
+                })
+                .DistinctBy(x => x.value)
+                .OrderBy(x =>
+                {
+                    var idx = x.text.ToLower().IndexOf(lowerTerm);
+                    return idx < 0 ? int.MaxValue : idx;
+                })
+                .Take(8)
+                .ToList();
+
+            return Json(results);
         }
     }
 }

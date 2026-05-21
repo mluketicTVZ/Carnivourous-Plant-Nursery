@@ -45,16 +45,13 @@
             <legend>Care Profile</legend>
             <div class="filter-group">
                 <label asp-for="CareProfileId" class="card-label"></label>
-                <select asp-for="CareProfileId">
-                    <option value="">-- None --</option>
-                    @if (ViewBag.CareProfiles != null)
-                    {
-                        foreach (var cp in (List<Carnivorous_Plant_Nursery.Models.CareProfile>)ViewBag.CareProfiles)
-                        {
-                            <option value="@cp.Id">@cp.CareProfileName</option>
-                        }
-                    }
-                </select>
+                <partial name="_HybridDropdown"
+                    model="@(((List<Carnivorous_Plant_Nursery.Models.CareProfile>)ViewBag.CareProfiles).Select(cp => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Text = cp.CareProfileName, Value = cp.Id.ToString() }))"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "FieldName", "CareProfileId" },
+                        { "CurrentValue", Model?.CareProfileId?.ToString() },
+                        { "Placeholder", "-- None --" }
+                    })' />
                 <span asp-validation-for="CareProfileId" class="val-error"></span>
             </div>
         </fieldset>

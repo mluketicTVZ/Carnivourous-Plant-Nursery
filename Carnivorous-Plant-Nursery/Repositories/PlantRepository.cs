@@ -75,6 +75,7 @@ namespace Carnivorous_Plant_Nursery.Repositories
                     ((p.ListingTitle != null && p.ListingTitle.Contains(term)) ||
                     (p.Description != null && p.Description.Contains(term)) ||
                     (p.Taxonomy != null && (
+                        (p.Taxonomy.CommonName != null && p.Taxonomy.CommonName.Contains(term)) ||
                         (p.Taxonomy.Genus != null && p.Taxonomy.Genus.Contains(term)) ||
                         (p.Taxonomy.Species != null && p.Taxonomy.Species.Contains(term)) ||
                         (p.Taxonomy.Cultivar != null && p.Taxonomy.Cultivar.Contains(term))

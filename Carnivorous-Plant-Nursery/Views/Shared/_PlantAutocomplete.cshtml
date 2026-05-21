@@ -1,0 +1,263 @@
+@model string?
+
+@{
+    var suggestionsEndpoint = ViewData["Endpoint"] as string ?? "/plants/suggestions";
+    var inputPlaceholder = ViewData["Placeholder"] as string ?? "e.g. Venus Flytrap";
+    var fieldName = ViewData["FieldName"] as string ?? "searchTerm";
+    var initialHiddenValue = ViewData["InitialValue"] as string ?? Model ?? "";
+    var autocompleteMode = ViewData["Mode"] as string ?? "search";
+}
+
+<style>
+    .plant-autocomplete-wrapper {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        z-index: 100;
+    }
+
+    .plant-autocomplete-wrapper.is-open {
+        z-index: 999;
+    }
+
+    .plant-autocomplete-wrapper input[type="text"] {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .plant-autocomplete-wrapper .autocomplete-items {
+        position: absolute;
+        border: 1px solid var(--accent-color, #8bc34a);
+        border-top: none;
+        z-index: 99;
+        /* Position exactly below the input */
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--bg-white, #ffffff);
+        max-height: 250px;
+        overflow-y: auto;
+        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.15);
+        border-radius: 0 0 6px 6px;
+        animation: autocompleteFadeIn 0.2s ease-out forwards;
+        display: none; /* hidden until results are available */
+    }
+
+    @@keyframes autocompleteFadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .plant-autocomplete-wrapper .autocomplete-items div {
+        padding: 10px;
+        cursor: pointer;
+        background-color: var(--bg-white, #ffffff);
+        border-bottom: 1px solid var(--border-color, #e0e0e0);
+        color: var(--text-dark, #333333);
+        transition: background-color 0.1s ease-in-out;
+    }
+
+    .plant-autocomplete-wrapper .autocomplete-items div:last-child {
+        border-bottom: none;
+    }
+
+    .plant-autocomplete-wrapper .autocomplete-items div:hover {
+        background-color: var(--light-green, #dcedc8);
+    }
+
+    .plant-autocomplete-wrapper .autocomplete-active {
+        background-color: var(--light-green, #dcedc8) !important;
+    }
+
+    .plant-autocomplete-wrapper .autocomplete-items strong {
+        color: var(--dark-green, #2e7d32);
+        font-weight: 700;
+    }
+</style>
+
+<div class="plant-autocomplete-wrapper" 
+     data-endpoint="@suggestionsEndpoint" 
+     data-placeholder="@inputPlaceholder"
+     data-mode="@autocompleteMode">
+    <!-- Visible text input for the user -->
+    <input type="text" 
+           id="autocomplete-display-@fieldName" 
+           class="form-control botanical-input" 
+           placeholder="@inputPlaceholder" 
+           value="@Model" 
+           autocomplete="off" />
+           
+    <!-- Hidden input that actually gets submitted as 'searchTerm' -->
+    <input type="hidden" 
+           id="autocomplete-hidden-@fieldName" 
+           name="@fieldName" 
+           value="@initialHiddenValue" />
+           
+    <!-- Suggestions dropdown container -->
+    <div class="autocomplete-items autocomplete-list"></div>
+</div>
+
+<script>
+    (function initPlantAutocomplete() {
+        document.addEventListener("DOMContentLoaded", function () {
+            // Find all instances if this script runs multiple times or just bind to the current one.
+            // Since this script might be included multiple times, we need to bind strictly or safely.
+            const displayInput = document.getElementById("autocomplete-display-@fieldName");
+            const hiddenInput = document.getElementById("autocomplete-hidden-@fieldName");
+            const wrapper = displayInput?.closest('.plant-autocomplete-wrapper');
+            const autocompleteList = wrapper?.querySelector('.autocomplete-list');
+            
+            const endpoint = wrapper?.dataset.endpoint ?? '/plants/suggestions';
+            const mode = wrapper?.dataset.mode ?? 'search';
+
+            if (!displayInput || !hiddenInput || !autocompleteList) return;
+
+            let currentFocus = -1;
+            let debounceTimer;
+
+            // Handle user typing
+            displayInput.addEventListener("input", function(e) {
+                const val = this.value;
+
+                // Always keep hidden input in sync so Enter-to-submit works
+                hiddenInput.value = val;
+
+                if (!val) {
+                    closeAllLists();
+                    return;
+                }
+                
+                // Debounce 300ms before making the AJAX call
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    fetchSuggestions(val);
+                }, 300);
+            });
+
+            // Handle keyboard navigation (Up, Down, Enter, Escape)
+            displayInput.addEventListener("keydown", function(e) {
+                const items = autocompleteList.getElementsByTagName("div");
+                
+                if (e.key === "ArrowDown") {
+                    currentFocus++;
+                    addActive(items);
+                    e.preventDefault(); // Prevent cursor moving in the text input
+                } else if (e.key === "ArrowUp") {
+                    currentFocus--;
+                    addActive(items);
+                    e.preventDefault(); 
+                } else if (e.key === "Enter") {
+                    if (autocompleteList.style.display === "block" && currentFocus > -1) {
+                        // A suggestion is highlighted — select it
+                        e.preventDefault();
+                        items[currentFocus].click();
+                    } else {
+                        // Nothing selected — close dropdown and let the form submit normally
+                        closeAllLists();
+                    }
+                } else if (e.key === "Escape") {
+                    closeAllLists();
+                }
+            });
+
+            function fetchSuggestions(query) {
+                // Expected API endpoint returning JSON: [{ text: "...", value: "..." }, ...]
+                fetch(`${endpoint}?term=${encodeURIComponent(query)}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error("Suggestion fetch failed");
+                        return response.json();
+                    })
+                    .then(data => {
+                        renderSuggestions(data, query);
+                    })
+                    .catch(error => {
+                        console.error("Autocomplete fetch error:", error);
+                        closeAllLists();
+                    });
+            }
+
+            function renderSuggestions(data, query) {
+                // Clear any existing suggestions
+                autocompleteList.innerHTML = "";
+                currentFocus = -1;
+
+                if (!data || data.length === 0) {
+                    closeAllLists();
+                    return;
+                }
+                
+                const fragment = document.createDocumentFragment();
+                // Regex to find occurrences and wrap in strong (case insensitive)
+                const regex = new RegExp(`(${escapeRegExp(query)})`, "gi");
+
+                data.forEach(item => {
+                    const suggestionDiv = document.createElement("div");
+                    
+                    // Emphasize matched characters
+                    const displayHtml = item.text.replace(regex, "<strong>$1</strong>");
+                    suggestionDiv.innerHTML = displayHtml;
+                    
+                    // Handle selection via click
+                    suggestionDiv.addEventListener("click", function(e) {
+                        displayInput.value = item.text;
+                        hiddenInput.value = item.value;
+                        closeAllLists();
+                        
+                        // Only auto-submit in search mode (Index filters).
+                        // In select mode (FK fields on Create/Edit), just set the value.
+                        if (mode !== 'select') {
+                            const parentForm = displayInput.closest("form");
+                            if (parentForm) {
+                                parentForm.submit();
+                            }
+                        }
+                    });
+
+                    fragment.appendChild(suggestionDiv);
+                });
+
+                autocompleteList.appendChild(fragment);
+                autocompleteList.style.display = "block";
+                wrapper.classList.add("is-open");
+            }
+
+            function addActive(items) {
+                if (!items || items.length === 0) return false;
+                removeActive(items);
+                
+                if (currentFocus >= items.length) currentFocus = 0;
+                if (currentFocus < 0) currentFocus = (items.length - 1);
+                
+                items[currentFocus].classList.add("autocomplete-active");
+                // Ensure the focused item is visible in the scroll container
+                items[currentFocus].scrollIntoView({ block: "nearest" });
+            }
+
+            function removeActive(items) {
+                for (let i = 0; i < items.length; i++) {
+                    items[i].classList.remove("autocomplete-active");
+                }
+            }
+
+            function closeAllLists(element) {
+                if (element !== displayInput) {
+                    autocompleteList.innerHTML = "";
+                    autocompleteList.style.display = "none";
+                    currentFocus = -1;
+                    wrapper.classList.remove("is-open");
+                }
+            }
+
+            function escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+
+            // Close suggestions list if clicking anywhere else on the document
+            document.addEventListener("click", function(e) {
+                if (e.target !== displayInput && e.target !== autocompleteList) {
+                    closeAllLists();
+                }
+            });
+        });
+    })();
+</script>

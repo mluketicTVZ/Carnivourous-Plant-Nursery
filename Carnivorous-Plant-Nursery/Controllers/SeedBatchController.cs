@@ -17,10 +17,23 @@ namespace Carnivorous_Plant_Nursery.Controllers
         }
 
         [Route("")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchTerm, bool? availableInWebshop)
         {
             var seedBatches = await _seedBatchRepository.GetAll();
-            return View(seedBatches);
+            IEnumerable<SeedBatch> items = seedBatches;
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+                items = items.Where(s =>
+                    (s.ListingTitle != null && s.ListingTitle.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    (s.SKU != null && s.SKU.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    (s.Taxonomy != null && s.Taxonomy.CommonName != null && s.Taxonomy.CommonName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+
+            if (availableInWebshop == true)
+                items = items.Where(i => i.IsAvailableInWebshop);
+
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.AvailableInWebshop = availableInWebshop;
+            return View(items);
         }
 
         [Route("{id:int}")]
@@ -120,6 +133,72 @@ namespace Carnivorous_Plant_Nursery.Controllers
                 TempData["DeleteError"] = ex.Message;
                 return RedirectToAction("Details", new { id });
             }
+        }
+
+        [HttpGet]
+        [Route("suggestions")]
+        public async Task<IActionResult> Suggestions([FromQuery] string? term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+                return Json(Array.Empty<object>());
+
+            var all = await _seedBatchRepository.GetAll();
+            var lowerTerm = term.ToLowerInvariant();
+
+            var results = all
+                .Where(sb => !string.IsNullOrEmpty(sb.ListingTitle) &&
+                             (sb.ListingTitle.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase) ||
+                              (!string.IsNullOrEmpty(sb.SKU) && sb.SKU.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase)) ||
+                              (sb.Taxonomy?.CommonName != null && sb.Taxonomy.CommonName.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase)) ||
+                              sb.Taxonomy?.FullName.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase) == true))
+                .Select(sb => new
+                {
+                    text = string.IsNullOrEmpty(sb.SKU) ? sb.ListingTitle! : $"{sb.ListingTitle} [{sb.SKU}]",
+                    value = sb.ListingTitle!
+                })
+                .DistinctBy(x => x.value)
+                .OrderBy(x =>
+                {
+                    var idx = x.text.IndexOf(lowerTerm, StringComparison.OrdinalIgnoreCase);
+                    return idx >= 0 ? idx : int.MaxValue;
+                })
+                .Take(8)
+                .ToList();
+
+            return Json(results);
+        }
+
+        [HttpGet]
+        [Route("batch-suggestions")]
+        public async Task<IActionResult> BatchSuggestions([FromQuery] string? term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+                return Json(Array.Empty<object>());
+
+            var all = await _seedBatchRepository.GetAll();
+            var lowerTerm = term.ToLowerInvariant();
+
+            var results = all
+                .Where(sb => !string.IsNullOrEmpty(sb.ListingTitle) &&
+                             (sb.ListingTitle.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase) ||
+                              (!string.IsNullOrEmpty(sb.SKU) && sb.SKU.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase)) ||
+                              (sb.Taxonomy?.CommonName != null && sb.Taxonomy.CommonName.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase)) ||
+                              sb.Taxonomy?.FullName.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase) == true))
+                .Select(sb => new
+                {
+                    text = string.IsNullOrEmpty(sb.SKU) ? sb.ListingTitle! : $"{sb.ListingTitle} [{sb.SKU}]",
+                    value = sb.Id.ToString()
+                })
+                .DistinctBy(x => x.value)
+                .OrderBy(x =>
+                {
+                    var idx = x.text.IndexOf(lowerTerm, StringComparison.OrdinalIgnoreCase);
+                    return idx >= 0 ? idx : int.MaxValue;
+                })
+                .Take(8)
+                .ToList();
+
+            return Json(results);
         }
     }
 }

@@ -54,16 +54,15 @@
             <legend>Acquisition</legend>
             <div class="filter-group">
                 <label asp-for="TaxonomyId" class="card-label"></label>
-                <select asp-for="TaxonomyId">
-                    <option value="">-- None --</option>
-                    @if (ViewBag.Taxonomies != null)
-                    {
-                        foreach (var t in (List<Carnivorous_Plant_Nursery.Models.Taxonomy>)ViewBag.Taxonomies)
-                        {
-                            <option value="@t.Id">@t.FullName</option>
-                        }
-                    }
-                </select>
+                <partial name="_PlantAutocomplete"
+                    model="@(Model?.Taxonomy?.FullName ?? "")"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "Endpoint", "/taxonomy/id-suggestions" },
+                        { "Placeholder", "Search by common name, genus or species..." },
+                        { "FieldName", "TaxonomyId" },
+                        { "InitialValue", Model?.TaxonomyId?.ToString() ?? "" },
+                        { "Mode", "select" }
+                    })' />
                 <span asp-validation-for="TaxonomyId" class="val-error"></span>
             </div>
             <div class="filter-group">

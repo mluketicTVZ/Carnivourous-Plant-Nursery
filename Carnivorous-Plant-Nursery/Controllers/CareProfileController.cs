@@ -15,10 +15,33 @@ namespace Carnivorous_Plant_Nursery.Controllers
         }
 
         [Route("")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchTerm, string? requiredLight)
         {
-            var careProfiles = await _careProfileRepository.GetAll();
-            return View(careProfiles);
+            var allCareProfiles = await _careProfileRepository.GetAll();
+
+            // Populate dropdown options BEFORE filtering so all names are always shown
+            ViewBag.AllCareProfiles = allCareProfiles
+                .Select(cp => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Text = cp.CareProfileName,
+                    Value = cp.CareProfileName
+                })
+                .ToList();
+
+            IEnumerable<CareProfile> careProfiles = allCareProfiles;
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+                careProfiles = careProfiles
+                    .Where(cp => cp.CareProfileName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrWhiteSpace(requiredLight) && Enum.TryParse<LightLevel>(requiredLight, out var parsedLight))
+                careProfiles = careProfiles
+                    .Where(cp => cp.RequiredLight == parsedLight);
+
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.RequiredLight = requiredLight;
+
+            return View(careProfiles.ToList());
         }
 
         [Route("{id:int}")]
@@ -106,5 +129,6 @@ namespace Carnivorous_Plant_Nursery.Controllers
                 return RedirectToAction("Details", new { id });
             }
         }
+
     }
 }
