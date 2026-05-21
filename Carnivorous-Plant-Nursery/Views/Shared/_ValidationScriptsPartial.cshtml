@@ -1,2 +1,39 @@
 ﻿<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
 <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+<script>
+    // Trigger validation on blur (focus-out), not just on submit
+    $.validator.setDefaults({
+        onfocusout: function (element) {
+            this.element(element);
+        },
+        invalidHandler: function (event, validator) {
+            // Remove any existing validation toast to prevent duplicates
+            var existing = document.querySelector('.validation-toast');
+            if (existing) existing.remove();
+
+            // Build and insert the toast
+            var toast = document.createElement('div');
+            toast.className = 'toast-notification validation-toast';
+            toast.innerHTML =
+                '<div class="toast-icon">⚠️</div>' +
+                '<div class="toast-content">' +
+                    '<h4 class="toast-title">Some fields need attention</h4>' +
+                    '<p class="toast-message">Please review and correct the highlighted fields before saving.</p>' +
+                '</div>' +
+                '<button type="button" class="toast-close" onclick="closeToast(this.closest(\'.toast-notification\'))">&times;</button>';
+            document.body.prepend(toast);
+
+            // Auto-dismiss after 6 seconds (site.js DOMContentLoaded won't catch dynamic toasts)
+            setTimeout(function () { closeToast(toast); }, 6000);
+        }
+    });
+
+    // Safety net: delegated blur handler for any validated form
+    $(document).on('blur', 'form input, form select, form textarea', function () {
+        var form = $(this).closest('form');
+        var validator = form.data('validator');
+        if (validator) {
+            validator.element(this);
+        }
+    });
+</script>

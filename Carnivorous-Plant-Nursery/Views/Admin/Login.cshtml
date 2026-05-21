@@ -24,7 +24,12 @@
 
             <div class="filter-group" style="margin-top: 1rem;">
                 <label for="passkey">Passkey</label>
-                <input type="password" id="passkey" name="passkey" />
+                <input type="password" id="passkey" name="passkey" autocomplete="current-password" />
+            </div>
+
+            <div class="filter-group" style="margin-top: 1rem;">
+                <label for="totpCode">Authenticator Code</label>
+                <input type="text" id="totpCode" name="totpCode" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code" />
             </div>
 
             <div style="margin-top: 1.5rem;">

@@ -1,0 +1,13 @@
+@* Shown when server-side ModelState validation fails on a Create/Edit POST.
+   Usage: <partial name="_ValidationToast" /> — place directly before the form wrapper. *@
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="toast-notification" data-autodismiss="true">
+        <div class="toast-icon">⚠️</div>
+        <div class="toast-content">
+            <h4 class="toast-title">Some fields need attention</h4>
+            <p class="toast-message">Please review and correct the highlighted fields before saving.</p>
+        </div>
+        <button type="button" class="toast-close" onclick="closeToast(this.closest('.toast-notification'))">&times;</button>
+    </div>
+}

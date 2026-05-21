@@ -831,3 +831,23 @@ body {
     color: var(--text-dark);
 }
 
+/* --- Validation Error Styles --- */
+.val-error,
+.field-validation-error {
+    font-size: 0.8rem;
+    color: #c0392b;
+    display: block;
+    margin-top: 0.3rem;
+    border-left: 3px solid #c0392b;
+    padding-left: 0.5rem;
+}
+
+.input-validation-error {
+    border-color: #c0392b !important;
+    background-color: rgba(192, 57, 43, 0.04) !important;
+}
+
+.field-validation-valid {
+    display: none;
+}
+

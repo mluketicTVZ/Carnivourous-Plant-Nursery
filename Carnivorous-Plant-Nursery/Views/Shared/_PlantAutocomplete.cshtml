@@ -114,13 +114,24 @@
 
             let currentFocus = -1;
             let debounceTimer;
+            // Tracks the display text of the last confirmed selection (via suggestion click).
+            // Used in select mode to detect when the user edits the field after picking an option.
+            let confirmedText = displayInput.value;
 
             // Handle user typing
             displayInput.addEventListener("input", function(e) {
                 const val = this.value;
 
-                // Always keep hidden input in sync so Enter-to-submit works
-                hiddenInput.value = val;
+                if (mode === 'select') {
+                    // If the visible text no longer matches the last confirmed selection,
+                    // clear the hidden ID so a stale value cannot be saved.
+                    if (val !== confirmedText) hiddenInput.value = '';
+                    // When the field is fully cleared, reset confirmedText too.
+                    if (!val) confirmedText = '';
+                } else {
+                    // search mode: keep hidden input in sync so Enter-to-submit works
+                    hiddenInput.value = val;
+                }
 
                 if (!val) {
                     closeAllLists();
@@ -201,6 +212,8 @@
                     suggestionDiv.addEventListener("click", function(e) {
                         displayInput.value = item.text;
                         hiddenInput.value = item.value;
+                        confirmedText = item.text;
+                        clearFieldError();
                         closeAllLists();
                         
                         // Only auto-submit in search mode (Index filters).
@@ -258,6 +271,52 @@
                     closeAllLists();
                 }
             });
+
+            // --- Select-mode validation ---
+            // Prevents submitting a form when the user typed something but never
+            // picked a suggestion (visible field has text, hidden value is empty).
+            function showFieldError(message) {
+                const span = document.querySelector(`[data-valmsg-for="${hiddenInput.name}"]`);
+                if (span) {
+                    span.textContent = message;
+                    span.classList.remove('field-validation-valid');
+                    span.classList.add('field-validation-error', 'val-error');
+                }
+                displayInput.style.borderColor = 'var(--danger, #e53935)';
+            }
+
+            function clearFieldError() {
+                const span = document.querySelector(`[data-valmsg-for="${hiddenInput.name}"]`);
+                if (span) {
+                    span.textContent = '';
+                    span.classList.remove('field-validation-error', 'val-error');
+                    span.classList.add('field-validation-valid');
+                }
+                displayInput.style.borderColor = '';
+            }
+
+            if (mode === 'select') {
+                // On blur: if the user typed something but made no selection, flag it.
+                displayInput.addEventListener('blur', function() {
+                    if (displayInput.value.trim() && !hiddenInput.value) {
+                        showFieldError('Please select an option from the list.');
+                    } else {
+                        clearFieldError();
+                    }
+                });
+
+                // On form submit: block submission if in the same invalid state.
+                const parentForm = displayInput.closest('form');
+                if (parentForm) {
+                    parentForm.addEventListener('submit', function(e) {
+                        if (displayInput.value.trim() && !hiddenInput.value) {
+                            e.preventDefault();
+                            showFieldError('Please select an option from the list.');
+                            displayInput.focus();
+                        }
+                    });
+                }
+            }
         });
     })();
 </script>

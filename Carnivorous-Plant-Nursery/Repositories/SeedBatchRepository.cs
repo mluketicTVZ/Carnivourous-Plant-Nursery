@@ -83,6 +83,10 @@ namespace Carnivorous_Plant_Nursery.Repositories
                 if (usedInLineage)
                     throw new InvalidOperationException(ErrorMessage.DeleteErrorSeedBatchInLineage);
 
+                bool usedAsPlantSource = await _db.Plant.AnyAsync(p => p.SourceSeedBatchId == id && p.DeletedAt == null);
+                if (usedAsPlantSource)
+                    throw new InvalidOperationException(ErrorMessage.DeleteErrorSeedBatchHasPlants);
+
                 entity.DeletedAt = DateTime.UtcNow;
                 await _db.SaveChangesAsync();
             }

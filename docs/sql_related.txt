@@ -15,3 +15,6 @@ note: --project tells dotnet ef where the .csproj/DbContext/migrations are, allo
 the command to be run from the solution root instead of cd-ing into the project folder.
 --startup-project would point to the project with appsettings.json (connection string);
 since both are the same project here it is redundant and omitted.
+
+In Docker Console print database data to check DeletedAt field
+/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YourStrong!Password123' -d CarnivorousPlantNursery -No -Q "SELECT Id, Discriminator, ListingTitle, DeletedAt FROM Article"

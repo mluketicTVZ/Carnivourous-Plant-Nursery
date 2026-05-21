@@ -16,6 +16,7 @@ namespace Carnivorous_Plant_Nursery.Models
         public string? ListingTitle { get; set; }
 
         private decimal? _price;
+        [Range(typeof(decimal), "0", "999999.99")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal? Price
         {

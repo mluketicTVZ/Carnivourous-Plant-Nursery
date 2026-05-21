@@ -80,6 +80,11 @@
                 <div class="nursery-card-subtitle">@p.Taxonomy?.FullName</div>
             </div>
             <div class="nursery-card-body">
+                @if (!string.IsNullOrEmpty(p.ListingTitle))
+                {
+                    <p style="font-style: italic; color: var(--dark-green); margin-bottom: 0.5rem;">@p.ListingTitle</p>
+                }
+                <p><span class="card-label">SKU:</span> @(string.IsNullOrEmpty(p.SKU) ? "N/A" : p.SKU)</p>
                 <p><span class="card-label">Genus:</span> @p.Taxonomy?.Genus</p>
                 <p><span class="card-label">Species:</span> @p.Taxonomy?.Species</p>
                 <p><span class="card-label">Cultivar:</span> @(string.IsNullOrEmpty(p.Taxonomy?.Cultivar) ? "N/A" : p.Taxonomy?.Cultivar)</p>

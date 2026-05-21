@@ -18,12 +18,14 @@ namespace Carnivorous_Plant_Nursery.Repositories
             var plants = _db.Plant
                 .Include(p => p.Taxonomy)
                 .Include(p => p.Lineage)
+                .Where(p => p.DeletedAt == null)
                 .ToList()
                 .Cast<InventoryItem>();
 
             var seeds = _db.SeedBatch
                 .Include(s => s.Taxonomy)
                 .Include(s => s.Lineage)
+                .Where(s => s.DeletedAt == null)
                 .ToList()
                 .Cast<InventoryItem>();
 
@@ -35,27 +37,27 @@ namespace Carnivorous_Plant_Nursery.Repositories
             InventoryItem? item = _db.Plant
                 .Include(p => p.Taxonomy)
                 .Include(p => p.Lineage)
-                .FirstOrDefault(p => p.Id == id);
+                .FirstOrDefault(p => p.Id == id && p.DeletedAt == null);
 
             if (item != null) return item;
 
             return _db.SeedBatch
                 .Include(s => s.Taxonomy)
                 .Include(s => s.Lineage)
-                .FirstOrDefault(s => s.Id == id);
+                .FirstOrDefault(s => s.Id == id && s.DeletedAt == null);
         }
 
         public List<InventoryItem> GetWebshopItems()
         {
             var plants = _db.Plant
                 .Include(p => p.Taxonomy)
-                .Where(p => p.IsAvailableInWebshop)
+                .Where(p => p.DeletedAt == null && p.IsAvailableInWebshop)
                 .ToList()
                 .Cast<InventoryItem>();
 
             var seeds = _db.SeedBatch
                 .Include(s => s.Taxonomy)
-                .Where(s => s.IsAvailableInWebshop)
+                .Where(s => s.DeletedAt == null && s.IsAvailableInWebshop)
                 .ToList()
                 .Cast<InventoryItem>();
 
@@ -66,14 +68,16 @@ namespace Carnivorous_Plant_Nursery.Repositories
         {
             var plants = _db.Plant
                 .Include(p => p.Lineage)
-                .Where(p => p.Lineage != null &&
+                .Where(p => p.DeletedAt == null &&
+                            p.Lineage != null &&
                             (p.Lineage.MotherId != null || p.Lineage.FatherId != null))
                 .ToList()
                 .Cast<InventoryItem>();
 
             var seeds = _db.SeedBatch
                 .Include(s => s.Lineage)
-                .Where(s => s.Lineage != null &&
+                .Where(s => s.DeletedAt == null &&
+                            s.Lineage != null &&
                             (s.Lineage.MotherId != null || s.Lineage.FatherId != null))
                 .ToList()
                 .Cast<InventoryItem>();
@@ -85,12 +89,14 @@ namespace Carnivorous_Plant_Nursery.Repositories
             _db.Plant
                 .Include(p => p.Taxonomy)
                 .Include(p => p.Lineage)
+                .Where(p => p.DeletedAt == null)
                 .ToList();
 
         public List<SeedBatch> GetAllSeedBatches() =>
             _db.SeedBatch
                 .Include(s => s.Taxonomy)
                 .Include(s => s.Lineage)
+                .Where(s => s.DeletedAt == null)
                 .ToList();
     }
 }

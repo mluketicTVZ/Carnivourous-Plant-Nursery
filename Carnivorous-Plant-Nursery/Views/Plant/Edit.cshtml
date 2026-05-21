@@ -13,6 +13,8 @@
 
 <partial name="_BackButton" />
 
+<partial name="_ValidationToast" />
+
 <div class="entity-form-wrapper">
     <h1 class="form-title">Edit Plant: @(Model.ListingTitle ?? Model.Taxonomy?.CommonName ?? "Plant #" + Model.Id)</h1>
     <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
@@ -65,15 +67,18 @@
                     })' />
                 <span asp-validation-for="TaxonomyId" class="val-error"></span>
             </div>
-            <div class="filter-group">
+            <div class="filter-group" style="opacity:0.45; pointer-events:none;">
                 <label asp-for="LineageId" class="card-label"></label>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">(optional - enter Lineage ID)</div>
-                <input type="number" asp-for="LineageId" min="1" />
-                <span asp-validation-for="LineageId" class="val-error"></span>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">(lineage tracking — coming soon)</div>
+                <input type="number" asp-for="LineageId" min="1" disabled />
             </div>
             <div class="filter-group">
                 <label asp-for="DateAcquired" class="card-label"></label>
-                <input type="date" asp-for="DateAcquired" />
+                <partial name="_DatePicker"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "FieldName", "DateAcquired" },
+                        { "CurrentValue", Model?.DateAcquired?.ToString("yyyy-MM-dd") ?? "" }
+                    })' />
                 <span asp-validation-for="DateAcquired" class="val-error"></span>
             </div>
             <div class="filter-group">
@@ -108,27 +113,39 @@
             </div>
             <div class="filter-group">
                 <label asp-for="PotDiameterCm" class="card-label"></label>
-                <input type="number" asp-for="PotDiameterCm" step="0.1" min="0" />
+                <input type="number" asp-for="PotDiameterCm" step="0.01" min="0" />
                 <span asp-validation-for="PotDiameterCm" class="val-error"></span>
             </div>
             <div class="filter-group">
                 <label asp-for="PotHeightCm" class="card-label"></label>
-                <input type="number" asp-for="PotHeightCm" step="0.1" min="0" />
+                <input type="number" asp-for="PotHeightCm" step="0.01" min="0" />
                 <span asp-validation-for="PotHeightCm" class="val-error"></span>
             </div>
             <div class="filter-group">
                 <label asp-for="LastRepottingDate" class="card-label"></label>
-                <input type="date" asp-for="LastRepottingDate" />
+                <partial name="_DatePicker"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "FieldName", "LastRepottingDate" },
+                        { "CurrentValue", Model?.LastRepottingDate?.ToString("yyyy-MM-dd") ?? "" }
+                    })' />
                 <span asp-validation-for="LastRepottingDate" class="val-error"></span>
             </div>
             <div class="filter-group">
                 <label asp-for="LastDormancyDateStart" class="card-label"></label>
-                <input type="date" asp-for="LastDormancyDateStart" />
+                <partial name="_DatePicker"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "FieldName", "LastDormancyDateStart" },
+                        { "CurrentValue", Model?.LastDormancyDateStart?.ToString("yyyy-MM-dd") ?? "" }
+                    })' />
                 <span asp-validation-for="LastDormancyDateStart" class="val-error"></span>
             </div>
             <div class="filter-group">
                 <label asp-for="LastDormancyDateEnd" class="card-label"></label>
-                <input type="date" asp-for="LastDormancyDateEnd" />
+                <partial name="_DatePicker"
+                    view-data='@(new ViewDataDictionary(ViewData) {
+                        { "FieldName", "LastDormancyDateEnd" },
+                        { "CurrentValue", Model?.LastDormancyDateEnd?.ToString("yyyy-MM-dd") ?? "" }
+                    })' />
                 <span asp-validation-for="LastDormancyDateEnd" class="val-error"></span>
             </div>
         </fieldset>

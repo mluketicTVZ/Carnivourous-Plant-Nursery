@@ -56,6 +56,7 @@
                 <div class="nursery-card-subtitle">@s.Taxonomy?.FullName</div>
             </div>
             <div class="nursery-card-body">
+                <p><span class="card-label">SKU:</span> @(string.IsNullOrEmpty(s.SKU) ? "N/A" : s.SKU)</p>
                 <p><span class="card-label">Genus:</span> @s.Taxonomy?.Genus</p>
                 <p><span class="card-label">Species:</span> @s.Taxonomy?.Species</p>
                 <p><span class="card-label">Seeds:</span> @(s.SeedCount.HasValue ? s.SeedCount.Value.ToString() : "Unknown")</p>
