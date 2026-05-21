@@ -13,77 +13,82 @@ namespace Carnivorous_Plant_Nursery.Repositories
             _db = db;
         }
 
-        public List<SeedBatch> GetAll() =>
-            _db.SeedBatch
+        public async Task<List<SeedBatch>> GetAll() =>
+            await _db.SeedBatch
                 .Include(s => s.Taxonomy)
-                .ToList();
+                .Where(s => s.DeletedAt == null)
+                .ToListAsync();
 
-        public SeedBatch? GetById(int id) =>
-            _db.SeedBatch
+        public async Task<SeedBatch?> GetById(int id) =>
+            await _db.SeedBatch
                 .Include(s => s.Taxonomy)
                 .Include(s => s.Lineage)
-                .FirstOrDefault(s => s.Id == id);
+                .Where(s => s.DeletedAt == null)
+                .FirstOrDefaultAsync(s => s.Id == id);
 
-        public List<SeedBatch> GetAvailableInWebshop() =>
-            _db.SeedBatch
+        public async Task<List<SeedBatch>> GetAvailableInWebshop() =>
+            await _db.SeedBatch
+                .Where(s => s.DeletedAt == null)
                 .Where(s => s.IsAvailableInWebshop)
                 .OrderBy(s => s.Price)
-                .ToList();
+                .ToListAsync();
 
-        public List<SeedBatch> GetByTaxonomy(int taxonomyId) =>
-            _db.SeedBatch
+        public async Task<List<SeedBatch>> GetByTaxonomy(int taxonomyId) =>
+            await _db.SeedBatch
+                .Where(s => s.DeletedAt == null)
                 .Where(s => s.TaxonomyId == taxonomyId)
-                .ToList();
+                .ToListAsync();
 
-        public List<SeedBatch> GetRequiringStratification() =>
-            _db.SeedBatch
+        public async Task<List<SeedBatch>> GetRequiringStratification() =>
+            await _db.SeedBatch
+                .Where(s => s.DeletedAt == null)
                 .Where(s => s.RequiresStratification == true)
                 .OrderByDescending(s => s.SeedCount)
-                .ToList();
+                .ToListAsync();
 
-        public List<SeedBatch> GetByMinGerminationRate(decimal minRate) =>
-            _db.SeedBatch
+        public async Task<List<SeedBatch>> GetByMinGerminationRate(decimal minRate) =>
+            await _db.SeedBatch
+                .Where(s => s.DeletedAt == null)
                 .Where(s => s.EstimatedGerminationRate.HasValue &&
                             s.EstimatedGerminationRate.Value >= minRate)
                 .OrderByDescending(s => s.EstimatedGerminationRate)
-                .ToList();
+                .ToListAsync();
 
-        /// <summary>
-        /// Returns seed batches still within their expected viability window.
-        /// AddMonths cannot be translated to SQL, so data is pulled to memory first.
-        /// </summary>
-        public List<SeedBatch> GetViable() =>
-            _db.SeedBatch
-                .ToList()
+        public async Task<List<SeedBatch>> GetViable() =>
+            await _db.SeedBatch
+                .Where(s => s.DeletedAt == null)
                 .Where(s =>
                     s.HarvestDate.HasValue &&
                     s.ExpectedViabilityMonths.HasValue &&
                     s.HarvestDate.Value.AddMonths(s.ExpectedViabilityMonths.Value) >= DateTime.Today)
-                .ToList();
-        public void Add(SeedBatch seedBatch)
+                .ToListAsync();
+        public async Task Add(SeedBatch seedBatch)
         {
             _db.SeedBatch.Add(seedBatch);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public void Update(SeedBatch seedBatch)
+        public async Task Update(SeedBatch seedBatch)
         {
             _db.SeedBatch.Update(seedBatch);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public void Delete(int id)
+        public async Task Delete(int id)
         {
-            var entity = _db.SeedBatch.Find(id);
+            var entity = await _db.SeedBatch.FindAsync(id);
             if (entity != null)
             {
-                bool usedInLineage = _db.Lineage.Any(l => l.MotherId == id || l.FatherId == id);
+                bool usedInLineage = await _db.Lineage.AnyAsync(l => l.MotherId == id || l.FatherId == id);
                 if (usedInLineage)
-                    throw new InvalidOperationException(
-                        "This seed batch cannot be deleted because it is recorded as a parent in one or more lineage entries. Remove those lineage records first.");
+                    throw new InvalidOperationException(ErrorMessage.DeleteErrorSeedBatchInLineage);
 
-                _db.SeedBatch.Remove(entity);
-                _db.SaveChanges();
+                bool usedAsPlantSource = await _db.Plant.AnyAsync(p => p.SourceSeedBatchId == id && p.DeletedAt == null);
+                if (usedAsPlantSource)
+                    throw new InvalidOperationException(ErrorMessage.DeleteErrorSeedBatchHasPlants);
+
+                entity.DeletedAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync();
             }
         }    }
 }

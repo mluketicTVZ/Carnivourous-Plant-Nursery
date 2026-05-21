@@ -1,0 +1,254 @@
+@model IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>?
+@{
+    var fieldName = ViewData["FieldName"] as string ?? "field";
+    var currentValue = ViewData["CurrentValue"] as string;
+    var placeholder = ViewData["Placeholder"] as string ?? "-- Select --";
+
+    // Find the display text matching the current value
+    var currentText = placeholder;
+    if (!string.IsNullOrEmpty(currentValue) && Model != null)
+    {
+        var match = Model.FirstOrDefault(i => i.Value == currentValue);
+        if (match != null) currentText = match.Text;
+    }
+
+    // Unique ID scopes each dropdown instance on the page
+    var wrapperId = $"hybrid-dd-{fieldName}";
+}
+
+<style>
+    .hybrid-dropdown-wrapper {
+        position: relative;
+        width: 100%;
+        z-index: 100;
+    }
+
+    .hybrid-dropdown-trigger {
+        box-sizing: border-box;
+        padding: 0.6rem 1rem;
+        border: 1px solid var(--border-color, #e0e0e0);
+        border-radius: 4px;
+        font-size: 1rem;
+        background-color: var(--bg-light, #f9fbf9);
+        color: var(--text-dark, #333333);
+        width: 100%;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: border-color 0.2s, border-radius 0.2s;
+    }
+
+    .hybrid-dropdown-arrow {
+        transition: transform 0.2s;
+    }
+
+    .hybrid-dropdown-panel {
+        display: none;
+        position: absolute;
+        z-index: 200;
+        width: 100%;
+        top: 100%;
+        left: 0;
+        background-color: white;
+        border: 1px solid var(--accent-color, #8bc34a);
+        border-radius: 0 0 6px 6px;
+        box-shadow: 0 4px 12px rgba(46,125,50,0.15);
+        border-top: none;
+        animation: fadeInPanel 0.2s ease-out;
+    }
+
+    .hybrid-dropdown-wrapper.hybrid-open {
+        z-index: 999;
+    }
+
+    .hybrid-dropdown-wrapper.hybrid-open .hybrid-dropdown-panel {
+        display: block;
+    }
+
+    .hybrid-dropdown-wrapper.hybrid-open .hybrid-dropdown-trigger {
+        border-radius: 4px 4px 0 0;
+        border-color: var(--primary-green, #4caf50);
+    }
+
+    .hybrid-dropdown-wrapper.hybrid-open .hybrid-dropdown-arrow {
+        transform: rotate(180deg);
+    }
+
+    .hybrid-dropdown-options {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    .hybrid-dropdown-search {
+        width: 100%;
+        padding: 0.5rem 0.8rem;
+        border: none;
+        border-bottom: 1px solid var(--border-color, #e0e0e0);
+        outline: none;
+        font-size: 0.9rem;
+        background-color: transparent;
+        box-sizing: border-box;
+    }
+
+    .hybrid-dropdown-option {
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s;
+    }
+
+    .hybrid-dropdown-option:hover {
+        background-color: var(--light-green, #dcedc8);
+    }
+
+    .hybrid-dropdown-option.hybrid-selected {
+        background-color: var(--light-green, #dcedc8);
+        font-weight: 600;
+        color: var(--dark-green, #1b5e20);
+    }
+
+    @@keyframes fadeInPanel {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="hybrid-dropdown-wrapper" id="@wrapperId" data-field-name="@fieldName">
+    <div class="hybrid-dropdown-trigger" tabindex="0" role="combobox">
+        <span class="hybrid-dropdown-display">@currentText</span>
+        <span class="hybrid-dropdown-arrow">▾</span>
+    </div>
+    <div class="hybrid-dropdown-panel" role="listbox">
+        <input type="text" class="hybrid-dropdown-search" placeholder="Search..." autocomplete="off" />
+        <div class="hybrid-dropdown-options">
+            <!-- Clear / all option always first -->
+            <div class="hybrid-dropdown-option @(string.IsNullOrEmpty(currentValue) ? "hybrid-selected" : "")"
+                 data-value="" role="option">@placeholder</div>
+            @if (Model != null)
+            {
+                foreach (var item in Model)
+                {
+                    <div class="hybrid-dropdown-option @(item.Value == currentValue ? "hybrid-selected" : "")"
+                         data-value="@item.Value" role="option">@item.Text</div>
+                }
+            }
+        </div>
+    </div>
+    <!-- This hidden input is what the form actually submits -->
+    <input type="hidden" name="@fieldName" value="@currentValue" />
+</div>
+
+<script>
+    (function initHybridDropdowns() {
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".hybrid-dropdown-wrapper").forEach(function (wrapper) {
+                if(wrapper.dataset.hybridBound === 'true') return;
+                wrapper.dataset.hybridBound = 'true';
+                initSingleDropdown(wrapper);
+            });
+
+            // Close all when clicking outside
+            document.addEventListener("click", function (e) {
+                document.querySelectorAll(".hybrid-dropdown-wrapper.hybrid-open").forEach(function (w) {
+                    if (!w.contains(e.target)) {
+                        closeDropdown(w);
+                    }
+                });
+            });
+        });
+
+        function initSingleDropdown(wrapper) {
+            const trigger = wrapper.querySelector(".hybrid-dropdown-trigger");
+            const panel = wrapper.querySelector(".hybrid-dropdown-panel");
+            const search = wrapper.querySelector(".hybrid-dropdown-search");
+            const options = wrapper.querySelectorAll(".hybrid-dropdown-option");
+            const display = wrapper.querySelector(".hybrid-dropdown-display");
+            const hiddenInput = wrapper.querySelector("input[type='hidden']");
+
+            trigger.addEventListener("click", function (e) {
+                e.stopPropagation();
+                const isOpen = wrapper.classList.contains("hybrid-open");
+                // Close all others first
+                document.querySelectorAll(".hybrid-dropdown-wrapper.hybrid-open").forEach(closeDropdown);
+                if (!isOpen) {
+                    openDropdown(wrapper, search);
+                }
+            });
+
+            search.addEventListener("input", function () {
+                const term = this.value.toLowerCase();
+                options.forEach(function (opt) {
+                    const text = opt.textContent.toLowerCase();
+                    opt.style.display = text.includes(term) ? "" : "none";
+                });
+            });
+
+            options.forEach(function (opt) {
+                opt.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    const val = this.dataset.value;
+                    const text = this.textContent.trim();
+
+                    hiddenInput.value = val;
+                    display.textContent = text;
+
+                    options.forEach(o => o.classList.remove("hybrid-selected"));
+                    this.classList.add("hybrid-selected");
+
+                    closeDropdown(wrapper);
+                });
+            });
+
+            wrapper.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") closeDropdown(wrapper);
+            });
+        }
+
+        function openDropdown(wrapper, searchInput) {
+            var trigger = wrapper.querySelector(".hybrid-dropdown-trigger");
+            var panel   = wrapper.querySelector(".hybrid-dropdown-panel");
+            var rect    = trigger.getBoundingClientRect();
+
+            // Use fixed positioning so the panel escapes every stacking context
+            panel.style.position = "fixed";
+            panel.style.top      = rect.bottom + "px";
+            panel.style.left     = rect.left   + "px";
+            panel.style.width    = rect.width  + "px";
+            panel.style.zIndex   = "9999";
+
+            wrapper.classList.add("hybrid-open");
+
+            // Keep panel aligned with the trigger as the page scrolls
+            function onScroll(e) {
+                if (panel.contains(e.target)) return; // ignore scrolls inside the panel itself
+                var updatedRect = trigger.getBoundingClientRect();
+                panel.style.top  = updatedRect.bottom + "px";
+                panel.style.left = updatedRect.left   + "px";
+            }
+            wrapper._scrollHandler = onScroll;
+            window.addEventListener("scroll", onScroll, true);
+
+            if (searchInput) {
+                searchInput.value = "";
+                wrapper.querySelectorAll(".hybrid-dropdown-option").forEach(function (o) { o.style.display = ""; });
+                searchInput.focus();
+            }
+        }
+
+        function closeDropdown(wrapper) {
+            var panel = wrapper.querySelector(".hybrid-dropdown-panel");
+            if (panel) {
+                panel.style.position = "";
+                panel.style.top      = "";
+                panel.style.left     = "";
+                panel.style.width    = "";
+                panel.style.zIndex   = "";
+            }
+            wrapper.classList.remove("hybrid-open");
+            if (wrapper._scrollHandler) {
+                window.removeEventListener("scroll", wrapper._scrollHandler, true);
+                wrapper._scrollHandler = null;
+            }
+        }
+    })();
+</script>

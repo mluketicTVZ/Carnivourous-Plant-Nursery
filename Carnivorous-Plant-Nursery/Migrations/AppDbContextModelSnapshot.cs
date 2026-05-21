@@ -17,7 +17,7 @@ namespace Carnivorous_Plant_Nursery.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.26")
+                .HasAnnotation("ProductVersion", "8.0.27")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -29,6 +29,9 @@ namespace Carnivorous_Plant_Nursery.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
@@ -55,7 +58,7 @@ namespace Carnivorous_Plant_Nursery.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Article", null, t =>
+                    b.ToTable("Article", t =>
                         {
                             t.HasCheckConstraint("CK_Article_Price_NonNegative", "[Price] >= 0");
                         });
@@ -82,6 +85,9 @@ namespace Carnivorous_Plant_Nursery.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("MaxTemperature")
                         .HasColumnType("int");
 
@@ -107,7 +113,7 @@ namespace Carnivorous_Plant_Nursery.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CareProfile", (string)null);
+                    b.ToTable("CareProfile");
                 });
 
             modelBuilder.Entity("Carnivorous_Plant_Nursery.Models.Lineage", b =>
@@ -141,7 +147,7 @@ namespace Carnivorous_Plant_Nursery.Migrations
 
                     b.HasIndex("MotherId");
 
-                    b.ToTable("Lineage", (string)null);
+                    b.ToTable("Lineage");
                 });
 
             modelBuilder.Entity("Carnivorous_Plant_Nursery.Models.Taxonomy", b =>
@@ -163,6 +169,9 @@ namespace Carnivorous_Plant_Nursery.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Genus")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -175,7 +184,7 @@ namespace Carnivorous_Plant_Nursery.Migrations
 
                     b.HasIndex("CareProfileId");
 
-                    b.ToTable("Taxonomy", (string)null);
+                    b.ToTable("Taxonomy");
                 });
 
             modelBuilder.Entity("Carnivorous_Plant_Nursery.Models.InventoryItem", b =>
@@ -242,6 +251,11 @@ namespace Carnivorous_Plant_Nursery.Migrations
 
                     b.Property<decimal?>("PotHeightCm")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("SourceSeedBatchId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("SourceSeedBatchId");
 
                     b.ToTable(t =>
                         {
@@ -327,6 +341,16 @@ namespace Carnivorous_Plant_Nursery.Migrations
                     b.Navigation("Lineage");
 
                     b.Navigation("Taxonomy");
+                });
+
+            modelBuilder.Entity("Carnivorous_Plant_Nursery.Models.Plant", b =>
+                {
+                    b.HasOne("Carnivorous_Plant_Nursery.Models.SeedBatch", "SourceSeedBatch")
+                        .WithMany()
+                        .HasForeignKey("SourceSeedBatchId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("SourceSeedBatch");
                 });
 
             modelBuilder.Entity("Carnivorous_Plant_Nursery.Models.CareProfile", b =>

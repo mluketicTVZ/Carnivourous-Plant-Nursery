@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Carnivorous Plant Nursery</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script>
+        // Hide the page synchronously before the browser paints anything.
+        // Covers two cases:
+        //   1. First-ever load  — flytrap jaws will reveal it.
+        //   2. Transition navigation — the enter animation will reveal it.
+        if (!sessionStorage.getItem('ftSnapped') || sessionStorage.getItem('pendingTransition')) {
+            document.documentElement.style.visibility = 'hidden';
+        }
+    </script>
 </head>
 <body>
     <header class="nursery-header">
@@ -31,6 +40,7 @@
             <ul>
                 <li><a asp-controller="Home" asp-action="Index">Home</a></li>
                 <li><a asp-controller="Plant" asp-action="Index">Plants</a></li>
+                <li><a asp-controller="SeedBatch" asp-action="Index">Seeds</a></li>
                 <li><a asp-controller="Taxonomy" asp-action="Index">Taxonomy</a></li>
                 <li><a asp-controller="CareProfile" asp-action="Index">Care Guide</a></li>
                 <li><a asp-controller="Inventory" asp-action="Index">Inventory</a></li>

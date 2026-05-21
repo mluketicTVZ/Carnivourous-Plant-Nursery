@@ -46,6 +46,12 @@ namespace Carnivorous_Plant_Nursery.Data
                     t.HasCheckConstraint("CK_SeedBatch_SeedCount_NonNegative", "[SeedCount] >= 0");
                     t.HasCheckConstraint("CK_SeedBatch_EstimatedGerminationRate_Range", "[EstimatedGerminationRate] >= 0 AND [EstimatedGerminationRate] <= 1");
                 });
+
+            modelBuilder.Entity<Plant>()
+                .HasOne(p => p.SourceSeedBatch)
+                .WithMany()
+                .HasForeignKey(p => p.SourceSeedBatchId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

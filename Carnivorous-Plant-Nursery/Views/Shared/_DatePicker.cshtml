@@ -1,0 +1,436 @@
+@{
+    var fieldName = ViewData["FieldName"] as string ?? "date_field";
+    var currentValue = ViewData["CurrentValue"] as string ?? "";
+    var wrapperId = $"datepicker-wrapper-{fieldName}";
+}
+
+<style>
+    .datepicker-wrapper {
+        position: relative;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .datepicker-input-group {
+        display: flex;
+        width: 100%;
+        align-items: center;
+    }
+
+    .datepicker-display-input {
+        flex: 1;
+        padding: 0.6rem 1rem;
+        border: 1px solid var(--border-color, #e0e0e0);
+        border-right: none;
+        border-radius: 4px 0 0 4px;
+        font-size: 1rem;
+        background-color: var(--bg-light, #f9fbf9);
+        color: var(--text-dark, #333333);
+        outline: none;
+        box-sizing: border-box;
+    }
+
+
+
+    .datepicker-toggle-btn {
+        padding: 0.6rem;
+        background-color: var(--bg-light, #f9fbf9);
+        border: 1px solid var(--border-color, #e0e0e0);
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-dark, #333333);
+        font-size: 1rem;
+    }
+    
+    .datepicker-toggle-btn:hover {
+        background-color: var(--border-color, #e0e0e0);
+    }
+
+    .datepicker-panel {
+        display: none;
+        position: absolute;
+        z-index: 200;
+        top: 100%;
+        left: 0;
+        background-color: var(--bg-white, #ffffff);
+        border: 1px solid var(--accent-color, #8bc34a);
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(46,125,50,0.15);
+        padding: 10px;
+        width: 280px;
+        animation: fadeInDatePanel 0.2s ease-out;
+        margin-top: 5px;
+    }
+
+    .datepicker-wrapper.datepicker-open .datepicker-panel {
+        display: block;
+    }
+
+    .datepicker-wrapper.datepicker-open .datepicker-display-input,
+    .datepicker-wrapper.datepicker-open .datepicker-toggle-btn {
+        border-color: var(--primary-green, #4caf50);
+    }
+
+    .datepicker-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .datepicker-header span {
+        font-weight: bold;
+        color: var(--dark-green, #2e7d32);
+    }
+
+    .datepicker-nav-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        color: var(--primary-green, #4caf50);
+        padding: 0 8px;
+    }
+
+    .datepicker-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        text-align: center;
+    }
+
+    .datepicker-weekday {
+        font-size: 0.8rem;
+        color: var(--text-muted, #666666);
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .datepicker-day {
+        padding: 6px 0;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        transition: background-color 0.2s;
+        color: var(--text-dark, #333333);
+    }
+
+    .datepicker-day:hover {
+        background-color: var(--light-green, #dcedc8);
+    }
+
+    .datepicker-day.datepicker-selected {
+        background-color: var(--light-green, #dcedc8);
+        color: var(--dark-green, #2e7d32);
+        font-weight: bold;
+    }
+
+    .datepicker-day.datepicker-today {
+        border: 1px solid var(--primary-green, #4caf50);
+    }
+
+    .datepicker-day.datepicker-empty {
+        cursor: default;
+        background: none;
+    }
+
+
+    @@keyframes fadeInDatePanel {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="datepicker-wrapper" id="@wrapperId" data-current-value="@currentValue">
+    <div class="datepicker-input-group">
+        <input type="text" class="datepicker-display-input" id="display-@fieldName" placeholder="Loading format..." autocomplete="off" />
+        <button type="button" class="datepicker-toggle-btn" tabindex="-1">📅</button>
+    </div>
+    <div class="datepicker-panel">
+        <div class="datepicker-header">
+            <button type="button" class="datepicker-nav-btn datepicker-prev">◀</button>
+            <span class="datepicker-month-year"></span>
+            <button type="button" class="datepicker-nav-btn datepicker-next">▶</button>
+        </div>
+        <div class="datepicker-grid">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+    <input type="hidden" name="@fieldName" value="@currentValue" />
+</div>
+
+<script>
+    (function initDatePickers() {
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".datepicker-wrapper").forEach(function (wrapper) {
+                if (wrapper.dataset.datepickerBound === 'true') return;
+                wrapper.dataset.datepickerBound = 'true';
+                initSingleDatePicker(wrapper);
+            });
+
+            // Close all when clicking outside or pressing Escape
+            document.addEventListener("click", function (e) {
+                document.querySelectorAll(".datepicker-wrapper.datepicker-open").forEach(function (w) {
+                    if (!w.contains(e.target)) {
+                        w.classList.remove("datepicker-open");
+                    }
+                });
+            });
+
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") {
+                    document.querySelectorAll(".datepicker-wrapper.datepicker-open").forEach(function (w) {
+                        w.classList.remove("datepicker-open");
+                    });
+                }
+            });
+        });
+
+        function initSingleDatePicker(wrapper) {
+            const displayInput = wrapper.querySelector(".datepicker-display-input");
+            const toggleBtn = wrapper.querySelector(".datepicker-toggle-btn");
+            const hiddenInput = wrapper.querySelector("input[type='hidden']");
+            const panel = wrapper.querySelector(".datepicker-panel");
+            const monthYearLabel = wrapper.querySelector(".datepicker-month-year");
+            const grid = wrapper.querySelector(".datepicker-grid");
+            const prevBtn = wrapper.querySelector(".datepicker-prev");
+            const nextBtn = wrapper.querySelector(".datepicker-next");
+
+            // Culture detection
+            const lang = (navigator.languages && navigator.languages[0] || navigator.language || 'en').toLowerCase();
+            const isHr = lang.startsWith('hr');
+            const formatHint = isHr ? "dd.MM.yyyy" : "MM/dd/yyyy";
+            displayInput.placeholder = formatHint;
+
+            let currentDate = new Date(); // Date being viewed in calendar
+            let selectedDate = null;      // Date currently selected
+
+            // Initialize values from server
+            const initialIso = wrapper.dataset.currentValue;
+            if (initialIso) {
+                const parts = initialIso.split('-');
+                if (parts.length === 3) {
+                    const parsed = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                    if (!isNaN(parsed)) {
+                        selectedDate = parsed;
+                        currentDate = new Date(parsed);
+                        displayInput.value = formatDateLocal(parsed);
+                    }
+                }
+            }
+
+            // Blur validation
+            displayInput.addEventListener("blur", function () {
+                const val = this.value.trim();
+                if (!val) {
+                    hiddenInput.value = "";
+                    selectedDate = null;
+                    clearError();
+                    return;
+                }
+                const parsed = parseDateLocal(val);
+                if (parsed) {
+                    selectedDate = parsed;
+                    currentDate = new Date(parsed);
+                    hiddenInput.value = formatDateIso(parsed);
+                    displayInput.value = formatDateLocal(parsed); // Reformat neatly
+                    clearError();
+                } else {
+                    hiddenInput.value = "";
+                    selectedDate = null;
+                    showError();
+                }
+            });
+
+            // Toggle logic
+            toggleBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                const isOpen = wrapper.classList.contains("datepicker-open");
+                document.querySelectorAll(".datepicker-wrapper.datepicker-open").forEach(w => w.classList.remove("datepicker-open"));
+                if (!isOpen) {
+                    renderCalendar();
+                    wrapper.classList.add("datepicker-open");
+                }
+            });
+            
+            panel.addEventListener("click", function(e) {
+                e.stopPropagation();
+            });
+
+            prevBtn.addEventListener("click", function () {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+
+            nextBtn.addEventListener("click", function () {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+
+            // Prevent form submission when display input has text that couldn't be parsed
+            var form = wrapper.closest('form');
+            if (form && !form.dataset.datepickerSubmitBound) {
+                form.dataset.datepickerSubmitBound = 'true';
+                form.addEventListener('submit', function (e) {
+                    var hasDateError = false;
+                    form.querySelectorAll('.datepicker-wrapper').forEach(function (dp) {
+                        var disp = dp.querySelector('.datepicker-display-input');
+                        var hid = dp.querySelector('input[type="hidden"]');
+                        if (disp && hid && disp.value.trim() && !hid.value) {
+                            hasDateError = true;
+                            disp.classList.add('input-validation-error');
+                            var fName = hid.name;
+                            var span = document.querySelector('[data-valmsg-for="' + fName + '"]');
+                            if (span) {
+                                span.textContent = 'Invalid date format.';
+                                span.classList.remove('field-validation-valid');
+                                span.classList.add('field-validation-error');
+                            }
+                        }
+                    });
+                    if (hasDateError) {
+                        e.preventDefault();
+                        var existing = document.querySelector('.validation-toast');
+                        if (existing) existing.remove();
+                        var toast = document.createElement('div');
+                        toast.className = 'toast-notification validation-toast';
+                        toast.innerHTML =
+                            '<div class="toast-icon">⚠️</div>' +
+                            '<div class="toast-content">' +
+                                '<h4 class="toast-title">Some fields need attention</h4>' +
+                                '<p class="toast-message">Please review and correct the highlighted fields before saving.</p>' +
+                            '</div>' +
+                            '<button type="button" class="toast-close" onclick="closeToast(this.closest(\'.toast-notification\'))">&times;</button>';
+                        document.body.prepend(toast);
+                        setTimeout(function () { if (typeof closeToast === 'function') closeToast(toast); }, 6000);
+                    }
+                });
+            }
+
+            function renderCalendar() {
+                grid.innerHTML = "";
+                
+                // Weekdays header
+                const weekdays = isHr ? ["Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned"] : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+                weekdays.forEach(wd => {
+                    const div = document.createElement("div");
+                    div.className = "datepicker-weekday";
+                    div.textContent = wd;
+                    grid.appendChild(div);
+                });
+
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+                
+                // Set Month/Year label
+                const monthNamesHr = ["Siječanj", "Veljača", "Ožujak", "Travanj", "Svibanj", "Lipanj", "Srpanj", "Kolovoz", "Rujan", "Listopad", "Studeni", "Prosinac"];
+                const monthNamesEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                const monthName = isHr ? monthNamesHr[month] : monthNamesEn[month];
+                monthYearLabel.textContent = `${monthName} ${year}`;
+
+                const firstDayOfMonth = new Date(year, month, 1);
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                let startDay = firstDayOfMonth.getDay();
+                // Adjust to make Monday=0, Sunday=6
+                startDay = startDay === 0 ? 6 : startDay - 1;
+
+                // Empty slots
+                for (let i = 0; i < startDay; i++) {
+                    const empty = document.createElement("div");
+                    empty.className = "datepicker-day datepicker-empty";
+                    grid.appendChild(empty);
+                }
+
+                const today = new Date();
+
+                // Days
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const dayDiv = document.createElement("div");
+                    dayDiv.className = "datepicker-day";
+                    dayDiv.textContent = d;
+
+                    if (selectedDate && selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === d) {
+                        dayDiv.classList.add("datepicker-selected");
+                    }
+                    if (today.getFullYear() === year && today.getMonth() === month && today.getDate() === d) {
+                        dayDiv.classList.add("datepicker-today");
+                    }
+
+                    dayDiv.addEventListener("click", function () {
+                        selectedDate = new Date(year, month, d);
+                        hiddenInput.value = formatDateIso(selectedDate);
+                        displayInput.value = formatDateLocal(selectedDate);
+                        clearError();
+                        wrapper.classList.remove("datepicker-open");
+                    });
+
+                    grid.appendChild(dayDiv);
+                }
+            }
+
+            function formatDateLocal(date) {
+                const d = String(date.getDate()).padStart(2, '0');
+                const m = String(date.getMonth() + 1).padStart(2, '0');
+                const y = date.getFullYear();
+                return isHr ? `${d}.${m}.${y}` : `${m}/${d}/${y}`;
+            }
+
+            function formatDateIso(date) {
+                const d = String(date.getDate()).padStart(2, '0');
+                const m = String(date.getMonth() + 1).padStart(2, '0');
+                const y = date.getFullYear();
+                return `${y}-${m}-${d}`;
+            }
+
+            function parseDateLocal(str) {
+                const parts = str.split(/[\.\/\-]/);
+                if (parts.length !== 3) return null;
+                
+                let d, m, y;
+                if (isHr || str.includes('.')) {
+                    d = parseInt(parts[0], 10);
+                    m = parseInt(parts[1], 10);
+                    y = parseInt(parts[2], 10);
+                } else {
+                    m = parseInt(parts[0], 10);
+                    d = parseInt(parts[1], 10);
+                    y = parseInt(parts[2], 10);
+                }
+
+                if (isNaN(d) || isNaN(m) || isNaN(y)) return null;
+                if (y < 100) y += 2000;
+                
+                const testDate = new Date(y, m - 1, d);
+                if (testDate.getFullYear() === y && testDate.getMonth() === m - 1 && testDate.getDate() === d) {
+                    return testDate;
+                }
+                return null;
+            }
+
+            function showError() {
+                displayInput.classList.add('input-validation-error');
+                var span = document.querySelector('[data-valmsg-for="' + fieldName + '"]');
+                if (span) {
+                    span.textContent = 'Invalid date format.';
+                    span.classList.remove('field-validation-valid');
+                    span.classList.add('field-validation-error');
+                }
+            }
+
+            function clearError() {
+                displayInput.classList.remove('input-validation-error');
+                var span = document.querySelector('[data-valmsg-for="' + fieldName + '"]');
+                if (span) {
+                    span.textContent = '';
+                    span.classList.remove('field-validation-error');
+                    span.classList.add('field-validation-valid');
+                }
+            }
+        }
+    })();
+</script>

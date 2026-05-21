@@ -25,7 +25,12 @@
 <form method="get" class="botanical-filter-form">
     <div class="filter-group">
         <label for="searchTerm">Search</label>
-        <input type="text" id="searchTerm" name="searchTerm" value="@ViewData["SearchTerm"]" placeholder="Search by genus, species, cultivar or common name..." />
+        <partial name="_PlantAutocomplete"
+            model="@(ViewBag.SearchTerm as string)"
+            view-data='@(new ViewDataDictionary(ViewData) {
+                { "Endpoint", "/taxonomy/suggestions" },
+                { "Placeholder", "e.g. Dionaea muscipula" }
+            })' />
     </div>
     <div style="display: flex; gap: 10px;">
         <button type="submit" class="btn-filter">Filter</button>

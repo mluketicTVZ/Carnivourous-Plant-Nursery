@@ -25,6 +25,8 @@ namespace Carnivorous_Plant_Nursery.Models
         public int? CareProfileId { get; set; }
         public virtual CareProfile? CareProfile { get; set; }
 
+        public DateTime? DeletedAt { get; set; }
+
         public string FullName 
         {
             get

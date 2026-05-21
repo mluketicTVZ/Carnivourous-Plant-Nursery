@@ -15,16 +15,39 @@ namespace Carnivorous_Plant_Nursery.Controllers
         }
 
         [Route("")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string? searchTerm, string? requiredLight)
         {
-            var careProfiles = _careProfileRepository.GetAll();
-            return View(careProfiles);
+            var allCareProfiles = await _careProfileRepository.GetAll();
+
+            // Populate dropdown options BEFORE filtering so all names are always shown
+            ViewBag.AllCareProfiles = allCareProfiles
+                .Select(cp => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Text = cp.CareProfileName,
+                    Value = cp.CareProfileName
+                })
+                .ToList();
+
+            IEnumerable<CareProfile> careProfiles = allCareProfiles;
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+                careProfiles = careProfiles
+                    .Where(cp => cp.CareProfileName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrWhiteSpace(requiredLight) && Enum.TryParse<LightLevel>(requiredLight, out var parsedLight))
+                careProfiles = careProfiles
+                    .Where(cp => cp.RequiredLight == parsedLight);
+
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.RequiredLight = requiredLight;
+
+            return View(careProfiles.ToList());
         }
 
         [Route("{id:int}")]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var careProfile = _careProfileRepository.GetById(id);
+            var careProfile = await _careProfileRepository.GetById(id);
             if (careProfile == null)
                 return NotFound();
             return View(careProfile);
@@ -41,20 +64,21 @@ namespace Carnivorous_Plant_Nursery.Controllers
         [HttpPost]
         [Route("create")]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(CareProfile model)
+        public async Task<IActionResult> Create(CareProfile model)
         {
             if (!IsAdmin) return RequireAdmin();
             if (!ModelState.IsValid) return View(model);
-            _careProfileRepository.Add(model);
+            await _careProfileRepository.Add(model);
             return RedirectToAction("Index");
         }
 
         [HttpGet]
         [Route("edit/{id:int}")]
-        public IActionResult Edit(int id)
+        [ActionName("Edit")]
+        public async Task<IActionResult> EditGet(int id)
         {
             if (!IsAdmin) return RequireAdmin();
-            var careProfile = _careProfileRepository.GetById(id);
+            var careProfile = await _careProfileRepository.GetById(id);
             if (careProfile == null) return NotFound();
             return View(careProfile);
         }
@@ -62,24 +86,41 @@ namespace Carnivorous_Plant_Nursery.Controllers
         [HttpPost]
         [Route("edit/{id:int}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, CareProfile model)
+        [ActionName("Edit")]
+        public async Task<IActionResult> EditPost(int id)
         {
             if (!IsAdmin) return RequireAdmin();
-            if (id != model.Id) return BadRequest();
-            if (!ModelState.IsValid) return View(model);
-            _careProfileRepository.Update(model);
+
+            var entity = await _careProfileRepository.GetById(id);
+            if (entity == null) return NotFound();
+
+            if (!await TryUpdateModelAsync(entity, "",
+                e => e.CareProfileName,
+                e => e.RequiredLight,
+                e => e.MinTemperature,
+                e => e.MaxTemperature,
+                e => e.TemperatureDescription,
+                e => e.RequiresWinterDormancy,
+                e => e.SoilMix,
+                e => e.RequiredHumidity,
+                e => e.CareDescription))
+            {
+                return View(entity);
+            }
+
+            await _careProfileRepository.Update(entity);
             return RedirectToAction("Details", new { id });
         }
 
         [HttpPost]
         [Route("delete/{id:int}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             if (!IsAdmin) return RequireAdmin();
             try
             {
-                _careProfileRepository.Delete(id);
+                await _careProfileRepository.Delete(id);
                 return RedirectToAction("Index");
             }
             catch (InvalidOperationException ex)
@@ -88,5 +129,6 @@ namespace Carnivorous_Plant_Nursery.Controllers
                 return RedirectToAction("Details", new { id });
             }
         }
+
     }
 }

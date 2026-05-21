@@ -17,16 +17,29 @@ namespace Carnivorous_Plant_Nursery.Controllers
         }
 
         [Route("")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string? searchTerm, bool? availableInWebshop)
         {
-            var seedBatches = _seedBatchRepository.GetAll();
-            return View(seedBatches);
+            var seedBatches = await _seedBatchRepository.GetAll();
+            IEnumerable<SeedBatch> items = seedBatches;
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+                items = items.Where(s =>
+                    (s.ListingTitle != null && s.ListingTitle.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    (s.SKU != null && s.SKU.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    (s.Taxonomy != null && s.Taxonomy.CommonName != null && s.Taxonomy.CommonName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+
+            if (availableInWebshop == true)
+                items = items.Where(i => i.IsAvailableInWebshop);
+
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.AvailableInWebshop = availableInWebshop;
+            return View(items);
         }
 
         [Route("{id:int}")]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var seedBatch = _seedBatchRepository.GetById(id);
+            var seedBatch = await _seedBatchRepository.GetById(id);
             if (seedBatch == null)
                 return NotFound();
             return View(seedBatch);
@@ -34,64 +47,85 @@ namespace Carnivorous_Plant_Nursery.Controllers
 
         [HttpGet]
         [Route("create")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             if (!IsAdmin) return RequireAdmin();
-            ViewBag.Taxonomies = _taxonomyRepository.GetAll();
+            ViewBag.Taxonomies = await _taxonomyRepository.GetAll();
             return View();
         }
 
         [HttpPost]
         [Route("create")]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(SeedBatch model)
+        public async Task<IActionResult> Create(SeedBatch model)
         {
             if (!IsAdmin) return RequireAdmin();
             if (!ModelState.IsValid)
             {
-                ViewBag.Taxonomies = _taxonomyRepository.GetAll();
+                ViewBag.Taxonomies = await _taxonomyRepository.GetAll();
                 return View(model);
             }
-            _seedBatchRepository.Add(model);
+            await _seedBatchRepository.Add(model);
             return RedirectToAction("Index");
         }
 
         [HttpGet]
         [Route("edit/{id:int}")]
-        public IActionResult Edit(int id)
+        [ActionName("Edit")]
+        public async Task<IActionResult> EditGet(int id)
         {
             if (!IsAdmin) return RequireAdmin();
-            var seedBatch = _seedBatchRepository.GetById(id);
+            var seedBatch = await _seedBatchRepository.GetById(id);
             if (seedBatch == null) return NotFound();
-            ViewBag.Taxonomies = _taxonomyRepository.GetAll();
+            ViewBag.Taxonomies = await _taxonomyRepository.GetAll();
             return View(seedBatch);
         }
 
         [HttpPost]
         [Route("edit/{id:int}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, SeedBatch model)
+        [ActionName("Edit")]
+        public async Task<IActionResult> EditPost(int id)
         {
             if (!IsAdmin) return RequireAdmin();
-            if (id != model.Id) return BadRequest();
-            if (!ModelState.IsValid)
+
+            var entity = await _seedBatchRepository.GetById(id);
+            if (entity == null) return NotFound();
+
+            if (!await TryUpdateModelAsync(entity, "",
+                e => e.SKU,
+                e => e.ListingTitle,
+                e => e.Price,
+                e => e.IsAvailableInWebshop,
+                e => e.Description,
+                e => e.TaxonomyId,
+                e => e.LineageId,
+                e => e.DateAcquired,
+                e => e.InternalNotes,
+                e => e.LocationInNursery,
+                e => e.SeedCount,
+                e => e.HarvestDate,
+                e => e.ExpectedViabilityMonths,
+                e => e.RequiresStratification,
+                e => e.EstimatedGerminationRate))
             {
-                ViewBag.Taxonomies = _taxonomyRepository.GetAll();
-                return View(model);
+                ViewBag.Taxonomies = await _taxonomyRepository.GetAll();
+                return View(entity);
             }
-            _seedBatchRepository.Update(model);
+
+            await _seedBatchRepository.Update(entity);
             return RedirectToAction("Details", new { id });
         }
 
         [HttpPost]
         [Route("delete/{id:int}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             if (!IsAdmin) return RequireAdmin();
             try
             {
-                _seedBatchRepository.Delete(id);
+                await _seedBatchRepository.Delete(id);
                 return RedirectToAction("Index");
             }
             catch (InvalidOperationException ex)
@@ -99,6 +133,72 @@ namespace Carnivorous_Plant_Nursery.Controllers
                 TempData["DeleteError"] = ex.Message;
                 return RedirectToAction("Details", new { id });
             }
+        }
+
+        [HttpGet]
+        [Route("suggestions")]
+        public async Task<IActionResult> Suggestions([FromQuery] string? term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+                return Json(Array.Empty<object>());
+
+            var all = await _seedBatchRepository.GetAll();
+            var lowerTerm = term.ToLowerInvariant();
+
+            var results = all
+                .Where(sb => !string.IsNullOrEmpty(sb.ListingTitle) &&
+                             (sb.ListingTitle.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase) ||
+                              (!string.IsNullOrEmpty(sb.SKU) && sb.SKU.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase)) ||
+                              (sb.Taxonomy?.CommonName != null && sb.Taxonomy.CommonName.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase)) ||
+                              sb.Taxonomy?.FullName.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase) == true))
+                .Select(sb => new
+                {
+                    text = string.IsNullOrEmpty(sb.SKU) ? sb.ListingTitle! : $"{sb.ListingTitle} [{sb.SKU}]",
+                    value = sb.ListingTitle!
+                })
+                .DistinctBy(x => x.value)
+                .OrderBy(x =>
+                {
+                    var idx = x.text.IndexOf(lowerTerm, StringComparison.OrdinalIgnoreCase);
+                    return idx >= 0 ? idx : int.MaxValue;
+                })
+                .Take(8)
+                .ToList();
+
+            return Json(results);
+        }
+
+        [HttpGet]
+        [Route("batch-suggestions")]
+        public async Task<IActionResult> BatchSuggestions([FromQuery] string? term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+                return Json(Array.Empty<object>());
+
+            var all = await _seedBatchRepository.GetAll();
+            var lowerTerm = term.ToLowerInvariant();
+
+            var results = all
+                .Where(sb => !string.IsNullOrEmpty(sb.ListingTitle) &&
+                             (sb.ListingTitle.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase) ||
+                              (!string.IsNullOrEmpty(sb.SKU) && sb.SKU.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase)) ||
+                              (sb.Taxonomy?.CommonName != null && sb.Taxonomy.CommonName.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase)) ||
+                              sb.Taxonomy?.FullName.Contains(lowerTerm, StringComparison.OrdinalIgnoreCase) == true))
+                .Select(sb => new
+                {
+                    text = string.IsNullOrEmpty(sb.SKU) ? sb.ListingTitle! : $"{sb.ListingTitle} [{sb.SKU}]",
+                    value = sb.Id.ToString()
+                })
+                .DistinctBy(x => x.value)
+                .OrderBy(x =>
+                {
+                    var idx = x.text.IndexOf(lowerTerm, StringComparison.OrdinalIgnoreCase);
+                    return idx >= 0 ? idx : int.MaxValue;
+                })
+                .Take(8)
+                .ToList();
+
+            return Json(results);
         }
     }
 }

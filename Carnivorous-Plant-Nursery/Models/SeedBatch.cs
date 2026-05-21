@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Carnivorous_Plant_Nursery.Models
@@ -6,6 +7,7 @@ namespace Carnivorous_Plant_Nursery.Models
     public class SeedBatch : InventoryItem
     {
         private int? _seedCount;
+        [Range(0, int.MaxValue)]
         public int? SeedCount
         {
             get => _seedCount;
@@ -22,6 +24,7 @@ namespace Carnivorous_Plant_Nursery.Models
         public bool? RequiresStratification { get; set; }
 
         private decimal? _estimatedGerminationRate;
+        [Range(typeof(decimal), "0", "1")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal? EstimatedGerminationRate
         {

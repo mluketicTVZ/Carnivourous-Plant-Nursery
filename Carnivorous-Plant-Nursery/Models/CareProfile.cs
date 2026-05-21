@@ -29,6 +29,8 @@ namespace Carnivorous_Plant_Nursery.Models
         [MaxLength(1000)]
         public string? CareDescription { get; set; }
 
+        public DateTime? DeletedAt { get; set; }
+
         public virtual ICollection<Taxonomy> Taxonomies { get; set; } = new List<Taxonomy>();
     }
 }

@@ -40,8 +40,9 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/plants/edit/{id}` | GET | PlantController | Edit(int id) | Views/Plant/Edit.cshtml |
 | `/plants/edit/{id}` | POST | PlantController | Edit(int id, Plant model) | Redirects to Details on success |
 | `/plants/delete/{id}` | POST | PlantController | Delete(int id) | Redirects to Index on success, Details on FK error |
+| `/plants/suggestions?term=X` | GET | PlantController | Suggestions(string term) | JSON: `[{text, value}]` |
 
-**Notes**: `Details()` returns `NotFound()` if no plant with the given id exists. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this plant.
+**Notes**: `Details()` returns `NotFound()` if no plant with the given id exists. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this plant. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
 
 ---
 
@@ -53,8 +54,9 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/inventory?searchTerm=X` | GET | InventoryController | Index(string searchTerm) | Views/Inventory/Index.cshtml |
 | `/inventory?webshopOnly=true` | GET | InventoryController | Index(bool webshopOnly) | Views/Inventory/Index.cshtml |
 | `/inventory/{id}` | GET | InventoryController | Details(int id) | Views/Inventory/Details.cshtml |
+| `/inventory/suggestions?term=X` | GET | InventoryController | Suggestions(string term) | JSON: `[{text, value}]` |
 
-**Notes**: Lists all inventory items (both Plants and SeedBatches). `Details()` returns `NotFound()` if id is not found.
+**Notes**: Lists all inventory items (both Plants and SeedBatches). `Details()` returns `NotFound()` if id is not found. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
 
 ---
 
@@ -63,6 +65,8 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | URL | HTTP | Controller | Action | View |
 |---|---|---|---|---|
 | `/care` | GET | CareProfileController | Index() | Views/CareProfile/Index.cshtml |
+| `/care?searchTerm=X` | GET | CareProfileController | Index(string searchTerm) | Views/CareProfile/Index.cshtml |
+| `/care?requiredLight=X` | GET | CareProfileController | Index(string requiredLight) | Views/CareProfile/Index.cshtml |
 | `/care/{id}` | GET | CareProfileController | Details(int id) | Views/CareProfile/Details.cshtml |
 | `/care/create` | GET | CareProfileController | Create() | Views/CareProfile/Create.cshtml |
 | `/care/create` | POST | CareProfileController | Create(CareProfile model) | Redirects to Details on success |
@@ -79,14 +83,17 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | URL | HTTP | Controller | Action | View |
 |---|---|---|---|---|
 | `/seeds` | GET | SeedBatchController | Index() | Views/SeedBatch/Index.cshtml |
+| `/seeds?searchTerm=X` | GET | SeedBatchController | Index(string searchTerm) | Views/SeedBatch/Index.cshtml |
+| `/seeds?availableInWebshop=true` | GET | SeedBatchController | Index(bool availableInWebshop) | Views/SeedBatch/Index.cshtml |
 | `/seeds/{id}` | GET | SeedBatchController | Details(int id) | Views/SeedBatch/Details.cshtml |
 | `/seeds/create` | GET | SeedBatchController | Create() | Views/SeedBatch/Create.cshtml |
 | `/seeds/create` | POST | SeedBatchController | Create(SeedBatch model) | Redirects to Details on success |
 | `/seeds/edit/{id}` | GET | SeedBatchController | Edit(int id) | Views/SeedBatch/Edit.cshtml |
 | `/seeds/edit/{id}` | POST | SeedBatchController | Edit(int id, SeedBatch model) | Redirects to Details on success |
 | `/seeds/delete/{id}` | POST | SeedBatchController | Delete(int id) | Redirects to Index on success, Details on FK error |
+| `/seeds/suggestions?term=X` | GET | SeedBatchController | Suggestions(string term) | JSON: `[{text, value}]` |
 
-**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this seed batch.
+**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this seed batch. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
 
 ---
 
@@ -102,8 +109,10 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/taxonomy/edit/{id}` | GET | TaxonomyController | Edit(int id) | Views/Taxonomy/Edit.cshtml |
 | `/taxonomy/edit/{id}` | POST | TaxonomyController | Edit(int id, Taxonomy model) | Redirects to Details on success |
 | `/taxonomy/delete/{id}` | POST | TaxonomyController | Delete(int id) | Redirects to Index on success, Details on FK error |
+| `/taxonomy/suggestions?term=X` | GET | TaxonomyController | Suggestions(string term) | JSON: `[{text, value}]` |
+| `/taxonomy/id-suggestions?term=X` | GET | TaxonomyController | IdSuggestions(string term) | JSON: `[{text, value}]` (value = taxonomy ID) |
 
-**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a plant or seed batch references this taxonomy.
+**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a plant or seed batch references this taxonomy. `Suggestions()` returns display-name matches for the search autocomplete; `IdSuggestions()` returns matches with the numeric ID as value, used by Plant/SeedBatch FK pickers.
 
 ---
 
@@ -126,8 +135,12 @@ These are rendered inside other views and do not have their own URLs:
 | Partial View | Used In | Purpose |
 |---|---|---|
 | Views/Shared/_Layout.cshtml | All views (via _ViewStart) | Master layout shell |
-| Views/Shared/_BackButton.cshtml | Detail views | Back navigation button |
-| Views/Shared/_ValidationScriptsPartial.cshtml | Form views | Client-side validation scripts |
+| Views/Shared/_BackButton.cshtml | Detail/list views | Back navigation button |
+| Views/Shared/_ValidationScriptsPartial.cshtml | All form views | jQuery Validate setup with blur triggering |
+| Views/Shared/_ValidationToast.cshtml | All Create/Edit form views | Server-side error toast shown on ModelState failure |
+| Views/Shared/_PlantAutocomplete.cshtml | Index search forms, Create/Edit FK fields | AJAX autocomplete input (search and select modes) |
+| Views/Shared/_HybridDropdown.cshtml | Index filter forms, Create/Edit enum fields | Client-side filtered dropdown for small collections |
+| Views/Shared/_DatePicker.cshtml | Plant/SeedBatch Create/Edit forms | Custom date picker with hr/en culture detection |
 
 ---
 
@@ -139,6 +152,6 @@ These are rendered inside other views and do not have their own URLs:
 | Admin | `/admin` | Index (login), Login, Logout | — |
 | Plants | `/plants` | Index, Details, Create, Edit, Delete | searchTerm, webshopOnly, stage, healthStatus |
 | Inventory | `/inventory` | Index, Details | searchTerm, webshopOnly |
-| Care Profiles | `/care` | Index, Details, Create, Edit, Delete | — |
-| Seed Batches | `/seeds` | Index, Details, Create, Edit, Delete | — |
+| Care Profiles | `/care` | Index, Details, Create, Edit, Delete | searchTerm, requiredLight |
+| Seed Batches | `/seeds` | Index, Details, Create, Edit, Delete | searchTerm, availableInWebshop |
 | Taxonomy | `/taxonomy` | Index, Details, Create, Edit, Delete | searchTerm |

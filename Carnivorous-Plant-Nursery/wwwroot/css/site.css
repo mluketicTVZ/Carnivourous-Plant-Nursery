@@ -735,6 +735,7 @@ body {
     flex-direction: column;
     flex: 1;
     min-width: 200px;
+    position: relative;
 }
 
 .filter-group label {
@@ -828,5 +829,172 @@ body {
 .btn-clear:hover {
     background-color: #e0e0e0;
     color: var(--text-dark);
+}
+
+/* --- Validation Error Styles --- */
+.val-error,
+.field-validation-error {
+    font-size: 0.8rem;
+    color: #c0392b;
+    display: block;
+    margin-top: 0.3rem;
+    border-left: 3px solid #c0392b;
+    padding-left: 0.5rem;
+}
+
+.input-validation-error {
+    border-color: #c0392b !important;
+    background-color: rgba(192, 57, 43, 0.04) !important;
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+/* =============================================
+   Venus Flytrap Page-Load Snap Animation
+   ============================================= */
+.flytrap-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.flytrap-jaw-top,
+.flytrap-jaw-bottom {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    will-change: transform;
+}
+
+/* Top jaw: dark green outside → red inner face, teeth point downward */
+.flytrap-jaw-top {
+    top: -30px;              /* extends 30px above the viewport — hides edge flash */
+    height: calc(60vh + 30px);
+    width: 104%;
+    left: -2%;
+    background: linear-gradient(to bottom,
+        #1a3d0f 0%,
+        #1b5e20 25%,
+        #2e7d32 50%,
+        #c62828 78%,
+        #7f0000 100%);
+    /* Polygon starts top-left → top-right → full bottom-right edge → teeth across → full bottom-left edge */
+    clip-path: polygon(
+        0% 0%, 100% 0%,
+        100% 100%,
+        95% 72%, 90% 100%, 85% 72%, 80% 100%, 75% 72%, 70% 100%,
+        65% 72%, 60% 100%, 55% 72%, 50% 100%, 45% 72%, 40% 100%,
+        35% 72%, 30% 100%, 25% 72%, 20% 100%, 15% 72%, 10% 100%,
+        5% 72%, 0% 100%
+    );
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* Cilia (trigger hairs) on the inner face of the top jaw */
+.flytrap-jaw-top::after {
+    content: '';
+    position: absolute;
+    bottom: 28%;
+    left: 0;
+    width: 100%;
+    height: 18%;
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent 0px, transparent 3.8%,
+        rgba(255, 180, 180, 0.45) 3.8%, rgba(255, 180, 180, 0.45) 4.2%
+    );
+    pointer-events: none;
+}
+
+/* Bottom jaw: mirror of top jaw, teeth point upward */
+.flytrap-jaw-bottom {
+    bottom: -30px;           /* extends 30px below the viewport — hides edge flash */
+    height: calc(60vh + 30px);
+    width: 104%;
+    left: -2%;
+    background: linear-gradient(to top,
+        #1a3d0f 0%,
+        #1b5e20 25%,
+        #2e7d32 50%,
+        #c62828 78%,
+        #7f0000 100%);
+    /* Polygon starts bottom-left → bottom-right → full top-right edge → teeth across → full top-left edge */
+    clip-path: polygon(
+        0% 100%, 100% 100%,
+        100% 0%,
+        95% 28%, 90% 0%, 85% 28%, 80% 0%, 75% 28%, 70% 0%,
+        65% 28%, 60% 0%, 55% 28%, 50% 0%, 45% 28%, 40% 0%,
+        35% 28%, 30% 0%, 25% 28%, 20% 0%, 15% 28%, 10% 0%,
+        5% 28%, 0% 0%
+    );
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* Cilia on the inner face of the bottom jaw */
+.flytrap-jaw-bottom::after {
+    content: '';
+    position: absolute;
+    top: 28%;
+    left: 0;
+    width: 100%;
+    height: 18%;
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent 0px, transparent 3.8%,
+        rgba(255, 180, 180, 0.45) 3.8%, rgba(255, 180, 180, 0.45) 4.2%
+    );
+    pointer-events: none;
+}
+
+/* Snap-open keyframes: compress slightly, then spring apart and fly off screen */
+@keyframes flytrap-snap-top {
+    0%   { transform: translateY(0); }
+    12%  { transform: translateY(14px); }   /* tension — jaws press inward */
+    38%  { transform: translateY(-45%); }   /* spring release — fast open */
+    100% { transform: translateY(-116%); }  /* fly off screen */
+}
+
+@keyframes flytrap-snap-bottom {
+    0%   { transform: translateY(0); }
+    12%  { transform: translateY(-14px); }
+    38%  { transform: translateY(45%); }
+    100% { transform: translateY(116%); }
+}
+
+.flytrap-jaw-top.flytrap-snapping {
+    animation: flytrap-snap-top 0.8s cubic-bezier(0.55, 0, 0.95, 0.55) forwards;
+}
+
+.flytrap-jaw-bottom.flytrap-snapping {
+    animation: flytrap-snap-bottom 0.8s cubic-bezier(0.55, 0, 0.95, 0.55) forwards;
+}
+
+/* =============================================
+   Page Transition — Jaw Slam
+   Exit : jaws slam shut from top & bottom edges
+   Enter: jaws snap back open (reuses flytrap snap animation)
+   ============================================= */
+
+/* Jaws fly in from off-screen and slam together */
+@keyframes jaw-slam-top {
+    from { transform: translateY(-115%); }
+    to   { transform: translateY(0); }
+}
+
+@keyframes jaw-slam-bottom {
+    from { transform: translateY(115%); }
+    to   { transform: translateY(0); }
+}
+
+.flytrap-jaw-top.jaw-slamming {
+    animation: jaw-slam-top 0.32s cubic-bezier(0.42, 0, 1, 1) forwards;
+}
+
+.flytrap-jaw-bottom.jaw-slamming {
+    animation: jaw-slam-bottom 0.32s cubic-bezier(0.42, 0, 1, 1) forwards;
 }
 

@@ -9,6 +9,7 @@ namespace Carnivorous_Plant_Nursery.Models
         public PlantStage? CurrentStage { get; set; }
 
         private decimal? _potDiameterCm;
+        [Range(typeof(decimal), "0", "999.99")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal? PotDiameterCm
         {
@@ -22,6 +23,7 @@ namespace Carnivorous_Plant_Nursery.Models
         }
 
         private decimal? _potHeightCm;
+        [Range(typeof(decimal), "0", "999.99")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal? PotHeightCm
         {
@@ -38,6 +40,7 @@ namespace Carnivorous_Plant_Nursery.Models
         public DateTime? LastDormancyDateStart { get; set; }
         public DateTime? LastDormancyDateEnd { get; set; }
         private int? _estimatedAgeAtAcquiryYears;
+        [Range(0, 1000)]
         public int? EstimatedAgeAtAcquiryYears
         {
             get => _estimatedAgeAtAcquiryYears;
@@ -53,5 +56,10 @@ namespace Carnivorous_Plant_Nursery.Models
 
         [MaxLength(1000)]
         public string? HealthDescription { get; set; }
+
+        public int? SourceSeedBatchId { get; set; }
+
+        [ForeignKey("SourceSeedBatchId")]
+        public virtual SeedBatch? SourceSeedBatch { get; set; }
     }
 }

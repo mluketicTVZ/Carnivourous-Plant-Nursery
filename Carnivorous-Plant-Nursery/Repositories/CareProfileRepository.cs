@@ -1,5 +1,6 @@
 using Carnivorous_Plant_Nursery.Data;
 using Carnivorous_Plant_Nursery.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Carnivorous_Plant_Nursery.Repositories
 {
@@ -12,36 +13,39 @@ namespace Carnivorous_Plant_Nursery.Repositories
             _db = db;
         }
 
-        public List<CareProfile> GetAll() =>
-            _db.CareProfile.ToList();
+        public async Task<List<CareProfile>> GetAll() =>
+            await _db.CareProfile
+                .Where(c => c.DeletedAt == null)
+                .ToListAsync();
 
-        public CareProfile? GetById(int id) =>
-            _db.CareProfile.FirstOrDefault(c => c.Id == id);
+        public async Task<CareProfile?> GetById(int id) =>
+            await _db.CareProfile
+                .Where(c => c.DeletedAt == null)
+                .FirstOrDefaultAsync(c => c.Id == id);
 
-        public void Add(CareProfile careProfile)
+        public async Task Add(CareProfile careProfile)
         {
             _db.CareProfile.Add(careProfile);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public void Update(CareProfile careProfile)
+        public async Task Update(CareProfile careProfile)
         {
             _db.CareProfile.Update(careProfile);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public void Delete(int id)
+        public async Task Delete(int id)
         {
-            var entity = _db.CareProfile.Find(id);
+            var entity = await _db.CareProfile.FindAsync(id);
             if (entity != null)
             {
-                bool hasReferences = _db.Taxonomy.Any(t => t.CareProfileId == id);
+                bool hasReferences = await _db.Taxonomy.AnyAsync(t => t.CareProfileId == id);
                 if (hasReferences)
-                    throw new InvalidOperationException(
-                        "This care profile cannot be deleted because one or more taxonomies are assigned to it. Remove or reassign those taxonomies first.");
+                    throw new InvalidOperationException(ErrorMessage.DeleteErrorCareProfileHasTaxonomies);
 
-                _db.CareProfile.Remove(entity);
-                _db.SaveChanges();
+                entity.DeletedAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync();
             }
         }
     }

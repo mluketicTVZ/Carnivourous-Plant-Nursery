@@ -20,8 +20,12 @@
 
 <form method="get" asp-action="Index" class="inventory-filter-form">
     <div class="filter-group">
-        <label for="searchTerm">Search Inventory SKU / Name</label>
-        <input type="text" id="searchTerm" name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Enter SKU or name..." />
+        <label for="searchTermDisplay">Search Inventory SKU / Name</label>
+        <partial name="_PlantAutocomplete" model="@(ViewBag.SearchTerm as string)"
+            view-data='@(new ViewDataDictionary(ViewData) {
+                { "Endpoint", "/inventory/suggestions" },
+                { "Placeholder", "Enter SKU or name..." }
+            })' />
     </div>
 
     <div class="filter-group filter-group-checkbox">

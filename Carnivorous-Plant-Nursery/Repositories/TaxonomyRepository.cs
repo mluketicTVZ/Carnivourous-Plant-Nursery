@@ -13,72 +13,76 @@ namespace Carnivorous_Plant_Nursery.Repositories
             _db = db;
         }
 
-        public List<Taxonomy> GetAll() =>
-            _db.Taxonomy
+        public async Task<List<Taxonomy>> GetAll() =>
+            await _db.Taxonomy
                 .Include(t => t.CareProfile)
                 .Include(t => t.InventoryItems)
-                .ToList();
+                .Where(t => t.DeletedAt == null)
+                .ToListAsync();
 
-        public Taxonomy? GetById(int id) =>
-            _db.Taxonomy
+        public async Task<Taxonomy?> GetById(int id) =>
+            await _db.Taxonomy
                 .Include(t => t.CareProfile)
                 .Include(t => t.InventoryItems)
-                .FirstOrDefault(t => t.Id == id);
+                .Where(t => t.DeletedAt == null)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
-        public List<Taxonomy> Search(string searchTerm)
+        public async Task<List<Taxonomy>> Search(string searchTerm)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
-                return GetAll();
+                return await GetAll();
 
             var term = searchTerm.Trim();
-            return _db.Taxonomy
+            return await _db.Taxonomy
                 .Include(t => t.CareProfile)
                 .Include(t => t.InventoryItems)
                 .Where(t =>
-                    (t.Genus != null && t.Genus.Contains(term)) ||
+                    t.DeletedAt == null &&
+                    ((t.Genus != null && t.Genus.Contains(term)) ||
                     (t.Species != null && t.Species.Contains(term)) ||
                     (t.Cultivar != null && t.Cultivar.Contains(term)) ||
-                    (t.CommonName != null && t.CommonName.Contains(term)))
-                .ToList();
+                    (t.CommonName != null && t.CommonName.Contains(term))))
+                .ToListAsync();
         }
 
-        public List<Taxonomy> GetWithWebshopItems() =>
-            _db.Taxonomy
+        public async Task<List<Taxonomy>> GetWithWebshopItems() =>
+            await _db.Taxonomy
                 .Include(t => t.InventoryItems)
+                .Where(t => t.DeletedAt == null)
                 .Where(t => t.InventoryItems.Any(i => i.IsAvailableInWebshop))
-                .ToList();
+                .ToListAsync();
 
-        public List<Taxonomy> GetRequiringDormancy() =>
-            _db.Taxonomy
+        public async Task<List<Taxonomy>> GetRequiringDormancy() =>
+            await _db.Taxonomy
                 .Include(t => t.CareProfile)
+                .Where(t => t.DeletedAt == null)
                 .Where(t => t.CareProfile != null && t.CareProfile.RequiresWinterDormancy == true)
-                .ToList();
+                .ToListAsync();
 
-        public void Add(Taxonomy taxonomy)
+        public async Task Add(Taxonomy taxonomy)
         {
             _db.Taxonomy.Add(taxonomy);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public void Update(Taxonomy taxonomy)
+        public async Task Update(Taxonomy taxonomy)
         {
             _db.Taxonomy.Update(taxonomy);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public void Delete(int id)
+        public async Task Delete(int id)
         {
-            var entity = _db.Taxonomy.Find(id);
+            var entity = await _db.Taxonomy.FindAsync(id);
             if (entity != null)
             {
-                bool hasPlants = _db.Plant.Any(p => p.TaxonomyId == id);
-                bool hasSeedBatches = _db.SeedBatch.Any(s => s.TaxonomyId == id);
+                bool hasPlants = await _db.Plant.AnyAsync(p => p.TaxonomyId == id);
+                bool hasSeedBatches = await _db.SeedBatch.AnyAsync(s => s.TaxonomyId == id);
                 if (hasPlants || hasSeedBatches)
-                    throw new InvalidOperationException(
-                        "This taxonomy cannot be deleted because plants or seed batches are assigned to it. Remove or reassign those records first.");
+                    throw new InvalidOperationException(ErrorMessage.DeleteErrorTaxonomyHasItems);
 
-                _db.Taxonomy.Remove(entity);
-                _db.SaveChanges();
+                entity.DeletedAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync();
             }
         }
     }
