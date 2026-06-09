@@ -128,6 +128,61 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 
 ---
 
+## API Controllers
+
+API controllers return JSON DTOs and do not render Razor views. They use `[ApiController]` and are routed under `/api/...`.
+
+### PlantsApiController `[Route("api/plants")]`
+
+| URL | HTTP | Action | Response |
+|---|---|---|---|
+| `/api/plants` | GET | GetAll(searchTerm, webshopOnly, stage, healthStatus) | `200 OK` with `PlantDto[]` |
+| `/api/plants/{id}` | GET | GetById(int id) | `200 OK` with `PlantDto`, or `404 Not Found` |
+| `/api/plants` | POST | Create(PlantWriteDto dto) | `201 Created` with `PlantDto`, or `400 Bad Request` |
+| `/api/plants/{id}` | PUT | Update(int id, PlantWriteDto dto) | `200 OK` with `PlantDto`, `400 Bad Request`, or `404 Not Found` |
+| `/api/plants/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure |
+
+### SeedBatchesApiController `[Route("api/seeds")]`
+
+| URL | HTTP | Action | Response |
+|---|---|---|---|
+| `/api/seeds` | GET | GetAll(searchTerm, availableInWebshop) | `200 OK` with `SeedBatchDto[]` |
+| `/api/seeds/{id}` | GET | GetById(int id) | `200 OK` with `SeedBatchDto`, or `404 Not Found` |
+| `/api/seeds` | POST | Create(SeedBatchWriteDto dto) | `201 Created` with `SeedBatchDto`, or `400 Bad Request` |
+| `/api/seeds/{id}` | PUT | Update(int id, SeedBatchWriteDto dto) | `200 OK` with `SeedBatchDto`, `400 Bad Request`, or `404 Not Found` |
+| `/api/seeds/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure |
+
+### TaxonomiesApiController `[Route("api/taxonomies")]`
+
+| URL | HTTP | Action | Response |
+|---|---|---|---|
+| `/api/taxonomies` | GET | GetAll(searchTerm) | `200 OK` with `TaxonomyDto[]` |
+| `/api/taxonomies/{id}` | GET | GetById(int id) | `200 OK` with `TaxonomyDto`, or `404 Not Found` |
+| `/api/taxonomies` | POST | Create(TaxonomyWriteDto dto) | `201 Created` with `TaxonomyDto`, or `400 Bad Request` |
+| `/api/taxonomies/{id}` | PUT | Update(int id, TaxonomyWriteDto dto) | `200 OK` with `TaxonomyDto`, `400 Bad Request`, or `404 Not Found` |
+| `/api/taxonomies/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure |
+
+### CareProfilesApiController `[Route("api/care-profiles")]`
+
+| URL | HTTP | Action | Response |
+|---|---|---|---|
+| `/api/care-profiles` | GET | GetAll(searchTerm, requiredLight) | `200 OK` with `CareProfileDto[]` |
+| `/api/care-profiles/{id}` | GET | GetById(int id) | `200 OK` with `CareProfileDto`, or `404 Not Found` |
+| `/api/care-profiles` | POST | Create(CareProfileWriteDto dto) | `201 Created` with `CareProfileDto`, or `400 Bad Request` |
+| `/api/care-profiles/{id}` | PUT | Update(int id, CareProfileWriteDto dto) | `200 OK` with `CareProfileDto`, `400 Bad Request`, or `404 Not Found` |
+| `/api/care-profiles/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure |
+
+### InventoryApiController `[Route("api/inventory")]`
+
+| URL | HTTP | Action | Response |
+|---|---|---|---|
+| `/api/inventory` | GET | GetAll(searchTerm, webshopOnly) | `200 OK` with `InventoryItemSummaryDto[]` |
+| `/api/inventory/{id}` | GET | GetById(int id) | `200 OK` with `InventoryItemSummaryDto`, or `404 Not Found` |
+
+**Notes**: Inventory API is read-only because `InventoryItem` is abstract. Create/update/delete operations are exposed through concrete `/api/plants` and `/api/seeds` endpoints. API delete operations preserve existing soft-delete and business-rule checks.
+
+---
+
 ## Shared Partial Views
 
 These are rendered inside other views and do not have their own URLs:
@@ -151,7 +206,12 @@ These are rendered inside other views and do not have their own URLs:
 | Home | `/` or `/home` | Index, Privacy, Error | — |
 | Admin | `/admin` | Index (login), Login, Logout | — |
 | Plants | `/plants` | Index, Details, Create, Edit, Delete | searchTerm, webshopOnly, stage, healthStatus |
+| Plants API | `/api/plants` | GET all, GET by ID, POST, PUT, DELETE | searchTerm, webshopOnly, stage, healthStatus |
 | Inventory | `/inventory` | Index, Details | searchTerm, webshopOnly |
+| Inventory API | `/api/inventory` | GET all, GET by ID | searchTerm, webshopOnly |
 | Care Profiles | `/care` | Index, Details, Create, Edit, Delete | searchTerm, requiredLight |
+| Care Profiles API | `/api/care-profiles` | GET all, GET by ID, POST, PUT, DELETE | searchTerm, requiredLight |
 | Seed Batches | `/seeds` | Index, Details, Create, Edit, Delete | searchTerm, availableInWebshop |
+| Seed Batches API | `/api/seeds` | GET all, GET by ID, POST, PUT, DELETE | searchTerm, availableInWebshop |
 | Taxonomy | `/taxonomy` | Index, Details, Create, Edit, Delete | searchTerm |
+| Taxonomies API | `/api/taxonomies` | GET all, GET by ID, POST, PUT, DELETE | searchTerm |

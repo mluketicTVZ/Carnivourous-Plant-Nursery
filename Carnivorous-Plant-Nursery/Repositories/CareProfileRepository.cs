@@ -23,6 +23,23 @@ namespace Carnivorous_Plant_Nursery.Repositories
                 .Where(c => c.DeletedAt == null)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
+        public async Task<List<CareProfile>> Search(string? searchTerm, LightLevel? requiredLight)
+        {
+            var query = _db.CareProfile
+                .Where(c => c.DeletedAt == null);
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var term = searchTerm.Trim();
+                query = query.Where(c => c.CareProfileName.Contains(term));
+            }
+
+            if (requiredLight.HasValue)
+                query = query.Where(c => c.RequiredLight == requiredLight.Value);
+
+            return await query.ToListAsync();
+        }
+
         public async Task Add(CareProfile careProfile)
         {
             _db.CareProfile.Add(careProfile);

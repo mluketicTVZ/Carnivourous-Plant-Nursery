@@ -19,17 +19,7 @@ namespace Carnivorous_Plant_Nursery.Controllers
         [Route("")]
         public async Task<IActionResult> Index(string? searchTerm, bool? availableInWebshop)
         {
-            var seedBatches = await _seedBatchRepository.GetAll();
-            IEnumerable<SeedBatch> items = seedBatches;
-
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-                items = items.Where(s =>
-                    (s.ListingTitle != null && s.ListingTitle.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-                    (s.SKU != null && s.SKU.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-                    (s.Taxonomy != null && s.Taxonomy.CommonName != null && s.Taxonomy.CommonName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
-
-            if (availableInWebshop == true)
-                items = items.Where(i => i.IsAvailableInWebshop);
+            var items = await _seedBatchRepository.Search(searchTerm, availableInWebshop);
 
             ViewBag.SearchTerm = searchTerm;
             ViewBag.AvailableInWebshop = availableInWebshop;

@@ -15,25 +15,9 @@ namespace Carnivorous_Plant_Nursery.Controllers
         }
 
         [Route("")]
-        public IActionResult Index([FromQuery] string searchTerm, [FromQuery] bool? webshopOnly)
+        public async Task<IActionResult> Index([FromQuery] string searchTerm, [FromQuery] bool? webshopOnly)
         {
-            var inventory = _inventoryRepository.GetAll();
-
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                var term = searchTerm.Trim().ToLowerInvariant();
-                inventory = inventory.Where(i => 
-                    (i.ListingTitle?.ToLowerInvariant().Contains(term) ?? false) ||
-                    (i.Taxonomy?.FullName?.ToLowerInvariant().Contains(term) ?? false) ||
-                    (i.Taxonomy?.CommonName?.ToLowerInvariant().Contains(term) ?? false) ||
-                    (i.SKU?.ToLowerInvariant().Contains(term) ?? false)
-                ).ToList();
-            }
-
-            if (webshopOnly == true)
-            {
-                inventory = inventory.Where(i => i.IsAvailableInWebshop).ToList();
-            }
+            var inventory = await _inventoryRepository.SearchAsync(searchTerm, webshopOnly);
 
             ViewBag.SearchTerm = searchTerm;
             ViewBag.WebshopOnly = webshopOnly;
@@ -42,9 +26,9 @@ namespace Carnivorous_Plant_Nursery.Controllers
         }
 
         [Route("{id:int}")]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var item = _inventoryRepository.GetById(id);
+            var item = await _inventoryRepository.GetByIdAsync(id);
             if (item == null)
             {
                 return NotFound();
