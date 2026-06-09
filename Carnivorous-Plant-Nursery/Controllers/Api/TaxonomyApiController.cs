@@ -1,18 +1,19 @@
 using Carnivorous_Plant_Nursery.Models;
 using Carnivorous_Plant_Nursery.Models.Api;
 using Carnivorous_Plant_Nursery.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Carnivorous_Plant_Nursery.Controllers.Api
 {
     [ApiController]
-    [Route("api/taxonomies")]
-    public class TaxonomiesApiController : ControllerBase
+    [Route("api/taxonomy")]
+    public class TaxonomyApiController : ControllerBase
     {
         private readonly TaxonomyRepository _taxonomyRepository;
 
-        public TaxonomiesApiController(TaxonomyRepository taxonomyRepository)
+        public TaxonomyApiController(TaxonomyRepository taxonomyRepository)
         {
             _taxonomyRepository = taxonomyRepository;
         }
@@ -32,6 +33,7 @@ namespace Carnivorous_Plant_Nursery.Controllers.Api
         }
 
         [HttpPost]
+        [Authorize(Roles = AuthorizationRole.AdminOrManager)]
         public async Task<ActionResult<TaxonomyDto>> Create([FromBody] TaxonomyWriteDto dto)
         {
             var taxonomy = new Taxonomy();
@@ -51,6 +53,7 @@ namespace Carnivorous_Plant_Nursery.Controllers.Api
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = AuthorizationRole.AdminOrManager)]
         public async Task<ActionResult<TaxonomyDto>> Update(int id, [FromBody] TaxonomyWriteDto dto)
         {
             var taxonomy = await _taxonomyRepository.GetById(id);
@@ -72,6 +75,7 @@ namespace Carnivorous_Plant_Nursery.Controllers.Api
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = AuthorizationRole.Admin)]
         public async Task<IActionResult> Delete(int id)
         {
             var taxonomy = await _taxonomyRepository.GetById(id);

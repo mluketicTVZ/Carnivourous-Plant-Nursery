@@ -42,7 +42,7 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/plants/delete/{id}` | POST | PlantController | Delete(int id) | Redirects to Index on success, Details on FK error |
 | `/plants/suggestions?term=X` | GET | PlantController | Suggestions(string term) | JSON: `[{text, value}]` |
 
-**Notes**: `Details()` returns `NotFound()` if no plant with the given id exists. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this plant. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
+**Notes**: `Details()` returns `NotFound()` if no plant with the given id exists. Create/Edit require `Admin` or `Manager`; Delete requires `Admin`. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this plant. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
 
 ---
 
@@ -74,7 +74,7 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/care/edit/{id}` | POST | CareProfileController | Edit(int id, CareProfile model) | Redirects to Details on success |
 | `/care/delete/{id}` | POST | CareProfileController | Delete(int id) | Redirects to Index on success, Details on FK error |
 
-**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a taxonomy references this care profile.
+**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit require `Admin` or `Manager`; Delete requires `Admin`. Delete sets `TempData["DeleteError"]` and redirects to Details if a taxonomy references this care profile.
 
 ---
 
@@ -93,7 +93,7 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/seeds/delete/{id}` | POST | SeedBatchController | Delete(int id) | Redirects to Index on success, Details on FK error |
 | `/seeds/suggestions?term=X` | GET | SeedBatchController | Suggestions(string term) | JSON: `[{text, value}]` |
 
-**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this seed batch. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
+**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit require `Admin` or `Manager`; Delete requires `Admin`. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this seed batch. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
 
 ---
 
@@ -112,7 +112,21 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/taxonomy/suggestions?term=X` | GET | TaxonomyController | Suggestions(string term) | JSON: `[{text, value}]` |
 | `/taxonomy/id-suggestions?term=X` | GET | TaxonomyController | IdSuggestions(string term) | JSON: `[{text, value}]` (value = taxonomy ID) |
 
-**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a plant or seed batch references this taxonomy. `Suggestions()` returns display-name matches for the search autocomplete; `IdSuggestions()` returns matches with the numeric ID as value, used by Plant/SeedBatch FK pickers.
+**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit require `Admin` or `Manager`; Delete requires `Admin`. Delete sets `TempData["DeleteError"]` and redirects to Details if a plant or seed batch references this taxonomy. `Suggestions()` returns display-name matches for the search autocomplete; `IdSuggestions()` returns matches with the numeric ID as value, used by Plant/SeedBatch FK pickers.
+
+---
+
+## AccountController `[Route("account")]`
+
+| URL | HTTP | Controller | Action | View |
+|---|---|---|---|---|
+| `/account/login` | GET | AccountController | Login(string? returnUrl) | Views/Account/Login.cshtml |
+| `/account/login` | POST | AccountController | Login(LoginViewModel model) | Redirects to return URL/Home on success, re-renders Login on failure |
+| `/account/register` | GET | AccountController | Register() | Views/Account/Register.cshtml |
+| `/account/register` | POST | AccountController | Register(RegisterViewModel model) | Creates a Customer account, signs in, redirects Home |
+| `/account/logout` | POST | AccountController | Logout() | Signs out and redirects Home |
+
+**Notes**: Authentication uses ASP.NET Core Identity with `AppUser`. Register requires email, display name, and password; phone number and default shipping city are optional. New registrations receive the `Customer` role.
 
 ---
 
@@ -120,11 +134,11 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 
 | URL | HTTP | Controller | Action | View |
 |---|---|---|---|---|
-| `/admin` | GET | AdminController | Index() | Views/Admin/Login.cshtml |
-| `/admin` | POST | AdminController | Login(string passkey) | Redirects to `/` on success, re-renders Login on failure |
-| `/admin/logout` | POST | AdminController | Logout() | Redirects to `/` |
+| `/admin` | GET | AdminController | Index() | Redirects to `/account/login` |
+| `/admin` | POST | AdminController | Login() | Redirects to `/account/login` |
+| `/admin/logout` | POST | AdminController | Logout() | Signs out and redirects Home |
 
-**Notes**: Login checks `passkey` against `appsettings.json "AdminPasskey"`. On success sets `HttpContext.Session["IsAdmin"] = "true"`. Logout removes that session key. Admin state gates Create/Edit/Delete actions across all entity controllers.
+**Notes**: This controller is a compatibility bridge for old admin URLs. Inventory authorization no longer uses `HttpContext.Session["IsAdmin"]`; it uses Identity roles.
 
 ---
 
@@ -132,45 +146,45 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 
 API controllers return JSON DTOs and do not render Razor views. They use `[ApiController]` and are routed under `/api/...`.
 
-### PlantsApiController `[Route("api/plants")]`
+### PlantApiController `[Route("api/plant")]`
 
 | URL | HTTP | Action | Response |
 |---|---|---|---|
-| `/api/plants` | GET | GetAll(searchTerm, webshopOnly, stage, healthStatus) | `200 OK` with `PlantDto[]` |
-| `/api/plants/{id}` | GET | GetById(int id) | `200 OK` with `PlantDto`, or `404 Not Found` |
-| `/api/plants` | POST | Create(PlantWriteDto dto) | `201 Created` with `PlantDto`, or `400 Bad Request` |
-| `/api/plants/{id}` | PUT | Update(int id, PlantWriteDto dto) | `200 OK` with `PlantDto`, `400 Bad Request`, or `404 Not Found` |
-| `/api/plants/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure |
+| `/api/plant` | GET | GetAll(searchTerm, webshopOnly, stage, healthStatus) | `200 OK` with `PlantDto[]` |
+| `/api/plant/{id}` | GET | GetById(int id) | `200 OK` with `PlantDto`, or `404 Not Found` |
+| `/api/plant` | POST | Create(PlantWriteDto dto) | `201 Created` with `PlantDto`, or `400 Bad Request`; requires `Admin` or `Manager` |
+| `/api/plant/{id}` | PUT | Update(int id, PlantWriteDto dto) | `200 OK` with `PlantDto`, `400 Bad Request`, or `404 Not Found`; requires `Admin` or `Manager` |
+| `/api/plant/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure; requires `Admin` |
 
-### SeedBatchesApiController `[Route("api/seeds")]`
+### SeedBatchApiController `[Route("api/seeds")]`
 
 | URL | HTTP | Action | Response |
 |---|---|---|---|
 | `/api/seeds` | GET | GetAll(searchTerm, availableInWebshop) | `200 OK` with `SeedBatchDto[]` |
 | `/api/seeds/{id}` | GET | GetById(int id) | `200 OK` with `SeedBatchDto`, or `404 Not Found` |
-| `/api/seeds` | POST | Create(SeedBatchWriteDto dto) | `201 Created` with `SeedBatchDto`, or `400 Bad Request` |
-| `/api/seeds/{id}` | PUT | Update(int id, SeedBatchWriteDto dto) | `200 OK` with `SeedBatchDto`, `400 Bad Request`, or `404 Not Found` |
-| `/api/seeds/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure |
+| `/api/seeds` | POST | Create(SeedBatchWriteDto dto) | `201 Created` with `SeedBatchDto`, or `400 Bad Request`; requires `Admin` or `Manager` |
+| `/api/seeds/{id}` | PUT | Update(int id, SeedBatchWriteDto dto) | `200 OK` with `SeedBatchDto`, `400 Bad Request`, or `404 Not Found`; requires `Admin` or `Manager` |
+| `/api/seeds/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure; requires `Admin` |
 
-### TaxonomiesApiController `[Route("api/taxonomies")]`
-
-| URL | HTTP | Action | Response |
-|---|---|---|---|
-| `/api/taxonomies` | GET | GetAll(searchTerm) | `200 OK` with `TaxonomyDto[]` |
-| `/api/taxonomies/{id}` | GET | GetById(int id) | `200 OK` with `TaxonomyDto`, or `404 Not Found` |
-| `/api/taxonomies` | POST | Create(TaxonomyWriteDto dto) | `201 Created` with `TaxonomyDto`, or `400 Bad Request` |
-| `/api/taxonomies/{id}` | PUT | Update(int id, TaxonomyWriteDto dto) | `200 OK` with `TaxonomyDto`, `400 Bad Request`, or `404 Not Found` |
-| `/api/taxonomies/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure |
-
-### CareProfilesApiController `[Route("api/care-profiles")]`
+### TaxonomyApiController `[Route("api/taxonomy")]`
 
 | URL | HTTP | Action | Response |
 |---|---|---|---|
-| `/api/care-profiles` | GET | GetAll(searchTerm, requiredLight) | `200 OK` with `CareProfileDto[]` |
-| `/api/care-profiles/{id}` | GET | GetById(int id) | `200 OK` with `CareProfileDto`, or `404 Not Found` |
-| `/api/care-profiles` | POST | Create(CareProfileWriteDto dto) | `201 Created` with `CareProfileDto`, or `400 Bad Request` |
-| `/api/care-profiles/{id}` | PUT | Update(int id, CareProfileWriteDto dto) | `200 OK` with `CareProfileDto`, `400 Bad Request`, or `404 Not Found` |
-| `/api/care-profiles/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure |
+| `/api/taxonomy` | GET | GetAll(searchTerm) | `200 OK` with `TaxonomyDto[]` |
+| `/api/taxonomy/{id}` | GET | GetById(int id) | `200 OK` with `TaxonomyDto`, or `404 Not Found` |
+| `/api/taxonomy` | POST | Create(TaxonomyWriteDto dto) | `201 Created` with `TaxonomyDto`, or `400 Bad Request`; requires `Admin` or `Manager` |
+| `/api/taxonomy/{id}` | PUT | Update(int id, TaxonomyWriteDto dto) | `200 OK` with `TaxonomyDto`, `400 Bad Request`, or `404 Not Found`; requires `Admin` or `Manager` |
+| `/api/taxonomy/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure; requires `Admin` |
+
+### CareProfileApiController `[Route("api/care")]`
+
+| URL | HTTP | Action | Response |
+|---|---|---|---|
+| `/api/care` | GET | GetAll(searchTerm, requiredLight) | `200 OK` with `CareProfileDto[]` |
+| `/api/care/{id}` | GET | GetById(int id) | `200 OK` with `CareProfileDto`, or `404 Not Found` |
+| `/api/care` | POST | Create(CareProfileWriteDto dto) | `201 Created` with `CareProfileDto`, or `400 Bad Request`; requires `Admin` or `Manager` |
+| `/api/care/{id}` | PUT | Update(int id, CareProfileWriteDto dto) | `200 OK` with `CareProfileDto`, `400 Bad Request`, or `404 Not Found`; requires `Admin` or `Manager` |
+| `/api/care/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure; requires `Admin` |
 
 ### InventoryApiController `[Route("api/inventory")]`
 
@@ -179,7 +193,7 @@ API controllers return JSON DTOs and do not render Razor views. They use `[ApiCo
 | `/api/inventory` | GET | GetAll(searchTerm, webshopOnly) | `200 OK` with `InventoryItemSummaryDto[]` |
 | `/api/inventory/{id}` | GET | GetById(int id) | `200 OK` with `InventoryItemSummaryDto`, or `404 Not Found` |
 
-**Notes**: Inventory API is read-only because `InventoryItem` is abstract. Create/update/delete operations are exposed through concrete `/api/plants` and `/api/seeds` endpoints. API delete operations preserve existing soft-delete and business-rule checks.
+**Notes**: Inventory API is read-only because `InventoryItem` is abstract. Create/update/delete operations are exposed through concrete `/api/plant` and `/api/seeds` endpoints. API delete operations preserve existing soft-delete and business-rule checks. API read endpoints are public; API write endpoints use Identity role authorization.
 
 ---
 
@@ -204,14 +218,15 @@ These are rendered inside other views and do not have their own URLs:
 | Section | Base URL | Actions | Query Filters |
 |---|---|---|---|
 | Home | `/` or `/home` | Index, Privacy, Error | — |
-| Admin | `/admin` | Index (login), Login, Logout | — |
+| Account | `/account` | Login, Register, Logout | returnUrl |
+| Admin compatibility | `/admin` | Redirect login, Logout | — |
 | Plants | `/plants` | Index, Details, Create, Edit, Delete | searchTerm, webshopOnly, stage, healthStatus |
-| Plants API | `/api/plants` | GET all, GET by ID, POST, PUT, DELETE | searchTerm, webshopOnly, stage, healthStatus |
+| Plant API | `/api/plant` | GET all, GET by ID, POST, PUT, DELETE | searchTerm, webshopOnly, stage, healthStatus |
 | Inventory | `/inventory` | Index, Details | searchTerm, webshopOnly |
 | Inventory API | `/api/inventory` | GET all, GET by ID | searchTerm, webshopOnly |
 | Care Profiles | `/care` | Index, Details, Create, Edit, Delete | searchTerm, requiredLight |
-| Care Profiles API | `/api/care-profiles` | GET all, GET by ID, POST, PUT, DELETE | searchTerm, requiredLight |
+| Care Profile API | `/api/care` | GET all, GET by ID, POST, PUT, DELETE | searchTerm, requiredLight |
 | Seed Batches | `/seeds` | Index, Details, Create, Edit, Delete | searchTerm, availableInWebshop |
-| Seed Batches API | `/api/seeds` | GET all, GET by ID, POST, PUT, DELETE | searchTerm, availableInWebshop |
+| Seed Batch API | `/api/seeds` | GET all, GET by ID, POST, PUT, DELETE | searchTerm, availableInWebshop |
 | Taxonomy | `/taxonomy` | Index, Details, Create, Edit, Delete | searchTerm |
-| Taxonomies API | `/api/taxonomies` | GET all, GET by ID, POST, PUT, DELETE | searchTerm |
+| Taxonomy API | `/api/taxonomy` | GET all, GET by ID, POST, PUT, DELETE | searchTerm |

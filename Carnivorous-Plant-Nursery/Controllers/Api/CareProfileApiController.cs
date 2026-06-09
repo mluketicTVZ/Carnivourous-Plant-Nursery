@@ -1,18 +1,19 @@
 using Carnivorous_Plant_Nursery.Models;
 using Carnivorous_Plant_Nursery.Models.Api;
 using Carnivorous_Plant_Nursery.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Carnivorous_Plant_Nursery.Controllers.Api
 {
     [ApiController]
-    [Route("api/care-profiles")]
-    public class CareProfilesApiController : ControllerBase
+    [Route("api/care")]
+    public class CareProfileApiController : ControllerBase
     {
         private readonly CareProfileRepository _careProfileRepository;
 
-        public CareProfilesApiController(CareProfileRepository careProfileRepository)
+        public CareProfileApiController(CareProfileRepository careProfileRepository)
         {
             _careProfileRepository = careProfileRepository;
         }
@@ -32,6 +33,7 @@ namespace Carnivorous_Plant_Nursery.Controllers.Api
         }
 
         [HttpPost]
+        [Authorize(Roles = AuthorizationRole.AdminOrManager)]
         public async Task<ActionResult<CareProfileDto>> Create([FromBody] CareProfileWriteDto dto)
         {
             var careProfile = new CareProfile();
@@ -50,6 +52,7 @@ namespace Carnivorous_Plant_Nursery.Controllers.Api
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = AuthorizationRole.AdminOrManager)]
         public async Task<ActionResult<CareProfileDto>> Update(int id, [FromBody] CareProfileWriteDto dto)
         {
             var careProfile = await _careProfileRepository.GetById(id);
@@ -70,6 +73,7 @@ namespace Carnivorous_Plant_Nursery.Controllers.Api
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = AuthorizationRole.Admin)]
         public async Task<IActionResult> Delete(int id)
         {
             var careProfile = await _careProfileRepository.GetById(id);

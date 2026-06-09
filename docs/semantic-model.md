@@ -106,6 +106,22 @@ Describes the cultivation requirements for a taxonomy.
 
 ---
 
+### AppUser
+ASP.NET Core Identity user for local accounts.
+
+| Property | Type | Notes |
+|---|---|---|
+| Id | string | Identity primary key |
+| UserName | string? | Uses the account email |
+| Email | string? | Identity email field; unique email is required in configuration |
+| PhoneNumber | string? | Optional inherited Identity field; validated on registration |
+| DisplayName | string | Required app-specific display label, max 100 chars |
+| DefaultShippingCity | string? | Optional app-specific city hint for future order flows, max 200 chars |
+
+**Roles**: `Admin`, `Manager`, and `Customer` are seeded at startup. New self-registered users receive `Customer`. Optional initial admin seeding is controlled by `SeedAdmin:Email`, `SeedAdmin:Password`, and `SeedAdmin:DisplayName` configuration.
+
+---
+
 ### Lineage
 Tracks genetic parentage between inventory items (cross-pollination / clones).
 

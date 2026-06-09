@@ -14,5 +14,8 @@ namespace Carnivorous_Plant_Nursery.Models
         public const string DeleteErrorTaxonomyHasItems = "This taxonomy cannot be deleted because plants or seed batches are assigned to it. Remove or reassign those records first.";
         public const string DeleteErrorCareProfileHasTaxonomies = "This care profile cannot be deleted because one or more taxonomies are assigned to it. Remove or reassign those taxonomies first.";
         public const string ApiInvalidReference = "One or more referenced records do not exist.";
+        public const string InvalidLoginAttempt = "Invalid login attempt.";
+        public const string InvalidPhoneNumberFormat = "Phone number format is not valid.";
+        public const string PasswordConfirmationMismatch = "The password and confirmation password do not match.";
     }
 }

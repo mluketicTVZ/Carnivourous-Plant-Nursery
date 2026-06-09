@@ -91,9 +91,12 @@
                 <a asp-controller="Inventory" asp-action="Index" class="btn-leaf">
                     Check Availability
                 </a>
-                @if (Context.Session.GetString("IsAdmin") == "true")
+                @if (User.IsInRole(AuthorizationRole.Admin) || User.IsInRole(AuthorizationRole.Manager))
                 {
                     <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-leaf">&#9998; Edit</a>
+                }
+                @if (User.IsInRole(AuthorizationRole.Admin))
+                {
                     <form id="delete-form-plant" asp-action="Delete" asp-route-id="@Model.Id" method="post" style="display: inline;">
                         @Html.AntiForgeryToken()
                         <button type="button" class="btn-leaf" style="background-color: #c0392b; border-color: #c0392b;" onclick="openDeleteModal('delete-form-plant', 'this plant')">&#128465; Delete</button>

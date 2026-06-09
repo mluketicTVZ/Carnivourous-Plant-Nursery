@@ -1,6 +1,7 @@
 using Carnivorous_Plant_Nursery.Models;
 using Carnivorous_Plant_Nursery.Models.Api;
 using Carnivorous_Plant_Nursery.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,11 +9,11 @@ namespace Carnivorous_Plant_Nursery.Controllers.Api
 {
     [ApiController]
     [Route("api/seeds")]
-    public class SeedBatchesApiController : ControllerBase
+    public class SeedBatchApiController : ControllerBase
     {
         private readonly SeedBatchRepository _seedBatchRepository;
 
-        public SeedBatchesApiController(SeedBatchRepository seedBatchRepository)
+        public SeedBatchApiController(SeedBatchRepository seedBatchRepository)
         {
             _seedBatchRepository = seedBatchRepository;
         }
@@ -32,6 +33,7 @@ namespace Carnivorous_Plant_Nursery.Controllers.Api
         }
 
         [HttpPost]
+        [Authorize(Roles = AuthorizationRole.AdminOrManager)]
         public async Task<ActionResult<SeedBatchDto>> Create([FromBody] SeedBatchWriteDto dto)
         {
             var seedBatch = new SeedBatch();
@@ -55,6 +57,7 @@ namespace Carnivorous_Plant_Nursery.Controllers.Api
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = AuthorizationRole.AdminOrManager)]
         public async Task<ActionResult<SeedBatchDto>> Update(int id, [FromBody] SeedBatchWriteDto dto)
         {
             var seedBatch = await _seedBatchRepository.GetById(id);
@@ -80,6 +83,7 @@ namespace Carnivorous_Plant_Nursery.Controllers.Api
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = AuthorizationRole.Admin)]
         public async Task<IActionResult> Delete(int id)
         {
             var seedBatch = await _seedBatchRepository.GetById(id);

@@ -76,9 +76,12 @@
     }
     <div style="margin-top: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap;">
         <a asp-action="Index" class="btn-leaf" style="background-color: var(--text-muted);">Back to Catalog</a>
-        @if (Context.Session.GetString("IsAdmin") == "true")
+        @if (User.IsInRole(AuthorizationRole.Admin) || User.IsInRole(AuthorizationRole.Manager))
         {
             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-leaf">&#9998; Edit</a>
+        }
+        @if (User.IsInRole(AuthorizationRole.Admin))
+        {
             <form id="delete-form-taxonomy" asp-action="Delete" asp-route-id="@Model.Id" method="post" style="display: inline;">
                 @Html.AntiForgeryToken()
                 <button type="button" class="btn-leaf" style="background-color: #c0392b; border-color: #c0392b;" onclick="openDeleteModal('delete-form-taxonomy', 'this taxonomy')">&#128465; Delete</button>

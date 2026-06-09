@@ -1,6 +1,6 @@
 namespace Carnivorous_Plant_Nursery.Models.Api
 {
-    public static class ApiMappers
+    public static class ApiMapper
     {
         public static CareProfileDto ToDto(this CareProfile careProfile) =>
             new()

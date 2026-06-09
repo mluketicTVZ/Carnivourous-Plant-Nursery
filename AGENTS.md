@@ -42,6 +42,7 @@ Do not start Docker, reset databases, run migrations, or apply database updates 
 ## Backend Standards
 
 - Use modern, clean C# and keep responsibilities separated.
+- Use singular filenames for `.cs` and similar code files by default, including DTO, mapper, view-model, controller, repository, and service files. Folders may remain plural when they group multiple files.
 - Use constructor DI for repositories and services.
 - Register EF repositories with `AddScoped` in `Program.cs`.
 - Keep user-facing C# strings out of controllers/repositories:
@@ -85,7 +86,7 @@ Do not start Docker, reset databases, run migrations, or apply database updates 
   - Edit: `[Route("edit/{id:int}")]`
   - Delete: `[Route("delete/{id:int}")]`
 - POST actions need `[ValidateAntiForgeryToken]`.
-- Admin-only Create/Edit/Delete behavior is session-gated. Preserve that behavior when adding protected actions.
+- Protected Create/Edit/Delete behavior is Identity role-gated. Use `Admin` or `Manager` for Create/Edit and `Admin` for Delete unless the task defines a different rule.
 - When adding or changing URLs, update `docs/sitemap.md`.
 
 ## List / Index Page Workflow

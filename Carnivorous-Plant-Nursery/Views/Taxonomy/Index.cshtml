@@ -10,7 +10,7 @@
 
 <partial name="_BackButton" />
 
-@if (Context.Session.GetString("IsAdmin") == "true")
+@if (User.IsInRole(AuthorizationRole.Admin) || User.IsInRole(AuthorizationRole.Manager))
 {
     <div style="margin-bottom: 1rem;">
         <a asp-action="Create" class="btn-leaf">+ Add New Taxonomy</a>

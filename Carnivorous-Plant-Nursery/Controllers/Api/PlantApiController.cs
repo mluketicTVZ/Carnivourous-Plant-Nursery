@@ -1,18 +1,19 @@
 using Carnivorous_Plant_Nursery.Models;
 using Carnivorous_Plant_Nursery.Models.Api;
 using Carnivorous_Plant_Nursery.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Carnivorous_Plant_Nursery.Controllers.Api
 {
     [ApiController]
-    [Route("api/plants")]
-    public class PlantsApiController : ControllerBase
+    [Route("api/plant")]
+    public class PlantApiController : ControllerBase
     {
         private readonly PlantRepository _plantRepository;
 
-        public PlantsApiController(PlantRepository plantRepository)
+        public PlantApiController(PlantRepository plantRepository)
         {
             _plantRepository = plantRepository;
         }
@@ -36,6 +37,7 @@ namespace Carnivorous_Plant_Nursery.Controllers.Api
         }
 
         [HttpPost]
+        [Authorize(Roles = AuthorizationRole.AdminOrManager)]
         public async Task<ActionResult<PlantDto>> Create([FromBody] PlantWriteDto dto)
         {
             var plant = new Plant();
@@ -59,6 +61,7 @@ namespace Carnivorous_Plant_Nursery.Controllers.Api
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = AuthorizationRole.AdminOrManager)]
         public async Task<ActionResult<PlantDto>> Update(int id, [FromBody] PlantWriteDto dto)
         {
             var plant = await _plantRepository.GetById(id);
@@ -84,6 +87,7 @@ namespace Carnivorous_Plant_Nursery.Controllers.Api
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = AuthorizationRole.Admin)]
         public async Task<IActionResult> Delete(int id)
         {
             var plant = await _plantRepository.GetById(id);
