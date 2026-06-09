@@ -76,8 +76,18 @@
     {
         <div class="nursery-card">
             <div class="nursery-card-header">
-                <h2 class="nursery-card-title">@p.Taxonomy?.CommonName</h2>
-                <div class="nursery-card-subtitle">@p.Taxonomy?.FullName</div>
+                <div class="nursery-card-title-row">
+                    <div>
+                        <h2 class="nursery-card-title">@p.Taxonomy?.CommonName</h2>
+                        <div class="nursery-card-subtitle">@p.Taxonomy?.FullName</div>
+                    </div>
+                    <partial name="_AttachmentGallery"
+                             model="p.Attachments"
+                             view-data='@(new ViewDataDictionary(ViewData) {
+                                 { "GallerySize", "compact" },
+                                 { "GalleryLabel", $"Photos for {p.Taxonomy?.CommonName ?? p.ListingTitle ?? "plant"}" }
+                             })' />
+                </div>
             </div>
             <div class="nursery-card-body">
                 @if (!string.IsNullOrEmpty(p.ListingTitle))

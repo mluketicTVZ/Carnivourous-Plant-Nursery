@@ -61,5 +61,7 @@ namespace Carnivorous_Plant_Nursery.Models
 
         [ForeignKey("SourceSeedBatchId")]
         public virtual SeedBatch? SourceSeedBatch { get; set; }
+
+        public virtual ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
     }
 }

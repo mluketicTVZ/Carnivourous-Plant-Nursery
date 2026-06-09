@@ -52,8 +52,18 @@
     {
         <div class="nursery-card">
             <div class="nursery-card-header">
-                <h2 class="nursery-card-title">@(string.IsNullOrEmpty(s.ListingTitle) ? s.Taxonomy?.CommonName + " Seeds" : s.ListingTitle)</h2>
-                <div class="nursery-card-subtitle">@s.Taxonomy?.FullName</div>
+                <div class="nursery-card-title-row">
+                    <div>
+                        <h2 class="nursery-card-title">@(string.IsNullOrEmpty(s.ListingTitle) ? s.Taxonomy?.CommonName + " Seeds" : s.ListingTitle)</h2>
+                        <div class="nursery-card-subtitle">@s.Taxonomy?.FullName</div>
+                    </div>
+                    <partial name="_AttachmentGallery"
+                             model="s.Attachments"
+                             view-data='@(new ViewDataDictionary(ViewData) {
+                                 { "GallerySize", "compact" },
+                                 { "GalleryLabel", $"Photos for {(string.IsNullOrEmpty(s.ListingTitle) ? s.Taxonomy?.CommonName + " Seeds" : s.ListingTitle) ?? "seed batch"}" }
+                             })' />
+                </div>
             </div>
             <div class="nursery-card-body">
                 <p><span class="card-label">SKU:</span> @(string.IsNullOrEmpty(s.SKU) ? "N/A" : s.SKU)</p>

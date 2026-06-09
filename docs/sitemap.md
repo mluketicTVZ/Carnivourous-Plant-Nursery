@@ -38,11 +38,13 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/plants/create` | GET | PlantController | Create() | Views/Plant/Create.cshtml |
 | `/plants/create` | POST | PlantController | Create(Plant model) | Redirects to Details on success |
 | `/plants/edit/{id}` | GET | PlantController | Edit(int id) | Views/Plant/Edit.cshtml |
-| `/plants/edit/{id}` | POST | PlantController | Edit(int id, Plant model) | Redirects to Details on success |
+| `/plants/edit/{id}` | POST | PlantController | Edit(int id, Plant model) | Redirects to Details on success; commits staged attachment additions/removals |
+| `/plants/{id}/attachments` | GET | PlantController | Attachments(int id) | Views/Shared/_PlantAttachmentList.cshtml partial |
+| `/plants/{id}/attachments/upload` | POST | PlantController | UploadAttachment(int id, IFormFile file) | JSON success/error; stores pending file under `wwwroot/uploads/plants/_pending/{id}` |
 | `/plants/delete/{id}` | POST | PlantController | Delete(int id) | Redirects to Index on success, Details on FK error |
 | `/plants/suggestions?term=X` | GET | PlantController | Suggestions(string term) | JSON: `[{text, value}]` |
 
-**Notes**: `Details()` returns `NotFound()` if no plant with the given id exists. Create/Edit require `Admin` or `Manager`; Delete requires `Admin`. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this plant. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
+**Notes**: `Details()` returns `NotFound()` if no plant with the given id exists. Create/Edit and attachment upload require `Admin` or `Manager`; Delete requires `Admin`. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this plant. Plant Edit stages uploaded pending files and staged removals in hidden form fields; metadata insertions and soft-deletes are committed only when Save Changes posts successfully. Attachment soft-delete leaves the physical image file on disk for later cleanup. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
 
 ---
 
@@ -89,11 +91,13 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/seeds/create` | GET | SeedBatchController | Create() | Views/SeedBatch/Create.cshtml |
 | `/seeds/create` | POST | SeedBatchController | Create(SeedBatch model) | Redirects to Details on success |
 | `/seeds/edit/{id}` | GET | SeedBatchController | Edit(int id) | Views/SeedBatch/Edit.cshtml |
-| `/seeds/edit/{id}` | POST | SeedBatchController | Edit(int id, SeedBatch model) | Redirects to Details on success |
+| `/seeds/edit/{id}` | POST | SeedBatchController | Edit(int id, SeedBatch model) | Redirects to Details on success; commits staged attachment additions/removals |
+| `/seeds/{id}/attachments` | GET | SeedBatchController | Attachments(int id) | Views/Shared/_SeedBatchAttachmentList.cshtml partial |
+| `/seeds/{id}/attachments/upload` | POST | SeedBatchController | UploadAttachment(int id, IFormFile file) | JSON success/error; stores pending file under `wwwroot/uploads/seeds/_pending/{id}` |
 | `/seeds/delete/{id}` | POST | SeedBatchController | Delete(int id) | Redirects to Index on success, Details on FK error |
 | `/seeds/suggestions?term=X` | GET | SeedBatchController | Suggestions(string term) | JSON: `[{text, value}]` |
 
-**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit require `Admin` or `Manager`; Delete requires `Admin`. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this seed batch. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
+**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit and attachment upload require `Admin` or `Manager`; Delete requires `Admin`. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this seed batch. Seed Batch Edit stages uploaded pending files and staged removals in hidden form fields; metadata insertions and soft-deletes are committed only when Save Changes posts successfully. Attachment soft-delete leaves the physical image file on disk for later cleanup. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
 
 ---
 
@@ -124,9 +128,13 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/account/login` | POST | AccountController | Login(LoginViewModel model) | Redirects to return URL/Home on success, re-renders Login on failure |
 | `/account/register` | GET | AccountController | Register() | Views/Account/Register.cshtml |
 | `/account/register` | POST | AccountController | Register(RegisterViewModel model) | Creates a Customer account, signs in, redirects Home |
+| `/account/manage` | GET | AccountController | Manage() | Views/Account/Manage.cshtml |
+| `/account/manage` | POST | AccountController | Manage(AccountManageViewModel model) | Updates display name, phone, default shipping city, and optional local password |
+| `/account/external-login` | POST | AccountController | ExternalLogin(string provider, string? returnUrl) | Starts external provider login challenge |
+| `/account/external-login-callback` | GET | AccountController | ExternalLoginCallback(string? returnUrl) | Signs in linked external users, links existing email users, or creates Customer account |
 | `/account/logout` | POST | AccountController | Logout() | Signs out and redirects Home |
 
-**Notes**: Authentication uses ASP.NET Core Identity with `AppUser`. Register requires email, display name, and password; phone number and default shipping city are optional. New registrations receive the `Customer` role.
+**Notes**: Authentication uses ASP.NET Core Identity with `AppUser`. Register requires email, display name, and password; phone number and default shipping city are optional. New local registrations receive the `Customer` role. Local login uses `RememberMe` for persistent auth cookies; non-remembered local logins use a session auth cookie. Google external login uses local configuration keys `Authentication:Google:ClientId` and `Authentication:Google:ClientSecret`; first-time Google users receive the `Customer` role, while existing users with matching email are linked to the Google login without changing their roles. Account management requires authentication, keeps email read-only, and uses Identity password hash APIs for password changes.
 
 ---
 
@@ -208,6 +216,9 @@ These are rendered inside other views and do not have their own URLs:
 | Views/Shared/_ValidationScriptsPartial.cshtml | All form views | jQuery Validate setup with blur triggering |
 | Views/Shared/_ValidationToast.cshtml | All Create/Edit form views | Server-side error toast shown on ModelState failure |
 | Views/Shared/_PlantAutocomplete.cshtml | Index search forms, Create/Edit FK fields | AJAX autocomplete input (search and select modes) |
+| Views/Shared/_PlantAttachmentList.cshtml | Plant Edit | Thumbnail list for uploaded plant photos with staged soft-delete actions |
+| Views/Shared/_SeedBatchAttachmentList.cshtml | SeedBatch Edit | Thumbnail list for uploaded seed batch photos with staged soft-delete actions |
+| Views/Shared/_AttachmentGallery.cshtml | Plant and SeedBatch Index/Details | Scrollable image gallery with shared lightbox enlargement |
 | Views/Shared/_HybridDropdown.cshtml | Index filter forms, Create/Edit enum fields | Client-side filtered dropdown for small collections |
 | Views/Shared/_DatePicker.cshtml | Plant/SeedBatch Create/Edit forms | Custom date picker with hr/en culture detection |
 

@@ -36,5 +36,7 @@ namespace Carnivorous_Plant_Nursery.Models
                 _estimatedGerminationRate = value;
             }
         }
+
+        public virtual ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
     }
 }

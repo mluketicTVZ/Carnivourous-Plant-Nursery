@@ -16,6 +16,20 @@ namespace Carnivorous_Plant_Nursery.Models
         public const string ApiInvalidReference = "One or more referenced records do not exist.";
         public const string InvalidLoginAttempt = "Invalid login attempt.";
         public const string InvalidPhoneNumberFormat = "Phone number format is not valid.";
+        public const string InvalidCityFormat = "City can contain only letters, spaces, apostrophes, periods, and hyphens.";
+        public const string ExternalLoginError = "External login could not be completed.";
+        public const string ExternalLoginEmailMissing = "External login did not provide an email address.";
+        public const string AccountUpdateFailed = "Account details could not be updated.";
+        public const string CurrentPasswordRequired = "Current password is required to change your password.";
+        public const string NewPasswordRequired = "New password is required when current password is provided.";
+        public const string LocalPasswordUnavailable = "This account does not have a local password to change.";
+        public const string PasswordMinimumLength = "Password must be at least 8 characters long.";
         public const string PasswordConfirmationMismatch = "The password and confirmation password do not match.";
+        public const string AttachmentFileRequired = "Select at least one image before uploading.";
+        public const string AttachmentInvalidImageType = "Only JPG, PNG, WEBP, and GIF image files can be uploaded.";
+        public const string AttachmentTooLarge = "Uploaded images must be 5 MB or smaller.";
+        public const string AttachmentPlantNotFound = "The selected plant does not exist.";
+        public const string AttachmentSeedBatchNotFound = "The selected seed batch does not exist.";
+        public const string AttachmentPendingFileMissing = "One or more uploaded images could not be found. Upload them again before saving.";
     }
 }

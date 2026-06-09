@@ -1,0 +1,7 @@
+dotnet add Carnivorous-Plant-Nursery package Microsoft.AspNetCore.Authentication.Google
+
+dotnet user-secrets set "Authentication:Google:ClientId" "YOUR_CLIENT_ID" --project Carnivorous-Plant-Nursery
+dotnet user-secrets set "Authentication:Google:ClientSecret" "YOUR_CLIENT_SECRET" --project Carnivorous-Plant-Nursery
+
+list secrets:
+dotnet user-secrets list --project Carnivorous-Plant-Nursery | Select-String "Authentication:Google"

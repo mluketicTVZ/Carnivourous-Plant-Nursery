@@ -13,6 +13,18 @@
 
 <div class="entity-form-wrapper" style="max-width: 640px;">
     <h1 class="form-title">Create Account</h1>
+
+    <form asp-controller="Account" asp-action="ExternalLogin" method="post" class="external-login-form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="provider" value="@DisplayConstant.GoogleProvider" />
+        <button type="submit" class="btn-google-login">
+            <span class="google-login-mark">G</span>
+            Continue with Google
+        </button>
+    </form>
+
+    <div class="account-divider"><span>or create with email</span></div>
+
     <form asp-controller="Account" asp-action="Register" method="post">
         @Html.AntiForgeryToken()
 

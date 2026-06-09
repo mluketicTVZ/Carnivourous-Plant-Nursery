@@ -17,6 +17,7 @@ namespace Carnivorous_Plant_Nursery.Repositories
             await _db.Plant
                 .Include(p => p.Taxonomy)
                 .Include(p => p.Lineage)
+                .Include(p => p.Attachments.Where(a => a.DeletedAt == null).OrderByDescending(a => a.CreatedAt))
                 .Where(p => p.DeletedAt == null)
                 .ToListAsync();
 
@@ -24,12 +25,14 @@ namespace Carnivorous_Plant_Nursery.Repositories
             await _db.Plant
                 .Include(p => p.Taxonomy)
                 .Include(p => p.Lineage)
+                .Include(p => p.Attachments.Where(a => a.DeletedAt == null).OrderByDescending(a => a.CreatedAt))
                 .Where(p => p.DeletedAt == null)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
         public async Task<List<Plant>> GetAvailableInWebshop() =>
             await _db.Plant
                 .Include(p => p.Taxonomy)
+                .Include(p => p.Attachments.Where(a => a.DeletedAt == null).OrderByDescending(a => a.CreatedAt))
                 .Where(p => p.DeletedAt == null)
                 .Where(p => p.IsAvailableInWebshop)
                 .OrderBy(p => p.Price)
@@ -71,6 +74,7 @@ namespace Carnivorous_Plant_Nursery.Repositories
             var query = _db.Plant
                 .Include(p => p.Taxonomy)
                 .Include(p => p.Lineage)
+                .Include(p => p.Attachments.Where(a => a.DeletedAt == null).OrderByDescending(a => a.CreatedAt))
                 .Where(p => p.DeletedAt == null);
 
             if (!string.IsNullOrWhiteSpace(searchTerm))

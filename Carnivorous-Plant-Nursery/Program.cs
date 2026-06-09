@@ -23,15 +23,34 @@ builder.Services
     {
         options.SignIn.RequireConfirmedAccount = false;
         options.User.RequireUniqueEmail = true;
+        options.Password.RequiredLength = 8;
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireNonAlphanumeric = false;
     })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+    });
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.ExpireTimeSpan = TimeSpan.FromDays(14);
+    options.SlidingExpiration = true;
+});
 
 builder.Services.AddScoped<PlantRepository>();
 builder.Services.AddScoped<TaxonomyRepository>();
 builder.Services.AddScoped<CareProfileRepository>();
 builder.Services.AddScoped<SeedBatchRepository>();
 builder.Services.AddScoped<InventoryRepository>();
+builder.Services.AddScoped<AttachmentRepository>();
 
 var app = builder.Build();
 

@@ -1,0 +1,25 @@
+Future Implementation Notes
+
+Account soft delete and email reuse
+
+- If accounts later get a DeletedAt field, do not leave the original Email/UserName values on soft-deleted users indefinitely.
+- ASP.NET Core Identity effectively blocks duplicate account emails in this app because UserName is set to Email and the normalized username has a unique index.
+- Preferred future approach:
+  1. Add DeletedAt to AppUser.
+  2. When an account is soft-deleted, anonymize Identity login fields so the original email can be reused:
+     - Email = deleted-{userId}@deleted.local
+     - UserName = deleted-{userId}@deleted.local
+     - NormalizedEmail = normalized deleted email
+     - NormalizedUserName = normalized deleted username
+     - PhoneNumber = null
+     - DisplayName = Deleted account
+     - DefaultShippingCity = null
+  3. Keep non-personal relational history, such as order references, as needed.
+  4. Hard-delete or further anonymize the account after the retention period, for example after about one month.
+- A filtered unique index on active users only is possible in SQL Server, but it is more invasive with Identity's default normalized username indexes.
+
+Google sign-in display name refinement
+
+- Google-created accounts currently use the Google profile name as DisplayName.
+- Add an intermediate post-Google-registration step where first-time Google users choose a nursery DisplayName before entering the app.
+- Keep the Google email read-only until email confirmation/change-email support exists.

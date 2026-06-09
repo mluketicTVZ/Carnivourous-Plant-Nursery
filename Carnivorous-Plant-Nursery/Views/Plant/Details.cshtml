@@ -26,12 +26,22 @@
 
 <div class="entity-details-wrapper">
     <div class="details-header">
-        <h1>@Model.Taxonomy?.CommonName</h1>
-        <div class="scientific-name">@Model.Taxonomy?.FullName</div>
-        @if (!string.IsNullOrEmpty(Model.ListingTitle))
-        {
-            <div style="font-style: italic; color: var(--dark-green); margin-top: 0.5rem; font-size: 1.1rem;">@Model.ListingTitle</div>
-        }
+        <div class="details-title-row">
+            <div>
+                <h1>@Model.Taxonomy?.CommonName</h1>
+                <div class="scientific-name">@Model.Taxonomy?.FullName</div>
+                @if (!string.IsNullOrEmpty(Model.ListingTitle))
+                {
+                    <div style="font-style: italic; color: var(--dark-green); margin-top: 0.5rem; font-size: 1.1rem;">@Model.ListingTitle</div>
+                }
+            </div>
+            <partial name="_AttachmentGallery"
+                     model="Model.Attachments"
+                     view-data='@(new ViewDataDictionary(ViewData) {
+                         { "GallerySize", "hero" },
+                         { "GalleryLabel", $"Photos for {Model.Taxonomy?.CommonName ?? Model.ListingTitle ?? "plant"}" }
+                     })' />
+        </div>
     </div>
     
     <div class="details-content">

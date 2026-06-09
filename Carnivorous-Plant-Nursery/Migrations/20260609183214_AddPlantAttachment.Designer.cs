@@ -4,6 +4,7 @@ using Carnivorous_Plant_Nursery.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Carnivorous_Plant_Nursery.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260609183214_AddPlantAttachment")]
+    partial class AddPlantAttachment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -174,10 +177,7 @@ namespace Carnivorous_Plant_Nursery.Migrations
                     b.Property<long>("FileSize")
                         .HasColumnType("bigint");
 
-                    b.Property<int?>("PlantId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SeedBatchId")
+                    b.Property<int>("PlantId")
                         .HasColumnType("int");
 
                     b.Property<string>("StoredFileName")
@@ -188,8 +188,6 @@ namespace Carnivorous_Plant_Nursery.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PlantId");
-
-                    b.HasIndex("SeedBatchId");
 
                     b.ToTable("Attachment");
                 });
@@ -566,16 +564,10 @@ namespace Carnivorous_Plant_Nursery.Migrations
                     b.HasOne("Carnivorous_Plant_Nursery.Models.Plant", "Plant")
                         .WithMany("Attachments")
                         .HasForeignKey("PlantId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Carnivorous_Plant_Nursery.Models.SeedBatch", "SeedBatch")
-                        .WithMany("Attachments")
-                        .HasForeignKey("SeedBatchId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Plant");
-
-                    b.Navigation("SeedBatch");
                 });
 
             modelBuilder.Entity("Carnivorous_Plant_Nursery.Models.Lineage", b =>
@@ -691,11 +683,6 @@ namespace Carnivorous_Plant_Nursery.Migrations
                 });
 
             modelBuilder.Entity("Carnivorous_Plant_Nursery.Models.Plant", b =>
-                {
-                    b.Navigation("Attachments");
-                });
-
-            modelBuilder.Entity("Carnivorous_Plant_Nursery.Models.SeedBatch", b =>
                 {
                     b.Navigation("Attachments");
                 });

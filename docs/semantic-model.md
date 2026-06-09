@@ -52,6 +52,27 @@ Represents a living plant specimen.
 | EstimatedAgeAtAcquiryYears | int? | — |
 | HealthStatus | HealthState? | Enum: Excellent, Good, Fair, Poor, Quarantined, Dead |
 | HealthDescription | string? | Max 1000 chars |
+| Attachments | ICollection\<Attachment\> | Navigation - one Plant to many active or soft-deleted image metadata records |
+
+---
+
+### Attachment
+Stores plant or seed batch image metadata. Physical image files are stored on disk under `wwwroot/uploads/plants/{PlantId}` or `wwwroot/uploads/seeds/{SeedBatchId}` and are not deleted when metadata is soft-deleted.
+
+| Property | Type | Notes |
+|---|---|---|
+| Id | int | [Key] Primary key |
+| PlantId | int? | [ForeignKey("Plant")] |
+| Plant | Plant? | Navigation - many Attachments to one Plant |
+| SeedBatchId | int? | [ForeignKey("SeedBatch")] |
+| SeedBatch | SeedBatch? | Navigation - many Attachments to one SeedBatch |
+| FileName | string | Original uploaded file name, max 255 chars |
+| StoredFileName | string | Generated file name on disk, max 255 chars |
+| FilePath | string | Web path used for image display, max 500 chars |
+| ContentType | string | Uploaded MIME type, max 100 chars |
+| FileSize | long | Uploaded file size in bytes |
+| CreatedAt | DateTime | Metadata creation timestamp |
+| DeletedAt | DateTime? | Soft delete timestamp - `null` = active, set = deleted |
 
 ---
 
@@ -65,6 +86,8 @@ Represents a batch of collected or purchased seeds.
 | ExpectedViabilityMonths | int? | — |
 | RequiresStratification | bool? | Whether cold stratification is needed |
 | EstimatedGerminationRate | decimal? | 0.0 – 1.0, decimal(18,2) |
+
+| Attachments | ICollection\<Attachment\> | Navigation - one SeedBatch to many active or soft-deleted image metadata records |
 
 ---
 
@@ -168,3 +191,5 @@ CareProfile ──── 1:N ──── Taxonomy ──── 1:N ────
 | Lineage → InventoryItem (Father) | Many-to-One | A lineage has one optional paternal parent |
 | InventoryItem (Plant) | TPH/TPT subtype | Plant-specific data |
 | InventoryItem (SeedBatch) | TPH/TPT subtype | SeedBatch-specific data |
+| Plant -> Attachment | One-to-Many | A plant can have multiple uploaded image metadata records; attachment metadata uses soft delete |
+| SeedBatch -> Attachment | One-to-Many | A seed batch can have multiple uploaded image metadata records; attachment metadata uses soft delete |

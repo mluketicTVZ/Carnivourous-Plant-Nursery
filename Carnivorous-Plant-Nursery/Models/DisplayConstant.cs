@@ -5,5 +5,8 @@ namespace Carnivorous_Plant_Nursery.Models
         public const string UnknownTaxonomy = "Nepoznata taksonomija";
         public const string UnknownGeneration = "Nepoznata generacija";
         public const string UnknownFullName = "Nepoznato puno ime";
+        public const string GoogleProvider = "Google";
+        public const string AccountUpdated = "Account details were updated.";
+        public const string PasswordUpdated = "Password was updated.";
     }
 }

@@ -13,6 +13,7 @@ namespace Carnivorous_Plant_Nursery.Data
         public DbSet<Taxonomy> Taxonomy { get; set; }
         public DbSet<CareProfile> CareProfile { get; set; }
         public DbSet<Lineage> Lineage { get; set; }
+        public DbSet<Attachment> Attachment { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,6 +54,18 @@ namespace Carnivorous_Plant_Nursery.Data
                 .WithMany()
                 .HasForeignKey(p => p.SourceSeedBatchId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Plant>()
+                .HasMany(p => p.Attachments)
+                .WithOne(a => a.Plant)
+                .HasForeignKey(a => a.PlantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SeedBatch>()
+                .HasMany(s => s.Attachments)
+                .WithOne(a => a.SeedBatch)
+                .HasForeignKey(a => a.SeedBatchId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

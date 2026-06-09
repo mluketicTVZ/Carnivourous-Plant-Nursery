@@ -1,0 +1,38 @@
+@using Carnivorous_Plant_Nursery.Models
+@model IEnumerable<Attachment>
+
+@{
+    var attachments = Model?.ToList() ?? new List<Attachment>();
+    var size = ViewData["GallerySize"] as string ?? "compact";
+    var label = ViewData["GalleryLabel"] as string ?? "Photos";
+    var galleryId = $"attachment-gallery-{Guid.NewGuid():N}";
+}
+
+<div class="attachment-gallery attachment-gallery-@size"
+     data-attachment-gallery="@galleryId"
+     aria-label="@label">
+    @if (attachments.Count == 0)
+    {
+        <div class="attachment-gallery-empty">
+            No photos
+        </div>
+    }
+    else
+    {
+        <div class="attachment-gallery-strip">
+            @for (var index = 0; index < attachments.Count; index++)
+            {
+                var attachment = attachments[index];
+                <button type="button"
+                        class="attachment-gallery-thumb"
+                        data-gallery-trigger="true"
+                        data-gallery-id="@galleryId"
+                        data-gallery-index="@index"
+                        data-gallery-src="@attachment.FilePath"
+                        data-gallery-alt="@attachment.FileName">
+                    <img src="@attachment.FilePath" alt="@attachment.FileName" loading="lazy" />
+                </button>
+            }
+        </div>
+    }
+</div>
