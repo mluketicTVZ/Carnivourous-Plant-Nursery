@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Carnivorous_Plant_Nursery.Repositories;
 using Carnivorous_Plant_Nursery.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Carnivorous_Plant_Nursery.Controllers
 {
@@ -55,18 +56,18 @@ namespace Carnivorous_Plant_Nursery.Controllers
 
         [HttpGet]
         [Route("create")]
+        [Authorize(Roles = AuthorizationRole.AdminOrManager)]
         public IActionResult Create()
         {
-            if (!IsAdmin) return RequireAdmin();
             return View();
         }
 
         [HttpPost]
         [Route("create")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = AuthorizationRole.AdminOrManager)]
         public async Task<IActionResult> Create(CareProfile model)
         {
-            if (!IsAdmin) return RequireAdmin();
             if (!ModelState.IsValid) return View(model);
             await _careProfileRepository.Add(model);
             return RedirectToAction("Index");
@@ -75,9 +76,9 @@ namespace Carnivorous_Plant_Nursery.Controllers
         [HttpGet]
         [Route("edit/{id:int}")]
         [ActionName("Edit")]
+        [Authorize(Roles = AuthorizationRole.AdminOrManager)]
         public async Task<IActionResult> EditGet(int id)
         {
-            if (!IsAdmin) return RequireAdmin();
             var careProfile = await _careProfileRepository.GetById(id);
             if (careProfile == null) return NotFound();
             return View(careProfile);
@@ -87,10 +88,9 @@ namespace Carnivorous_Plant_Nursery.Controllers
         [Route("edit/{id:int}")]
         [ValidateAntiForgeryToken]
         [ActionName("Edit")]
+        [Authorize(Roles = AuthorizationRole.AdminOrManager)]
         public async Task<IActionResult> EditPost(int id)
         {
-            if (!IsAdmin) return RequireAdmin();
-
             var entity = await _careProfileRepository.GetById(id);
             if (entity == null) return NotFound();
 
@@ -115,9 +115,9 @@ namespace Carnivorous_Plant_Nursery.Controllers
         [HttpPost]
         [Route("delete/{id:int}")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = AuthorizationRole.Admin)]
         public async Task<IActionResult> Delete(int id)
         {
-            if (!IsAdmin) return RequireAdmin();
             try
             {
                 await _careProfileRepository.Delete(id);

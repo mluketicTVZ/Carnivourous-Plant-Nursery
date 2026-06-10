@@ -1,0 +1,109 @@
+@model Carnivorous_Plant_Nursery.Models.AccountManageViewModel
+
+@{
+    ViewData["Title"] = "Account Management";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&rsaquo;</span>
+    <span>Account Management</span>
+</div>
+
+<partial name="_BackButton" />
+
+<div class="entity-form-wrapper" style="max-width: 720px;">
+    <h1 class="form-title">Account Management</h1>
+
+    @if (TempData["AccountStatus"] != null || TempData["PasswordStatus"] != null)
+    {
+        <div class="account-status-panel">
+            @if (TempData["AccountStatus"] != null)
+            {
+                <p>@TempData["AccountStatus"]</p>
+            }
+            @if (TempData["PasswordStatus"] != null)
+            {
+                <p>@TempData["PasswordStatus"]</p>
+            }
+        </div>
+    }
+
+    <form asp-controller="Account" asp-action="Manage" method="post">
+        @Html.AntiForgeryToken()
+
+        <fieldset class="details-section">
+            <legend>Profile</legend>
+
+            <div asp-validation-summary="ModelOnly" class="val-error"></div>
+
+            <div class="filter-group">
+                <label asp-for="Email" class="card-label"></label>
+                <input asp-for="Email" readonly class="readonly-field" />
+                <span class="field-hint">Email changes are disabled until email confirmation is implemented.</span>
+            </div>
+
+            <div class="filter-group">
+                <label asp-for="DisplayName" class="card-label"></label>
+                <input asp-for="DisplayName" autocomplete="nickname" />
+                <span asp-validation-for="DisplayName" class="val-error"></span>
+            </div>
+
+            <div class="filter-group">
+                <label asp-for="PhoneNumber" class="card-label"></label>
+                <input asp-for="PhoneNumber" autocomplete="tel" />
+                <span asp-validation-for="PhoneNumber" class="val-error"></span>
+            </div>
+
+            <div class="filter-group">
+                <label asp-for="DefaultShippingCity" class="card-label"></label>
+                <input asp-for="DefaultShippingCity" autocomplete="address-level2" />
+                <span asp-validation-for="DefaultShippingCity" class="val-error"></span>
+            </div>
+        </fieldset>
+
+        <fieldset class="details-section">
+            <legend>Password</legend>
+
+            @if (Model.HasLocalPassword)
+            {
+                <div class="filter-group">
+                    <label asp-for="CurrentPassword" class="card-label"></label>
+                    <input asp-for="CurrentPassword" autocomplete="current-password" />
+                    <span asp-validation-for="CurrentPassword" class="val-error"></span>
+                </div>
+
+                <div class="filter-group">
+                    <label asp-for="NewPassword" class="card-label"></label>
+                    <input asp-for="NewPassword" autocomplete="new-password" />
+                    <span asp-validation-for="NewPassword" class="val-error"></span>
+                </div>
+
+                <div class="filter-group">
+                    <label asp-for="ConfirmNewPassword" class="card-label"></label>
+                    <input asp-for="ConfirmNewPassword" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmNewPassword" class="val-error"></span>
+                </div>
+            }
+            else
+            {
+                <div class="attachment-empty-state">
+                    This account currently signs in through an external provider and does not have a local password to change.
+                </div>
+            }
+        </fieldset>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+            <button type="submit" class="btn-leaf">Save Account Changes</button>
+            <a asp-controller="Home" asp-action="Index" class="btn-clear">Cancel</a>
+        </div>
+    </form>
+
+    <form asp-controller="Account" asp-action="Logout" method="post" class="account-management-logout" data-transition-submit="true">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn-clear">Logout</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -27,8 +27,18 @@
 
 <div class="entity-details-wrapper">
     <div class="details-header">
-        <h1>@displayTitle</h1>
-        <div class="scientific-name">@Model.Taxonomy?.FullName</div>
+        <div class="details-title-row">
+            <div>
+                <h1>@displayTitle</h1>
+                <div class="scientific-name">@Model.Taxonomy?.FullName</div>
+            </div>
+            <partial name="_AttachmentGallery"
+                     model="Model.Attachments"
+                     view-data='@(new ViewDataDictionary(ViewData) {
+                         { "GallerySize", "hero" },
+                         { "GalleryLabel", $"Photos for {displayTitle ?? "seed batch"}" }
+                     })' />
+        </div>
     </div>
     
     <div class="details-content">
@@ -83,9 +93,12 @@
                         Add to Cart
                     </a>
                 }
-                @if (Context.Session.GetString("IsAdmin") == "true")
+                @if (User.IsInRole(AuthorizationRole.Admin) || User.IsInRole(AuthorizationRole.Manager))
                 {
                     <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-leaf">&#9998; Edit</a>
+                }
+                @if (User.IsInRole(AuthorizationRole.Admin))
+                {
                     <form id="delete-form-seedbatch" asp-action="Delete" asp-route-id="@Model.Id" method="post" style="display: inline;">
                         @Html.AntiForgeryToken()
                         <button type="button" class="btn-leaf" style="background-color: #c0392b; border-color: #c0392b;" onclick="openDeleteModal('delete-form-seedbatch', 'this seed batch')">&#128465; Delete</button>

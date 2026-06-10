@@ -1,0 +1,34 @@
+@using Carnivorous_Plant_Nursery.Models
+@model IEnumerable<Attachment>
+
+@{
+}
+
+@if (!Model.Any())
+{
+    <div class="attachment-empty-state">
+        No plant photos have been uploaded yet.
+    </div>
+}
+else
+{
+    <div class="plant-attachment-grid">
+        @foreach (var attachment in Model)
+        {
+            <article class="plant-attachment-card">
+                <a href="@attachment.FilePath" target="_blank" rel="noopener" class="plant-attachment-link">
+                    <img src="@attachment.FilePath" alt="@attachment.FileName" loading="lazy" />
+                </a>
+                <div class="plant-attachment-meta">
+                    <span title="@attachment.FileName">@attachment.FileName</span>
+                    <button type="button"
+                            class="btn-clear attachment-delete-button"
+                            data-attachment-delete="true"
+                            data-existing-attachment-id="@attachment.Id">
+                        Remove
+                    </button>
+                </div>
+            </article>
+        }
+    </div>
+}

@@ -17,6 +17,7 @@ namespace Carnivorous_Plant_Nursery.Repositories
             await _db.Plant
                 .Include(p => p.Taxonomy)
                 .Include(p => p.Lineage)
+                .Include(p => p.Attachments.Where(a => a.DeletedAt == null).OrderByDescending(a => a.CreatedAt))
                 .Where(p => p.DeletedAt == null)
                 .ToListAsync();
 
@@ -24,12 +25,14 @@ namespace Carnivorous_Plant_Nursery.Repositories
             await _db.Plant
                 .Include(p => p.Taxonomy)
                 .Include(p => p.Lineage)
+                .Include(p => p.Attachments.Where(a => a.DeletedAt == null).OrderByDescending(a => a.CreatedAt))
                 .Where(p => p.DeletedAt == null)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
         public async Task<List<Plant>> GetAvailableInWebshop() =>
             await _db.Plant
                 .Include(p => p.Taxonomy)
+                .Include(p => p.Attachments.Where(a => a.DeletedAt == null).OrderByDescending(a => a.CreatedAt))
                 .Where(p => p.DeletedAt == null)
                 .Where(p => p.IsAvailableInWebshop)
                 .OrderBy(p => p.Price)
@@ -63,15 +66,21 @@ namespace Carnivorous_Plant_Nursery.Repositories
 
         public async Task<List<Plant>> Search(string searchTerm)
         {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-                return await GetAll();
+            return await Search(searchTerm, null, null, null);
+        }
 
-            var term = searchTerm.Trim();
-            return await _db.Plant
+        public async Task<List<Plant>> Search(string? searchTerm, bool? webshopOnly, PlantStage? stage, HealthState? healthStatus)
+        {
+            var query = _db.Plant
                 .Include(p => p.Taxonomy)
                 .Include(p => p.Lineage)
-                .Where(p =>
-                    p.DeletedAt == null &&
+                .Include(p => p.Attachments.Where(a => a.DeletedAt == null).OrderByDescending(a => a.CreatedAt))
+                .Where(p => p.DeletedAt == null);
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var term = searchTerm.Trim();
+                query = query.Where(p =>
                     ((p.ListingTitle != null && p.ListingTitle.Contains(term)) ||
                     (p.Description != null && p.Description.Contains(term)) ||
                     (p.Taxonomy != null && (
@@ -79,8 +88,19 @@ namespace Carnivorous_Plant_Nursery.Repositories
                         (p.Taxonomy.Genus != null && p.Taxonomy.Genus.Contains(term)) ||
                         (p.Taxonomy.Species != null && p.Taxonomy.Species.Contains(term)) ||
                         (p.Taxonomy.Cultivar != null && p.Taxonomy.Cultivar.Contains(term))
-                    ))))
-                .ToListAsync();
+                    ))));
+            }
+
+            if (webshopOnly == true)
+                query = query.Where(p => p.IsAvailableInWebshop);
+
+            if (stage.HasValue)
+                query = query.Where(p => p.CurrentStage == stage.Value);
+
+            if (healthStatus.HasValue)
+                query = query.Where(p => p.HealthStatus == healthStatus.Value);
+
+            return await query.ToListAsync();
         }
         public async Task Add(Plant plant)
         {

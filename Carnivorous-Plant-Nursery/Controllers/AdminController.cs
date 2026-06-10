@@ -1,60 +1,40 @@
+using Carnivorous_Plant_Nursery.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using OtpNet;
 
 namespace Carnivorous_Plant_Nursery.Controllers
 {
     [Route("admin")]
     public class AdminController : BaseController
     {
-        private readonly IConfiguration _config;
+        private readonly SignInManager<AppUser> _signInManager;
 
-        public AdminController(IConfiguration config)
+        public AdminController(SignInManager<AppUser> signInManager)
         {
-            _config = config;
+            _signInManager = signInManager;
         }
 
         [HttpGet]
         [Route("")]
         public IActionResult Index()
         {
-            return View("Login");
+            return RedirectToAction("Login", "Account");
         }
 
         [HttpPost]
         [Route("")]
         [ValidateAntiForgeryToken]
-        public IActionResult Login(string passkey, string totpCode)
+        public IActionResult Login()
         {
-            var passkeyHash = _config["AdminPasskeyHash"];
-            var totpSecret = _config["AdminTotpSecret"];
-
-            bool passkeyValid = !string.IsNullOrEmpty(passkeyHash)
-                && BCrypt.Net.BCrypt.Verify(passkey ?? string.Empty, passkeyHash);
-
-            bool totpValid = false;
-            if (!string.IsNullOrEmpty(totpSecret) && !string.IsNullOrEmpty(totpCode))
-            {
-                var key = Base32Encoding.ToBytes(totpSecret);
-                var totp = new Totp(key);
-                totpValid = totp.VerifyTotp(totpCode.Trim(), out _, VerificationWindow.RfcSpecifiedNetworkDelay);
-            }
-
-            if (passkeyValid && totpValid)
-            {
-                HttpContext.Session.SetString("IsAdmin", "true");
-                return RedirectToAction("Index", "Home");
-            }
-
-            ViewBag.Error = "Invalid credentials.";
-            return View("Login");
+            return RedirectToAction("Login", "Account");
         }
 
         [HttpPost]
         [Route("logout")]
         [ValidateAntiForgeryToken]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            HttpContext.Session.Remove("IsAdmin");
+            await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
     }

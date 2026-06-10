@@ -38,11 +38,13 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/plants/create` | GET | PlantController | Create() | Views/Plant/Create.cshtml |
 | `/plants/create` | POST | PlantController | Create(Plant model) | Redirects to Details on success |
 | `/plants/edit/{id}` | GET | PlantController | Edit(int id) | Views/Plant/Edit.cshtml |
-| `/plants/edit/{id}` | POST | PlantController | Edit(int id, Plant model) | Redirects to Details on success |
+| `/plants/edit/{id}` | POST | PlantController | Edit(int id, Plant model) | Redirects to Details on success; commits staged attachment additions/removals |
+| `/plants/{id}/attachments` | GET | PlantController | Attachments(int id) | Views/Shared/_PlantAttachmentList.cshtml partial |
+| `/plants/{id}/attachments/upload` | POST | PlantController | UploadAttachment(int id, IFormFile file) | JSON success/error; stores pending file under `wwwroot/uploads/plants/_pending/{id}` |
 | `/plants/delete/{id}` | POST | PlantController | Delete(int id) | Redirects to Index on success, Details on FK error |
 | `/plants/suggestions?term=X` | GET | PlantController | Suggestions(string term) | JSON: `[{text, value}]` |
 
-**Notes**: `Details()` returns `NotFound()` if no plant with the given id exists. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this plant. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
+**Notes**: `Details()` returns `NotFound()` if no plant with the given id exists. Create/Edit and attachment upload require `Admin` or `Manager`; Delete requires `Admin`. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this plant. Plant Edit stages uploaded pending files and staged removals in hidden form fields; metadata insertions and soft-deletes are committed only when Save Changes posts successfully. Attachment soft-delete leaves the physical image file on disk for later cleanup. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
 
 ---
 
@@ -74,7 +76,7 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/care/edit/{id}` | POST | CareProfileController | Edit(int id, CareProfile model) | Redirects to Details on success |
 | `/care/delete/{id}` | POST | CareProfileController | Delete(int id) | Redirects to Index on success, Details on FK error |
 
-**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a taxonomy references this care profile.
+**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit require `Admin` or `Manager`; Delete requires `Admin`. Delete sets `TempData["DeleteError"]` and redirects to Details if a taxonomy references this care profile.
 
 ---
 
@@ -89,11 +91,13 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/seeds/create` | GET | SeedBatchController | Create() | Views/SeedBatch/Create.cshtml |
 | `/seeds/create` | POST | SeedBatchController | Create(SeedBatch model) | Redirects to Details on success |
 | `/seeds/edit/{id}` | GET | SeedBatchController | Edit(int id) | Views/SeedBatch/Edit.cshtml |
-| `/seeds/edit/{id}` | POST | SeedBatchController | Edit(int id, SeedBatch model) | Redirects to Details on success |
+| `/seeds/edit/{id}` | POST | SeedBatchController | Edit(int id, SeedBatch model) | Redirects to Details on success; commits staged attachment additions/removals |
+| `/seeds/{id}/attachments` | GET | SeedBatchController | Attachments(int id) | Views/Shared/_SeedBatchAttachmentList.cshtml partial |
+| `/seeds/{id}/attachments/upload` | POST | SeedBatchController | UploadAttachment(int id, IFormFile file) | JSON success/error; stores pending file under `wwwroot/uploads/seeds/_pending/{id}` |
 | `/seeds/delete/{id}` | POST | SeedBatchController | Delete(int id) | Redirects to Index on success, Details on FK error |
 | `/seeds/suggestions?term=X` | GET | SeedBatchController | Suggestions(string term) | JSON: `[{text, value}]` |
 
-**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this seed batch. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
+**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit and attachment upload require `Admin` or `Manager`; Delete requires `Admin`. Delete sets `TempData["DeleteError"]` and redirects to Details if a lineage entry references this seed batch. Seed Batch Edit stages uploaded pending files and staged removals in hidden form fields; metadata insertions and soft-deletes are committed only when Save Changes posts successfully. Attachment soft-delete leaves the physical image file on disk for later cleanup. `Suggestions()` returns up to 8 matching results for the AJAX autocomplete control.
 
 ---
 
@@ -112,7 +116,25 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 | `/taxonomy/suggestions?term=X` | GET | TaxonomyController | Suggestions(string term) | JSON: `[{text, value}]` |
 | `/taxonomy/id-suggestions?term=X` | GET | TaxonomyController | IdSuggestions(string term) | JSON: `[{text, value}]` (value = taxonomy ID) |
 
-**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit/Delete require admin session. Delete sets `TempData["DeleteError"]` and redirects to Details if a plant or seed batch references this taxonomy. `Suggestions()` returns display-name matches for the search autocomplete; `IdSuggestions()` returns matches with the numeric ID as value, used by Plant/SeedBatch FK pickers.
+**Notes**: `Details()` returns `NotFound()` if id is not found. Create/Edit require `Admin` or `Manager`; Delete requires `Admin`. Delete sets `TempData["DeleteError"]` and redirects to Details if a plant or seed batch references this taxonomy. `Suggestions()` returns display-name matches for the search autocomplete; `IdSuggestions()` returns matches with the numeric ID as value, used by Plant/SeedBatch FK pickers.
+
+---
+
+## AccountController `[Route("account")]`
+
+| URL | HTTP | Controller | Action | View |
+|---|---|---|---|---|
+| `/account/login` | GET | AccountController | Login(string? returnUrl) | Views/Account/Login.cshtml |
+| `/account/login` | POST | AccountController | Login(LoginViewModel model) | Redirects to return URL/Home on success, re-renders Login on failure |
+| `/account/register` | GET | AccountController | Register() | Views/Account/Register.cshtml |
+| `/account/register` | POST | AccountController | Register(RegisterViewModel model) | Creates a Customer account, signs in, redirects Home |
+| `/account/manage` | GET | AccountController | Manage() | Views/Account/Manage.cshtml |
+| `/account/manage` | POST | AccountController | Manage(AccountManageViewModel model) | Updates display name, phone, default shipping city, and optional local password |
+| `/account/external-login` | POST | AccountController | ExternalLogin(string provider, string? returnUrl) | Starts external provider login challenge |
+| `/account/external-login-callback` | GET | AccountController | ExternalLoginCallback(string? returnUrl) | Signs in linked external users, links existing email users, or creates Customer account |
+| `/account/logout` | POST | AccountController | Logout() | Signs out and redirects Home |
+
+**Notes**: Authentication uses ASP.NET Core Identity with `AppUser`. Register requires email, display name, and password; phone number and default shipping city are optional. New local registrations receive the `Customer` role. Local login uses `RememberMe` for persistent auth cookies; non-remembered local logins use a session auth cookie. Google external login uses local configuration keys `Authentication:Google:ClientId` and `Authentication:Google:ClientSecret`; first-time Google users receive the `Customer` role, while existing users with matching email are linked to the Google login without changing their roles. Account management requires authentication, keeps email read-only, and uses Identity password hash APIs for password changes.
 
 ---
 
@@ -120,11 +142,66 @@ All controllers also use **attribute routing** via `[Route]` on the controller c
 
 | URL | HTTP | Controller | Action | View |
 |---|---|---|---|---|
-| `/admin` | GET | AdminController | Index() | Views/Admin/Login.cshtml |
-| `/admin` | POST | AdminController | Login(string passkey) | Redirects to `/` on success, re-renders Login on failure |
-| `/admin/logout` | POST | AdminController | Logout() | Redirects to `/` |
+| `/admin` | GET | AdminController | Index() | Redirects to `/account/login` |
+| `/admin` | POST | AdminController | Login() | Redirects to `/account/login` |
+| `/admin/logout` | POST | AdminController | Logout() | Signs out and redirects Home |
 
-**Notes**: Login checks `passkey` against `appsettings.json "AdminPasskey"`. On success sets `HttpContext.Session["IsAdmin"] = "true"`. Logout removes that session key. Admin state gates Create/Edit/Delete actions across all entity controllers.
+**Notes**: This controller is a compatibility bridge for old admin URLs. Inventory authorization no longer uses `HttpContext.Session["IsAdmin"]`; it uses Identity roles.
+
+---
+
+## API Controllers
+
+API controllers return JSON DTOs and do not render Razor views. They use `[ApiController]` and are routed under `/api/...`.
+
+### PlantApiController `[Route("api/plant")]`
+
+| URL | HTTP | Action | Response |
+|---|---|---|---|
+| `/api/plant` | GET | GetAll(searchTerm, webshopOnly, stage, healthStatus) | `200 OK` with `PlantDto[]` |
+| `/api/plant/{id}` | GET | GetById(int id) | `200 OK` with `PlantDto`, or `404 Not Found` |
+| `/api/plant` | POST | Create(PlantWriteDto dto) | `201 Created` with `PlantDto`, or `400 Bad Request`; requires `Admin` or `Manager` |
+| `/api/plant/{id}` | PUT | Update(int id, PlantWriteDto dto) | `200 OK` with `PlantDto`, `400 Bad Request`, or `404 Not Found`; requires `Admin` or `Manager` |
+| `/api/plant/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure; requires `Admin` |
+
+### SeedBatchApiController `[Route("api/seeds")]`
+
+| URL | HTTP | Action | Response |
+|---|---|---|---|
+| `/api/seeds` | GET | GetAll(searchTerm, availableInWebshop) | `200 OK` with `SeedBatchDto[]` |
+| `/api/seeds/{id}` | GET | GetById(int id) | `200 OK` with `SeedBatchDto`, or `404 Not Found` |
+| `/api/seeds` | POST | Create(SeedBatchWriteDto dto) | `201 Created` with `SeedBatchDto`, or `400 Bad Request`; requires `Admin` or `Manager` |
+| `/api/seeds/{id}` | PUT | Update(int id, SeedBatchWriteDto dto) | `200 OK` with `SeedBatchDto`, `400 Bad Request`, or `404 Not Found`; requires `Admin` or `Manager` |
+| `/api/seeds/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure; requires `Admin` |
+
+### TaxonomyApiController `[Route("api/taxonomy")]`
+
+| URL | HTTP | Action | Response |
+|---|---|---|---|
+| `/api/taxonomy` | GET | GetAll(searchTerm) | `200 OK` with `TaxonomyDto[]` |
+| `/api/taxonomy/{id}` | GET | GetById(int id) | `200 OK` with `TaxonomyDto`, or `404 Not Found` |
+| `/api/taxonomy` | POST | Create(TaxonomyWriteDto dto) | `201 Created` with `TaxonomyDto`, or `400 Bad Request`; requires `Admin` or `Manager` |
+| `/api/taxonomy/{id}` | PUT | Update(int id, TaxonomyWriteDto dto) | `200 OK` with `TaxonomyDto`, `400 Bad Request`, or `404 Not Found`; requires `Admin` or `Manager` |
+| `/api/taxonomy/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure; requires `Admin` |
+
+### CareProfileApiController `[Route("api/care")]`
+
+| URL | HTTP | Action | Response |
+|---|---|---|---|
+| `/api/care` | GET | GetAll(searchTerm, requiredLight) | `200 OK` with `CareProfileDto[]` |
+| `/api/care/{id}` | GET | GetById(int id) | `200 OK` with `CareProfileDto`, or `404 Not Found` |
+| `/api/care` | POST | Create(CareProfileWriteDto dto) | `201 Created` with `CareProfileDto`, or `400 Bad Request`; requires `Admin` or `Manager` |
+| `/api/care/{id}` | PUT | Update(int id, CareProfileWriteDto dto) | `200 OK` with `CareProfileDto`, `400 Bad Request`, or `404 Not Found`; requires `Admin` or `Manager` |
+| `/api/care/{id}` | DELETE | Delete(int id) | `204 No Content`, `404 Not Found`, or `409 Conflict` on business-rule delete failure; requires `Admin` |
+
+### InventoryApiController `[Route("api/inventory")]`
+
+| URL | HTTP | Action | Response |
+|---|---|---|---|
+| `/api/inventory` | GET | GetAll(searchTerm, webshopOnly) | `200 OK` with `InventoryItemSummaryDto[]` |
+| `/api/inventory/{id}` | GET | GetById(int id) | `200 OK` with `InventoryItemSummaryDto`, or `404 Not Found` |
+
+**Notes**: Inventory API is read-only because `InventoryItem` is abstract. Create/update/delete operations are exposed through concrete `/api/plant` and `/api/seeds` endpoints. API delete operations preserve existing soft-delete and business-rule checks. API read endpoints are public; API write endpoints use Identity role authorization.
 
 ---
 
@@ -139,6 +216,9 @@ These are rendered inside other views and do not have their own URLs:
 | Views/Shared/_ValidationScriptsPartial.cshtml | All form views | jQuery Validate setup with blur triggering |
 | Views/Shared/_ValidationToast.cshtml | All Create/Edit form views | Server-side error toast shown on ModelState failure |
 | Views/Shared/_PlantAutocomplete.cshtml | Index search forms, Create/Edit FK fields | AJAX autocomplete input (search and select modes) |
+| Views/Shared/_PlantAttachmentList.cshtml | Plant Edit | Thumbnail list for uploaded plant photos with staged soft-delete actions |
+| Views/Shared/_SeedBatchAttachmentList.cshtml | SeedBatch Edit | Thumbnail list for uploaded seed batch photos with staged soft-delete actions |
+| Views/Shared/_AttachmentGallery.cshtml | Plant and SeedBatch Index/Details | Scrollable image gallery with shared lightbox enlargement |
 | Views/Shared/_HybridDropdown.cshtml | Index filter forms, Create/Edit enum fields | Client-side filtered dropdown for small collections |
 | Views/Shared/_DatePicker.cshtml | Plant/SeedBatch Create/Edit forms | Custom date picker with hr/en culture detection |
 
@@ -149,9 +229,15 @@ These are rendered inside other views and do not have their own URLs:
 | Section | Base URL | Actions | Query Filters |
 |---|---|---|---|
 | Home | `/` or `/home` | Index, Privacy, Error | — |
-| Admin | `/admin` | Index (login), Login, Logout | — |
+| Account | `/account` | Login, Register, Logout | returnUrl |
+| Admin compatibility | `/admin` | Redirect login, Logout | — |
 | Plants | `/plants` | Index, Details, Create, Edit, Delete | searchTerm, webshopOnly, stage, healthStatus |
+| Plant API | `/api/plant` | GET all, GET by ID, POST, PUT, DELETE | searchTerm, webshopOnly, stage, healthStatus |
 | Inventory | `/inventory` | Index, Details | searchTerm, webshopOnly |
+| Inventory API | `/api/inventory` | GET all, GET by ID | searchTerm, webshopOnly |
 | Care Profiles | `/care` | Index, Details, Create, Edit, Delete | searchTerm, requiredLight |
+| Care Profile API | `/api/care` | GET all, GET by ID, POST, PUT, DELETE | searchTerm, requiredLight |
 | Seed Batches | `/seeds` | Index, Details, Create, Edit, Delete | searchTerm, availableInWebshop |
+| Seed Batch API | `/api/seeds` | GET all, GET by ID, POST, PUT, DELETE | searchTerm, availableInWebshop |
 | Taxonomy | `/taxonomy` | Index, Details, Create, Edit, Delete | searchTerm |
+| Taxonomy API | `/api/taxonomy` | GET all, GET by ID, POST, PUT, DELETE | searchTerm |

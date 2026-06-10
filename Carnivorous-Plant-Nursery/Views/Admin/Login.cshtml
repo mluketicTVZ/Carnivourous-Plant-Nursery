@@ -10,33 +10,19 @@
 <partial name="_BackButton" />
 
 <div class="entity-form-wrapper" style="max-width: 480px;">
-    <h1 class="form-title">Admin Login</h1>
-    <form asp-controller="Admin" asp-action="Login" method="post">
+    <h1 class="form-title">Account Login</h1>
+    <form asp-controller="Account" asp-action="Login" method="get">
         @Html.AntiForgeryToken()
 
         <fieldset class="details-section">
-            <legend>Admin Access</legend>
-
-            @if (ViewBag.Error != null)
-            {
-                <p class="val-error">@ViewBag.Error</p>
-            }
-
-            <div class="filter-group" style="margin-top: 1rem;">
-                <label for="passkey">Passkey</label>
-                <input type="password" id="passkey" name="passkey" autocomplete="current-password" />
-            </div>
-
-            <div class="filter-group" style="margin-top: 1rem;">
-                <label for="totpCode">Authenticator Code</label>
-                <input type="text" id="totpCode" name="totpCode" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code" />
-            </div>
+            <legend>Nursery Account</legend>
+            <p style="color: var(--text-muted);">Inventory management now uses account roles.</p>
 
             <div style="margin-top: 1.5rem;">
-                <button type="submit" class="btn-leaf">Enter</button>
+                <button type="submit" class="btn-leaf">Continue to Login</button>
             </div>
         </fieldset>
     </form>
 </div>
 
-<p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem; max-width: 480px;">Admin access is required to create, edit, or delete records.</p>
+<p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem; max-width: 480px;">An Admin or Manager role is required to create or edit records. Delete actions require Admin.</p>

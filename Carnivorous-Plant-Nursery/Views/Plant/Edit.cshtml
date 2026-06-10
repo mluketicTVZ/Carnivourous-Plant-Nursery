@@ -3,6 +3,8 @@
 
 @{
     ViewData["Title"] = "Edit Plant";
+    var plantId = Model?.Id ?? 0;
+    var plantTitle = Model?.ListingTitle ?? Model?.Taxonomy?.CommonName ?? "Plant #" + plantId;
 }
 
 <div class="nursery-breadcrumb">
@@ -16,8 +18,8 @@
 <partial name="_ValidationToast" />
 
 <div class="entity-form-wrapper">
-    <h1 class="form-title">Edit Plant: @(Model.ListingTitle ?? Model.Taxonomy?.CommonName ?? "Plant #" + Model.Id)</h1>
-    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+    <h1 class="form-title">Edit Plant: @plantTitle</h1>
+    <form asp-action="Edit" asp-route-id="@plantId" method="post">
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="Id" />
 
@@ -188,13 +190,209 @@
             </div>
         </fieldset>
 
+        <fieldset class="details-section plant-attachment-section">
+            <legend>Plant Photos</legend>
+            <div class="plant-dropzone"
+                 id="plant-dropzone"
+                 role="button"
+                 tabindex="0"
+                 data-upload-url="@Url.Action("UploadAttachment", "Plant", new { id = plantId })">
+                <input type="file" id="plant-attachment-input" accept="image/*" multiple hidden />
+                <div class="dropzone-icon">+</div>
+                <div>
+                    <strong>Drop plant images here</strong>
+                    <span>or click to browse. JPG, PNG, WEBP, and GIF files up to 5 MB are accepted.</span>
+                </div>
+            </div>
+            <div class="plant-attachment-status val-error" id="plant-attachment-status" hidden></div>
+            <div class="plant-attachment-list"
+                 id="plant-attachment-list"
+                 data-list-url="@Url.Action("Attachments", "Plant", new { id = plantId })">
+            </div>
+            <div id="plant-attachment-form-state"></div>
+        </fieldset>
+
         <div style="display: flex; gap: 10px; margin-top: 20px;">
             <button type="submit" class="btn-leaf">Save Changes</button>
-            <a asp-action="Details" asp-route-id="@Model.Id" class="btn-clear">Cancel</a>
+            <a asp-action="Details" asp-route-id="@plantId" class="btn-clear">Cancel</a>
         </div>
     </form>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const dropzone = document.getElementById('plant-dropzone');
+            const input = document.getElementById('plant-attachment-input');
+            const status = document.getElementById('plant-attachment-status');
+            const list = document.getElementById('plant-attachment-list');
+            const formState = document.getElementById('plant-attachment-form-state');
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            if (!dropzone || !input || !list || !formState || !token) {
+                return;
+            }
+
+            const showStatus = (message, isError = true) => {
+                if (!status) {
+                    return;
+                }
+
+                status.hidden = !message;
+                status.textContent = message;
+                status.classList.toggle('attachment-status-ok', !isError);
+            };
+
+            const refreshList = async () => {
+                const response = await fetch(list.dataset.listUrl, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                if (response.ok) {
+                    list.innerHTML = await response.text();
+                }
+            };
+
+            const createHidden = (name, value) => {
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = name;
+                hidden.value = value;
+                formState.appendChild(hidden);
+                return hidden;
+            };
+
+            const removeEmptyState = () => {
+                list.querySelector('.attachment-empty-state')?.remove();
+            };
+
+            const ensureGrid = () => {
+                removeEmptyState();
+                let grid = list.querySelector('.plant-attachment-grid');
+                if (!grid) {
+                    grid = document.createElement('div');
+                    grid.className = 'plant-attachment-grid';
+                    list.appendChild(grid);
+                }
+
+                return grid;
+            };
+
+            const appendPendingAttachment = attachment => {
+                const grid = ensureGrid();
+                const card = document.createElement('article');
+                card.className = 'plant-attachment-card plant-attachment-pending';
+
+                const link = document.createElement('a');
+                link.href = attachment.filePath;
+                link.target = '_blank';
+                link.rel = 'noopener';
+                link.className = 'plant-attachment-link';
+
+                const image = document.createElement('img');
+                image.src = attachment.filePath;
+                image.alt = attachment.fileName;
+                image.loading = 'lazy';
+                link.appendChild(image);
+
+                const meta = document.createElement('div');
+                meta.className = 'plant-attachment-meta';
+
+                const title = document.createElement('span');
+                title.title = attachment.fileName;
+                title.textContent = attachment.fileName;
+
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'btn-clear attachment-delete-button';
+                removeButton.textContent = 'Remove';
+                removeButton.addEventListener('click', () => {
+                    card.remove();
+                    hiddenFields.forEach(hidden => hidden.remove());
+                });
+
+                meta.append(title, removeButton);
+                card.append(link, meta);
+                grid.prepend(card);
+
+                const hiddenFields = [
+                    createHidden('PendingAttachmentStoredFileNames', attachment.storedFileName),
+                    createHidden('PendingAttachmentFileNames', attachment.fileName),
+                    createHidden('PendingAttachmentContentTypes', attachment.contentType),
+                    createHidden('PendingAttachmentFileSizes', attachment.fileSize)
+                ];
+            };
+
+            const uploadFiles = async files => {
+                const selectedFiles = Array.from(files);
+                if (selectedFiles.length === 0) {
+                    return;
+                }
+
+                dropzone.classList.add('is-uploading');
+                showStatus('');
+
+                for (const file of selectedFiles) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const response = await fetch(dropzone.dataset.uploadUrl, {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': token },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const payload = await response.json().catch(() => null);
+                        showStatus(payload?.error ?? `Could not upload ${file.name}.`);
+                        break;
+                    }
+
+                    const payload = await response.json();
+                    appendPendingAttachment(payload);
+                }
+
+                input.value = '';
+                dropzone.classList.remove('is-uploading');
+            };
+
+            dropzone.addEventListener('click', () => input.click());
+            dropzone.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    input.click();
+                }
+            });
+            dropzone.addEventListener('dragover', event => {
+                event.preventDefault();
+                dropzone.classList.add('is-dragging');
+            });
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('is-dragging');
+            });
+            dropzone.addEventListener('drop', event => {
+                event.preventDefault();
+                dropzone.classList.remove('is-dragging');
+                uploadFiles(event.dataTransfer.files);
+            });
+            input.addEventListener('change', event => uploadFiles(event.target.files));
+            list.addEventListener('click', event => {
+                const deleteButton = event.target.closest('[data-attachment-delete="true"]');
+                if (!deleteButton) {
+                    return;
+                }
+
+                const attachmentId = deleteButton.dataset.existingAttachmentId;
+                if (attachmentId) {
+                    createHidden('RemovedAttachmentIds', attachmentId);
+                }
+
+                deleteButton.closest('.plant-attachment-card')?.remove();
+                showStatus('');
+            });
+
+            refreshList();
+        })();
+    </script>
 }

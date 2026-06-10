@@ -16,6 +16,7 @@ namespace Carnivorous_Plant_Nursery.Repositories
         public async Task<List<SeedBatch>> GetAll() =>
             await _db.SeedBatch
                 .Include(s => s.Taxonomy)
+                .Include(s => s.Attachments.Where(a => a.DeletedAt == null).OrderByDescending(a => a.CreatedAt))
                 .Where(s => s.DeletedAt == null)
                 .ToListAsync();
 
@@ -23,11 +24,13 @@ namespace Carnivorous_Plant_Nursery.Repositories
             await _db.SeedBatch
                 .Include(s => s.Taxonomy)
                 .Include(s => s.Lineage)
+                .Include(s => s.Attachments.Where(a => a.DeletedAt == null).OrderByDescending(a => a.CreatedAt))
                 .Where(s => s.DeletedAt == null)
                 .FirstOrDefaultAsync(s => s.Id == id);
 
         public async Task<List<SeedBatch>> GetAvailableInWebshop() =>
             await _db.SeedBatch
+                .Include(s => s.Attachments.Where(a => a.DeletedAt == null).OrderByDescending(a => a.CreatedAt))
                 .Where(s => s.DeletedAt == null)
                 .Where(s => s.IsAvailableInWebshop)
                 .OrderBy(s => s.Price)
@@ -62,6 +65,36 @@ namespace Carnivorous_Plant_Nursery.Repositories
                     s.ExpectedViabilityMonths.HasValue &&
                     s.HarvestDate.Value.AddMonths(s.ExpectedViabilityMonths.Value) >= DateTime.Today)
                 .ToListAsync();
+
+        public async Task<List<SeedBatch>> Search(string? searchTerm, bool? availableInWebshop)
+        {
+            var query = _db.SeedBatch
+                .Include(s => s.Taxonomy)
+                .Include(s => s.Lineage)
+                .Include(s => s.Attachments.Where(a => a.DeletedAt == null).OrderByDescending(a => a.CreatedAt))
+                .Where(s => s.DeletedAt == null);
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var term = searchTerm.Trim();
+                query = query.Where(s =>
+                    (s.ListingTitle != null && s.ListingTitle.Contains(term)) ||
+                    (s.SKU != null && s.SKU.Contains(term)) ||
+                    (s.Description != null && s.Description.Contains(term)) ||
+                    (s.Taxonomy != null && (
+                        (s.Taxonomy.CommonName != null && s.Taxonomy.CommonName.Contains(term)) ||
+                        (s.Taxonomy.Genus != null && s.Taxonomy.Genus.Contains(term)) ||
+                        (s.Taxonomy.Species != null && s.Taxonomy.Species.Contains(term)) ||
+                        (s.Taxonomy.Cultivar != null && s.Taxonomy.Cultivar.Contains(term))
+                    )));
+            }
+
+            if (availableInWebshop == true)
+                query = query.Where(s => s.IsAvailableInWebshop);
+
+            return await query.ToListAsync();
+        }
+
         public async Task Add(SeedBatch seedBatch)
         {
             _db.SeedBatch.Add(seedBatch);

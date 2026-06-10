@@ -52,6 +52,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    initAttachmentLightbox();
 });
 
 function closeToast(toastElement) {
@@ -60,6 +62,93 @@ function closeToast(toastElement) {
     setTimeout(() => {
         toastElement.remove();
     }, 500);
+}
+
+function initAttachmentLightbox() {
+    if (document.querySelector('.attachment-lightbox')) {
+        return;
+    }
+
+    const lightbox = document.createElement('div');
+    lightbox.className = 'attachment-lightbox';
+    lightbox.innerHTML = `
+        <div class="attachment-lightbox-panel" role="dialog" aria-modal="true" aria-label="Image preview">
+            <button type="button" class="attachment-lightbox-close" aria-label="Close image preview">&times;</button>
+            <button type="button" class="attachment-lightbox-nav attachment-lightbox-prev" aria-label="Previous image">&lsaquo;</button>
+            <img class="attachment-lightbox-image" alt="" />
+            <button type="button" class="attachment-lightbox-nav attachment-lightbox-next" aria-label="Next image">&rsaquo;</button>
+        </div>`;
+    document.body.appendChild(lightbox);
+
+    const image = lightbox.querySelector('.attachment-lightbox-image');
+    const closeButton = lightbox.querySelector('.attachment-lightbox-close');
+    const previousButton = lightbox.querySelector('.attachment-lightbox-prev');
+    const nextButton = lightbox.querySelector('.attachment-lightbox-next');
+    let currentItems = [];
+    let currentIndex = 0;
+
+    const showImage = index => {
+        if (currentItems.length === 0) {
+            return;
+        }
+
+        currentIndex = (index + currentItems.length) % currentItems.length;
+        const item = currentItems[currentIndex];
+        image.src = item.src;
+        image.alt = item.alt;
+        previousButton.hidden = currentItems.length < 2;
+        nextButton.hidden = currentItems.length < 2;
+    };
+
+    const close = () => {
+        lightbox.classList.remove('is-visible');
+        image.removeAttribute('src');
+        image.alt = '';
+    };
+
+    document.addEventListener('click', event => {
+        const trigger = event.target.closest('[data-gallery-trigger="true"]');
+        if (!trigger) {
+            return;
+        }
+
+        const gallery = trigger.closest('[data-attachment-gallery]');
+        if (!gallery) {
+            return;
+        }
+
+        event.preventDefault();
+        currentItems = Array.from(gallery.querySelectorAll('[data-gallery-trigger="true"]'))
+            .map(item => ({
+                src: item.dataset.gallerySrc,
+                alt: item.dataset.galleryAlt || ''
+            }))
+            .filter(item => item.src);
+        showImage(Number.parseInt(trigger.dataset.galleryIndex || '0', 10));
+        lightbox.classList.add('is-visible');
+    });
+
+    closeButton.addEventListener('click', close);
+    previousButton.addEventListener('click', () => showImage(currentIndex - 1));
+    nextButton.addEventListener('click', () => showImage(currentIndex + 1));
+    lightbox.addEventListener('click', event => {
+        if (event.target === lightbox) {
+            close();
+        }
+    });
+    document.addEventListener('keydown', event => {
+        if (!lightbox.classList.contains('is-visible')) {
+            return;
+        }
+
+        if (event.key === 'Escape') {
+            close();
+        } else if (event.key === 'ArrowLeft') {
+            showImage(currentIndex - 1);
+        } else if (event.key === 'ArrowRight') {
+            showImage(currentIndex + 1);
+        }
+    });
 }
 
 // =============================================================
@@ -110,7 +199,8 @@ function closeToast(toastElement) {
         '/seeds', '/seeds/index',
         '/taxonomy', '/taxonomy/index',
         '/care', '/care/index',
-        '/inventory', '/inventory/index'
+        '/inventory', '/inventory/index',
+        '/account/login', '/account/register', '/account/manage'
     ];
 
     function norm(p) {
@@ -119,6 +209,27 @@ function closeToast(toastElement) {
 
     function isNavPage(href) {
         return NAV_PAGES.indexOf(norm(href)) !== -1;
+    }
+
+    function routeSection(path) {
+        var normalized = norm(path);
+        if (normalized === '/' || normalized.indexOf('/home') === 0) {
+            return 'home';
+        }
+
+        return normalized.split('/')[1] || 'home';
+    }
+
+    function shouldAnimateToNavPage(targetHref) {
+        if (!isNavPage(targetHref)) {
+            return false;
+        }
+
+        if (isNavPage(window.location.pathname)) {
+            return true;
+        }
+
+        return routeSection(window.location.pathname) !== routeSection(targetHref);
     }
 
     function buildJaws() {
@@ -149,9 +260,41 @@ function closeToast(toastElement) {
         }, 350);
     }
 
+    function exitJawSubmit(form) {
+        var j = buildJaws();
+        j.top.classList.add('jaw-slamming');
+        j.bot.classList.add('jaw-slamming');
+        document.body.appendChild(j.overlay);
+
+        setTimeout(function () {
+            sessionStorage.setItem('pendingTransition', 'jaw');
+            HTMLFormElement.prototype.submit.call(form);
+        }, 350);
+    }
+
+    function exitJawBack() {
+        var j = buildJaws();
+        j.top.classList.add('jaw-slamming');
+        j.bot.classList.add('jaw-slamming');
+        document.body.appendChild(j.overlay);
+
+        setTimeout(function () {
+            sessionStorage.setItem('pendingTransition', 'jaw');
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = '/';
+            }
+        }, 350);
+    }
+
     // ENTER: jaws start closed (covering hidden page), reveal page,
     // then snap open using the existing flytrap animation.
     function enterJaw() {
+        document.querySelectorAll('.flytrap-overlay').forEach(function (overlay) {
+            overlay.remove();
+        });
+
         var j = buildJaws();
         // No transform needed — flytrap-jaw-top/bottom sit at position 0 by default
         document.body.appendChild(j.overlay);
@@ -175,18 +318,49 @@ function closeToast(toastElement) {
         document.documentElement.style.visibility = '';
     }
 
+    window.addEventListener('pageshow', function () {
+        var pendingBackTransition = sessionStorage.getItem('pendingTransition');
+        if (pendingBackTransition) {
+            sessionStorage.removeItem('pendingTransition');
+            enterJaw();
+        } else {
+            document.documentElement.style.visibility = '';
+        }
+    });
+
     // Intercept nav link clicks
     document.addEventListener('click', function (e) {
+        var backLink = e.target.closest('[data-history-back="true"]');
+        if (backLink) {
+            e.preventDefault();
+            if (isNavPage(window.location.pathname)) {
+                exitJawBack();
+            } else if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = '/';
+            }
+            return;
+        }
+
         var link = e.target.closest('a[href]');
         if (!link) return;
         var href = link.getAttribute('href');
         if (!href || href.charAt(0) === '#' || href.indexOf('javascript') === 0) return;
         if (link.target === '_blank' || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
         if (/^(https?:)?\/\//.test(href)) return;
-        if (!isNavPage(href)) return;
+        if (!shouldAnimateToNavPage(href)) return;
 
         e.preventDefault();
         exitJaw(href);
+    });
+
+    document.addEventListener('submit', function (e) {
+        var form = e.target.closest('form[data-transition-submit="true"]');
+        if (!form) return;
+
+        e.preventDefault();
+        exitJawSubmit(form);
     });
 
 }());

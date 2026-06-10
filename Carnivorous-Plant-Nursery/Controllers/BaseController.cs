@@ -4,9 +4,9 @@ namespace Carnivorous_Plant_Nursery.Controllers
 {
     public abstract class BaseController : Controller
     {
-        protected bool IsAdmin => HttpContext.Session.GetString("IsAdmin") == "true";
+        protected bool IsAdmin => User.IsInRole("Admin");
 
         protected IActionResult RequireAdmin() =>
-            RedirectToAction("Index", "Admin");
+            Challenge();
     }
 }

@@ -1,0 +1,68 @@
+@model Carnivorous_Plant_Nursery.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="nursery-breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a> <span class="separator">&rsaquo;</span>
+    <span>Login</span>
+</div>
+
+<partial name="_BackButton" />
+
+<div class="entity-form-wrapper" style="max-width: 520px;">
+    <h1 class="form-title">Account Login</h1>
+
+    <form asp-controller="Account" asp-action="ExternalLogin" method="post" class="external-login-form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="provider" value="@DisplayConstant.GoogleProvider" />
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+        <button type="submit" class="btn-google-login">
+            <span class="google-login-mark">G</span>
+            Continue with Google
+        </button>
+    </form>
+
+    <div class="account-divider"><span>or use email</span></div>
+
+    <form asp-controller="Account" asp-action="Login" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ReturnUrl" />
+
+        <fieldset class="details-section">
+            <legend>Nursery Account</legend>
+
+            <div asp-validation-summary="ModelOnly" class="val-error"></div>
+
+            <div class="filter-group">
+                <label asp-for="Email" class="card-label"></label>
+                <input asp-for="Email" autocomplete="username" />
+                <span asp-validation-for="Email" class="val-error"></span>
+            </div>
+
+            <div class="filter-group">
+                <label asp-for="Password" class="card-label"></label>
+                <input asp-for="Password" autocomplete="current-password" />
+                <span asp-validation-for="Password" class="val-error"></span>
+            </div>
+
+            <div class="filter-group filter-group-checkbox">
+                <label>
+                    <input asp-for="RememberMe" />
+                    Remember me
+                </label>
+                <span class="field-hint">Keeps local email login active after the browser session ends.</span>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap;">
+                <button type="submit" class="btn-leaf">Login</button>
+                <a asp-controller="Account" asp-action="Register" class="btn-clear">Create Account</a>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

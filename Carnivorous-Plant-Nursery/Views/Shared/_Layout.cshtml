@@ -23,16 +23,13 @@
                 Carnivorous Plant Nursery
             </a>
             <div style="display: flex; align-items: center;">
-                @if (Context.Session.GetString("IsAdmin") == "true")
+                @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <form asp-controller="Admin" asp-action="Logout" method="post" style="display:inline;">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" style="background: none; border: 1px solid var(--accent-color); color: var(--accent-color); border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 0.8rem;">&#128274; Logout</button>
-                    </form>
+                    <a asp-controller="Account" asp-action="Manage" style="font-size: 0.8rem; color: var(--text-muted); text-decoration: none;">&#128100; Account Management</a>
                 }
                 else
                 {
-                    <a asp-controller="Admin" asp-action="Index" style="font-size: 0.8rem; color: var(--text-muted); text-decoration: none;">&#128272; Admin</a>
+                    <a asp-controller="Account" asp-action="Login" style="font-size: 0.8rem; color: var(--text-muted); text-decoration: none;">&#128272; Login</a>
                 }
             </div>
         </div>
