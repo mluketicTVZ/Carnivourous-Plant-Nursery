@@ -1,0 +1,1 @@
+dotnet test Carnivorous-Plant-Nursery.Tests\Carnivorous-Plant-Nursery.Tests.csproj --no-restore

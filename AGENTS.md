@@ -22,6 +22,7 @@ The application manages a carnivorous plant nursery inventory, with a later webs
 - Prefer existing local patterns, CSS classes, shared partials, and naming conventions over new abstractions.
 - Do not remove or rewrite unrelated user changes.
 - After meaningful route/domain changes, check whether `docs/sitemap.md` and `docs/semantic-model.md` need updates.
+- After changing API routes, authorization, validation, repository behavior, soft-delete rules, or DTO/domain fields, update the relevant tests so they still describe current app behavior.
 - After adding large features or resolving serious failures, consider whether this file needs a short "Known Pitfalls" update.
 
 ## Useful Commands
